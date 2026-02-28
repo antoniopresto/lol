@@ -1,0 +1,39 @@
+@use '../../styles/tokens' as *;
+
+.command-palette-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 15vh;
+}
+
+.command-palette {
+  width: 750px;
+  max-height: 500px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba($color-surface, 0.85);
+  backdrop-filter: blur(48px) saturate(180%);
+  -webkit-backdrop-filter: blur(48px) saturate(180%);
+  border-radius: $radius-xl;
+  border: 1px solid $color-border;
+  box-shadow: $shadow-window;
+  overflow: hidden;
+}
+
+.command-palette__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.command-palette__list-container {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 40%;
+  min-width: 0;
+  overflow: hidden;
+}

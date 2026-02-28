@@ -1,0 +1,347 @@
+import type { SectionData } from '../types';
+
+export const MOCK_SECTIONS: SectionData[] = [
+  {
+    title: 'Suggestions',
+    items: [
+      {
+        id: 'clipboard-history',
+        title: 'Clipboard History',
+        subtitle: 'Search Clipboard History',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# Clipboard History
+
+View and manage your clipboard history. Search through previously copied items and paste them quickly.
+
+## Features
+- Automatic clipboard monitoring
+- Pin frequently used items
+- Search by content type
+- Clear history on demand`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+            { type: 'separator' },
+            {
+              type: 'tag-list',
+              title: 'Tags',
+              tags: [
+                {
+                  text: 'Productivity',
+                  color: 'blue',
+                },
+                {
+                  text: 'Clipboard',
+                  color: 'green',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: 'snippets',
+        title: 'Search Snippets',
+        subtitle: 'Search Snippets',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# Search Snippets
+
+Quickly find and insert your saved text snippets. Create shortcuts for frequently typed text.
+
+## Usage
+1. Create a snippet with a keyword
+2. Type the keyword anywhere
+3. The snippet auto-expands`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+          ],
+        },
+      },
+      {
+        id: 'emoji',
+        title: 'Search Emoji & Symbols',
+        subtitle: 'Search Emoji',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# Search Emoji & Symbols
+
+Find and copy emoji and special characters instantly. Supports skin tone modifiers and recent picks.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    title: 'Commands',
+    items: [
+      {
+        id: 'window-management',
+        title: 'Window Management',
+        subtitle: 'Organize Windows',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# Window Management
+
+Organize and resize windows efficiently with keyboard shortcuts.
+
+## Available Layouts
+- **Left Half** / **Right Half**
+- **Top Half** / **Bottom Half**
+- **Maximize**
+- **Center**
+- **Reasonable Size**`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+            { type: 'separator' },
+            {
+              type: 'tag-list',
+              title: 'Tags',
+              tags: [
+                {
+                  text: 'Windows',
+                  color: 'purple',
+                },
+                {
+                  text: 'Layout',
+                  color: 'orange',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        id: 'calculator',
+        title: 'Calculator',
+        subtitle: 'Quick Calculations',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# Calculator
+
+Perform quick calculations right from the command bar. Supports basic arithmetic, percentages, and unit conversions.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+          ],
+        },
+      },
+      {
+        id: 'define-word',
+        title: 'Define Word',
+        subtitle: 'Dictionary',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# Define Word
+
+Look up word definitions, synonyms, and usage examples using the built-in dictionary.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+          ],
+        },
+      },
+      {
+        id: 'system-monitor',
+        title: 'System Monitor',
+        subtitle: 'CPU, Memory, Disk',
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# System Monitor
+
+Monitor your system resources in real-time. Check CPU usage, memory, disk space, and network activity.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    title: 'Applications',
+    items: [
+      {
+        id: 'app-safari',
+        title: 'Safari',
+        subtitle: 'Application',
+        accessories: [{ text: 'App' }],
+        detail: {
+          markdown: `# Safari
+
+Apple's web browser for macOS. Fast, energy-efficient, and privacy-focused.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Kind',
+              text: 'Application',
+            },
+            {
+              type: 'link',
+              title: 'Website',
+              text: 'apple.com/safari',
+              target: 'https://www.apple.com/safari/',
+            },
+          ],
+        },
+      },
+      {
+        id: 'app-vscode',
+        title: 'Visual Studio Code',
+        subtitle: 'Application',
+        accessories: [{ text: 'App' }],
+        detail: {
+          markdown: `# Visual Studio Code
+
+Lightweight but powerful source code editor by Microsoft. Supports hundreds of languages and extensions.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Kind',
+              text: 'Application',
+            },
+            {
+              type: 'link',
+              title: 'Website',
+              text: 'code.visualstudio.com',
+              target: 'https://code.visualstudio.com',
+            },
+          ],
+        },
+      },
+      {
+        id: 'app-terminal',
+        title: 'Terminal',
+        subtitle: 'Application',
+        accessories: [{ text: 'App' }],
+        detail: {
+          markdown: `# Terminal
+
+The built-in terminal emulator for macOS. Provides command-line access to the operating system.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Kind',
+              text: 'Application',
+            },
+            {
+              type: 'label',
+              title: 'Version',
+              text: '2.14',
+            },
+          ],
+        },
+      },
+      {
+        id: 'app-figma',
+        title: 'Figma',
+        subtitle: 'Application',
+        accessories: [{ text: 'App' }],
+        detail: {
+          markdown: `# Figma
+
+Collaborative design tool for building meaningful products. Design, prototype, and gather feedback.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Kind',
+              text: 'Application',
+            },
+            {
+              type: 'link',
+              title: 'Website',
+              text: 'figma.com',
+              target: 'https://www.figma.com',
+            },
+          ],
+        },
+      },
+      {
+        id: 'app-slack',
+        title: 'Slack',
+        subtitle: 'Application',
+        accessories: [{ text: 'App' }],
+        detail: {
+          markdown: `# Slack
+
+Business communication platform for teams. Channels, direct messages, and integrations.`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Kind',
+              text: 'Application',
+            },
+            {
+              type: 'link',
+              title: 'Website',
+              text: 'slack.com',
+              target: 'https://slack.com',
+            },
+          ],
+        },
+      },
+    ],
+  },
+];

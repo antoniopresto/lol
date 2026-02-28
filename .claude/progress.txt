@@ -139,7 +139,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03570 Wire up demo data and compose full UI. Create mock data
+- [x] L03570 Wire up demo data and compose full UI. Create mock data
      (fake commands, apps, bookmarks) in src/data/mock_data.ts.
      Define TypeScript interfaces for ListItemData, SectionData in
      src/types.ts. Render SearchBar + List with sections + ActionPanel
