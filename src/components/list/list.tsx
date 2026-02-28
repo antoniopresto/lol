@@ -13,9 +13,15 @@ interface ListProps {
   children: ReactNode;
   itemCount: number;
   onActiveIndexChange?: (index: number) => void;
+  onAction?: (index: number) => void;
 }
 
-export function List({ children, itemCount, onActiveIndexChange }: ListProps) {
+export function List({
+  children,
+  itemCount,
+  onActiveIndexChange,
+  onAction,
+}: ListProps) {
   const [activeIndex, setActiveIndexRaw] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +66,9 @@ export function List({ children, itemCount, onActiveIndexChange }: ListProps) {
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActiveIndex(activeIndex > 0 ? activeIndex - 1 : itemCount - 1);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        onAction?.(activeIndex);
       }
     }
 
@@ -69,6 +78,7 @@ export function List({ children, itemCount, onActiveIndexChange }: ListProps) {
     activeIndex,
     itemCount,
     setActiveIndex,
+    onAction,
   ]);
 
   const contextValue = useMemo(

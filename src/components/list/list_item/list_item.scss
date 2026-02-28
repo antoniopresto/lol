@@ -1,0 +1,97 @@
+@use '../../../styles/tokens' as *;
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 $space-3;
+  border-radius: $radius-md;
+  cursor: pointer;
+  transition: background-color $transition-fast ease;
+
+  &:hover:not(&--active) {
+    background-color: $color-surface-hover;
+  }
+
+  &--active {
+    background-color: $color-accent;
+
+    .list-item__title {
+      color: $color-text-on-accent;
+    }
+
+    .list-item__subtitle {
+      color: $color-text-on-accent-secondary;
+    }
+
+    .list-item__icon {
+      color: $color-text-on-accent;
+    }
+
+    .list-item__accessory {
+      color: $color-text-on-accent-secondary;
+    }
+
+    .list-item__accessory-text {
+      color: $color-text-on-accent-secondary;
+    }
+  }
+}
+
+.list-item__left {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  min-width: 0;
+  flex: 1;
+}
+
+.list-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: $color-text-secondary;
+}
+
+.list-item__title {
+  font-size: $font-md;
+  color: $color-text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.list-item__subtitle {
+  font-size: $font-sm;
+  color: $color-text-secondary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.list-item__accessories {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  flex-shrink: 0;
+  margin-left: $space-3;
+}
+
+.list-item__accessory {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+}
+
+.list-item__accessory-text {
+  font-size: $font-xs;
+  color: $color-text-tertiary;
+  white-space: nowrap;
+}

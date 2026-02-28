@@ -74,7 +74,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03510 Build ListItem component (src/components/list/list_item/).
+- [x] L03510 Build ListItem component (src/components/list/list_item/).
      Single row: icon (20x20) on left, title (primary text),
      optional subtitle (secondary text, $text-secondary). Right side
      shows accessories (shortcut badges, dates, status indicators).
