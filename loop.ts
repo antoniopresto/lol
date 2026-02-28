@@ -133,7 +133,10 @@ function syslog(message = '', color?: Color): void {
   println(`‣ ${message}`, color);
 }
 
-const TASK_PROMPT = `Read \`./.claude/progress.txt\`, pick the most important pending tasks, execute it, update the file, commit, and stop.
+const TASK_PROMPT = `
+Read './.claude/progress.txt', 
+pick the most important pending tasks, mark it as IN_PROGRESS immediately, 
+execute it, update the file, commit, and stop.
 
 './.claude/progress.txt' is:
 - your persistent memory.
@@ -143,7 +146,7 @@ const TASK_PROMPT = `Read \`./.claude/progress.txt\`, pick the most important pe
 
 
 WORKFLOW:
-0. Understand Project Facts from CLAUDE.md
+0. Understand Project
 1. Read ./.claude/progress.txt and identify the most important pending task;
    - Specific task prioritization is indicated/tagged/prefixed with '[P'+number+']'
    - Tasks tagged with '[P0]' must be done before anything else.
