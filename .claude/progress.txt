@@ -215,7 +215,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P1] L03630 Add loading/skeleton state. Create a subtle top-bar
+- [x] [P1] L03630 Add loading/skeleton state. Create a subtle top-bar
      loading indicator (thin animated gradient line at top of command
      palette, similar to Raycast's loading bar). Add isLoading prop to
      CommandPalette. When true, show the animated loading bar below the

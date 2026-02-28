@@ -10,6 +10,7 @@
 }
 
 .command-palette {
+  position: relative;
   width: 750px;
   max-width: calc(100vw - $space-6 * 2);
   max-height: 500px;

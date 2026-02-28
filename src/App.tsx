@@ -207,7 +207,7 @@ export function App() {
   );
 
   return (
-    <CommandPalette>
+    <CommandPalette isLoading>
       <SearchBar
         value={query}
         onChange={handleQueryChange}
