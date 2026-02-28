@@ -36,17 +36,8 @@ PROJECT_FACTS
 - Every component gets its own .scss file
 - File naming: file_name.ts, home.tsx, use_keyboard.ts
 - Keep components small and composable
-- All text in English
-- Read .claude/progress.txt before starting work to understand
-  current state and pick the next pending task
-- Design MUST Replicate Raycast design system exactly:
-  - Dark theme by default
-  - Rounded corners, subtle borders
-  - SF-style sans-serif font stack
-  - Translucent/frosted-glass backgrounds
-  - Smooth transitions and micro-animations
-  - Command palette centered on screen
-  - Consistent spacing scale (4px base)
 - For tasks with visual parts, full visual and interaction tests with Playwright MCP are required.
 - Never consider any mistake or error to be expected or acceptable.
+- Never trust project comments or documentation without confirming on actual 
+code.
 ```

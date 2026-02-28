@@ -1,130 +1,178 @@
-- [ ] L00235.1 Review tasks, plan and improve and expand tasks needed in order
-to delivery the desired result professionally.
-
-- [ ] L00235.2 Review tasks, plan and improve and expand tasks needed in order
-to delivery the desired result professionally.
-
-- [ ] L00235.3 Review tasks, plan and improve and expand tasks needed in order
-to delivery the desired result professionally.
-
-- [ ] L00235.4 Review tasks, plan and improve and expand tasks needed in order
-to delivery the desired result professionally.
-
-- [ ] L00235.5 Review tasks, plan and improve and expand tasks needed in order
-to delivery the desired result professionally.
-
---------------------------------------------------------------------------------
-
 - [ ] L03239 Setup Vite + React + TypeScript + Sass project scaffold.
-     Install dependencies with bun.
+     Install dependencies with bun: react, react-dom, @types/react,
+     @types/react-dom, vite, @vitejs/plugin-react, sass, eslint,
+     @eslint/js, typescript-eslint, eslint-plugin-react-hooks,
+     eslint-plugin-react-refresh, vitest, @testing-library/react,
+     @testing-library/jest-dom, jsdom.
+     Create vite.config.ts with React plugin and Sass support.
+     Update tsconfig.json for JSX (react-jsx), DOM lib, paths.
+     Create src/main.tsx entry point.
+     Create index.html with root div.
+     Create src/App.tsx placeholder component.
+     Create eslint.config.js with TypeScript + React rules.
+     Verify: bun run dev starts, bun run check passes.
 
 --------------------------------------------------------------------------------
 
 - [ ] L0333 Create Sass design tokens file (src/styles/_tokens.scss).
-     Define variables for: colors (background, surface, border,
-     text-primary, text-secondary, text-tertiary, accent),
-     spacing (4px base scale), border-radius, shadows, font
-     stack (system sans-serif), font sizes, transition
-     durations. Match Raycast dark theme exactly.
+     Define variables for: colors (background #1a1a1c, surface #262628,
+     surface-hover #2e2e30, border #3a3a3c, text-primary #f5f5f7,
+     text-secondary #98989d, text-tertiary #6e6e73, accent #007aff,
+     accent-hover #0a84ff, destructive #ff453a),
+     spacing (4px base scale: $space-1 through $space-8),
+     border-radius ($radius-sm: 4px, $radius-md: 8px, $radius-lg: 12px,
+     $radius-xl: 16px),
+     shadows ($shadow-window, $shadow-popover),
+     font stack (system sans-serif: -apple-system, BlinkMacSystemFont,
+     'SF Pro Text', 'Segoe UI', etc),
+     font sizes ($font-xs: 11px, $font-sm: 12px, $font-md: 13px,
+     $font-lg: 15px, $font-xl: 20px),
+     transition durations ($transition-fast: 80ms, $transition-normal: 150ms,
+     $transition-slow: 250ms).
+     Match Raycast dark theme exactly.
 
 --------------------------------------------------------------------------------
 
 - [ ] L03450 Create global styles (src/styles/global.scss). Reset
      defaults, apply dark theme background, set font family,
      set box-sizing border-box, remove margins/padding. Import
-     tokens. Style scrollbars to match Raycast (thin, subtle).
+     tokens. Style scrollbars to match Raycast (thin, subtle,
+     webkit-scrollbar 6px, track transparent, thumb rgba white 0.15).
+     Style ::selection with accent color. Set -webkit-font-smoothing
+     antialiased. Set base font size and line height.
 
 --------------------------------------------------------------------------------
 
-- [ ] L03459 Build root layout component. Full-screen centered
-     container with frosted-glass card (the command palette
-     window). Fixed width ~750px, dynamic height with max.
-     Rounded corners, subtle border, drop shadow. This is the
-     main window that holds everything.
+- [ ] L03459 Build root layout component (src/components/command_palette/).
+     Full-screen centered container with frosted-glass card (the command
+     palette window). Fixed width ~750px, dynamic height with max ~500px.
+     Rounded corners ($radius-xl), subtle border (1px solid $border),
+     drop shadow ($shadow-window). Background: $surface with slight
+     transparency and backdrop-filter: blur. This is the main window
+     that holds everything. Create command_palette.tsx and
+     command_palette.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] L03488 Build SearchBar component (src/components/SearchBar).
-     Input field at top of command palette. Icon on the left,
-     placeholder text, no visible border. Full width. Autofocus
-     on mount. Expose onChange and value props. Style with Sass
-     matching Raycast search bar exactly.
+- [ ] L03488 Build SearchBar component (src/components/search_bar/).
+     Input field at top of command palette. Magnifying glass icon on the
+     left (SVG inline or icon component). Placeholder text "Search...".
+     No visible border, bottom border-bottom 1px solid $border.
+     Full width. Autofocus on mount. Expose onChange, value, placeholder
+     props. Height ~46px. Font size $font-lg. Text color $text-primary.
+     Placeholder color $text-tertiary. Create search_bar.tsx and
+     search_bar.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build List component (src/components/List). Vertical
-     scrollable list below search bar. Accepts children of type
-     ListItem. Keyboard navigation with arrow keys (up/down).
-     Track active index with state. Scroll active item into
-     view automatically.
+- [ ] L03500 Build List component (src/components/list/). Vertical
+     scrollable list below search bar. Accepts children (ListItem or
+     ListSection). Keyboard navigation with arrow keys (up/down).
+     Track active index with state. Scroll active item into view
+     automatically (scrollIntoView). Overflow-y auto. Padding $space-1.
+     Flex: 1 to fill remaining height. Create list.tsx and list.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build ListItem component (src/components/ListItem).
-     Single row: icon on left, title, optional subtitle on
-     right. Hover state with subtle background highlight.
-     Active state (keyboard selected) with accent background.
-     onClick handler. Render accessories on the right side
-     (shortcut badges, chevron, etc).
+- [ ] L03510 Build ListItem component (src/components/list/list_item/).
+     Single row: icon (20x20) on left, title (primary text),
+     optional subtitle (secondary text, $text-secondary). Right side
+     shows accessories (shortcut badges, dates, status indicators).
+     Height ~36px. Padding horizontal $space-3. Hover state with
+     $surface-hover background. Active state (keyboard-selected) with
+     $accent background and white text. onClick handler. Cursor pointer.
+     Rounded corners $radius-md. Transition background $transition-fast.
+     Create list_item.tsx and list_item.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build ListSection component (src/components/ListSection).
-     Groups ListItems under a section header. Small uppercase
-     label above the group. Optional. Used to categorize
+- [ ] L03520 Build ListSection component (src/components/list/list_section/).
+     Groups ListItems under a section header. Small uppercase label
+     ($font-xs, $text-secondary, text-transform uppercase,
+     letter-spacing 0.5px) with horizontal padding $space-3.
+     Margin-top $space-2 (except first section). Used to categorize
      results like Raycast does (Applications, Commands, etc).
+     Create list_section.tsx and list_section.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build ActionPanel component (src/components/ActionPanel).
-     Footer bar at bottom of command palette. Shows available
-     actions for the selected item. Each action has a label and
-     keyboard shortcut badge. Primary action on the left,
-     secondary actions to the right. Subtle top border.
+- [ ] L03530 Build ActionPanel component (src/components/action_panel/).
+     Footer bar at bottom of command palette. Shows available actions
+     for the selected item. Height ~36px. Background slightly different
+     from main surface. Each action has a label and keyboard shortcut
+     badge. Primary action on the left, secondary actions to the right.
+     Top border 1px solid $border. Flex layout, align-items center.
+     Padding horizontal $space-3. Create action_panel.tsx and
+     action_panel.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build keyboard shortcut badge component
-     (src/components/Kbd). Small inline element that renders
-     a keyboard shortcut like "Cmd+K" or "Enter". Styled as
-     subtle bordered pill/box matching Raycast's shortcut
-     indicators. Used inside ActionPanel and ListItem.
+- [ ] L03540 Build Kbd component (src/components/kbd/).
+     Small inline element that renders a keyboard shortcut like
+     "⌘K" or "↵". Styled as subtle bordered pill/box matching
+     Raycast's shortcut indicators. Background slightly lighter than
+     surface. Border 1px solid $border. Border-radius $radius-sm.
+     Padding 1px 4px. Font-size $font-xs. Color $text-secondary.
+     Display inline-flex, gap 2px. Used inside ActionPanel and ListItem.
+     Create kbd.tsx and kbd.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build Detail component (src/components/Detail). Right
-     panel view for showing detail content when an item is
-     selected. Markdown-like content area with title, metadata
-     rows, and body text. Used in split-view layout where list
-     is on left and detail on right.
+- [ ] L03550 Build EmptyState component (src/components/empty_state/).
+     Centered message shown when list has no results. Icon (large,
+     48x48), title ($font-lg, $text-primary), and optional description
+     ($font-sm, $text-secondary). Flex column, align-items center,
+     justify-content center. Padding $space-8. Takes full available
+     height. Create empty_state.tsx and empty_state.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Build EmptyState component (src/components/EmptyState).
-     Centered message shown when list has no results. Icon,
-     title, and optional description. Matches Raycast's empty
-     state pattern.
+- [ ] L03560 Build Detail component (src/components/detail/).
+     Right panel view for showing detail content when an item is
+     selected. Supports markdown-rendered content area with title,
+     metadata rows (label/value pairs), and body text. Used in
+     split-view layout where list is on left (~40% width) and detail
+     on right (~60% width). Vertical scrollable. Padding $space-4.
+     Border-left 1px solid $border. Create detail.tsx and detail.scss.
+     Create detail_metadata.tsx for metadata sub-component with
+     label, link, tag-list, and separator variants.
 
 --------------------------------------------------------------------------------
 
-- [ ] Wire up demo data and compose full UI. Create mock data
-     (fake commands, apps, bookmarks). Render SearchBar + List
-     with sections + ActionPanel together in App.tsx. Filter
-     list items based on search input. Demonstrate keyboard
-     navigation working end-to-end.
+- [ ] L03570 Wire up demo data and compose full UI. Create mock data
+     (fake commands, apps, bookmarks) in src/data/mock_data.ts.
+     Define TypeScript interfaces for ListItemData, SectionData in
+     src/types.ts. Render SearchBar + List with sections + ActionPanel
+     together in App.tsx. Filter list items based on search input
+     (case-insensitive substring match). Demonstrate keyboard
+     navigation working end-to-end. Show Detail panel for selected
+     item.
 
 --------------------------------------------------------------------------------
 
-- [ ] Add transitions and micro-animations. Fade-in on mount.
-     Smooth highlight transitions on list item hover/active.
-     Subtle scale on command palette appear. Use CSS
-     transitions only, no animation libraries.
+- [ ] L03580 Add transitions and micro-animations. Fade-in on mount
+     for command palette (opacity 0->1, translateY slight).
+     Smooth highlight transitions on list item hover/active
+     (transition: background-color $transition-fast ease).
+     Subtle scale on command palette appear (scale 0.98->1).
+     Action panel slide-up entrance. Use CSS transitions only,
+     no animation libraries. Define @keyframes in global.scss.
 
 --------------------------------------------------------------------------------
 
-- [ ] Polish and pixel-perfect review. Compare side-by-side
+- [ ] L03590 Polish and pixel-perfect review. Compare side-by-side
      with Raycast screenshots. Adjust spacing, colors, font
      sizes, border radius, shadows until visually identical.
-     Test at different viewport sizes.
+     Test at different viewport sizes. Ensure smooth 60fps
+     animations. Verify keyboard navigation works flawlessly.
+     Check accessibility (focus visible states, aria labels).
 
 --------------------------------------------------------------------------------
+
+NOTES:
+- Project uses Bun exclusively (never npm/yarn)
+- File naming: snake_case (file_name.ts, home.tsx, use_keyboard.ts)
+- No CSS modules, no styled-components, no tailwind - only Sass
+- Each component gets its own .scss file
+- No comments in code unless JSDoc needed for public API
+- Raycast dark theme colors from official theme explorer
