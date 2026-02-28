@@ -1,0 +1,90 @@
+LOL - Phase 1: UI Foundation
+================================================================================
+
+- [ ] Setup Vite + React + TypeScript + Sass project scaffold.
+     Install dependencies with pnpm. Configure vite.config.ts
+     with path aliases (@/ -> src/). Configure tsconfig.json
+     for React JSX, strict mode, bundler module resolution.
+     Create src/main.tsx and src/App.tsx with empty shell.
+--------------------------------------------------------------------------------
+- [ ] Create Sass design tokens file (src/styles/_tokens.scss).
+     Define variables for: colors (background, surface, border,
+     text-primary, text-secondary, text-tertiary, accent),
+     spacing (4px base scale), border-radius, shadows, font
+     stack (system sans-serif), font sizes, transition
+     durations. Match Raycast dark theme exactly.
+--------------------------------------------------------------------------------
+- [ ] Create global styles (src/styles/global.scss). Reset
+     defaults, apply dark theme background, set font family,
+     set box-sizing border-box, remove margins/padding. Import
+     tokens. Style scrollbars to match Raycast (thin, subtle).
+--------------------------------------------------------------------------------
+- [ ] Build root layout component. Full-screen centered
+     container with frosted-glass card (the command palette
+     window). Fixed width ~750px, dynamic height with max.
+     Rounded corners, subtle border, drop shadow. This is the
+     main window that holds everything.
+--------------------------------------------------------------------------------
+- [ ] Build SearchBar component (src/components/SearchBar).
+     Input field at top of command palette. Icon on the left,
+     placeholder text, no visible border. Full width. Autofocus
+     on mount. Expose onChange and value props. Style with Sass
+     matching Raycast search bar exactly.
+--------------------------------------------------------------------------------
+- [ ] Build List component (src/components/List). Vertical
+     scrollable list below search bar. Accepts children of type
+     ListItem. Keyboard navigation with arrow keys (up/down).
+     Track active index with state. Scroll active item into
+     view automatically.
+--------------------------------------------------------------------------------
+- [ ] Build ListItem component (src/components/ListItem).
+     Single row: icon on left, title, optional subtitle on
+     right. Hover state with subtle background highlight.
+     Active state (keyboard selected) with accent background.
+     onClick handler. Render accessories on the right side
+     (shortcut badges, chevron, etc).
+--------------------------------------------------------------------------------
+- [ ] Build ListSection component (src/components/ListSection).
+     Groups ListItems under a section header. Small uppercase
+     label above the group. Optional. Used to categorize
+     results like Raycast does (Applications, Commands, etc).
+--------------------------------------------------------------------------------
+- [ ] Build ActionPanel component (src/components/ActionPanel).
+     Footer bar at bottom of command palette. Shows available
+     actions for the selected item. Each action has a label and
+     keyboard shortcut badge. Primary action on the left,
+     secondary actions to the right. Subtle top border.
+--------------------------------------------------------------------------------
+- [ ] Build keyboard shortcut badge component
+     (src/components/Kbd). Small inline element that renders
+     a keyboard shortcut like "Cmd+K" or "Enter". Styled as
+     subtle bordered pill/box matching Raycast's shortcut
+     indicators. Used inside ActionPanel and ListItem.
+--------------------------------------------------------------------------------
+- [ ] Build Detail component (src/components/Detail). Right
+     panel view for showing detail content when an item is
+     selected. Markdown-like content area with title, metadata
+     rows, and body text. Used in split-view layout where list
+     is on left and detail on right.
+--------------------------------------------------------------------------------
+- [ ] Build EmptyState component (src/components/EmptyState).
+     Centered message shown when list has no results. Icon,
+     title, and optional description. Matches Raycast's empty
+     state pattern.
+--------------------------------------------------------------------------------
+- [ ] Wire up demo data and compose full UI. Create mock data
+     (fake commands, apps, bookmarks). Render SearchBar + List
+     with sections + ActionPanel together in App.tsx. Filter
+     list items based on search input. Demonstrate keyboard
+     navigation working end-to-end.
+--------------------------------------------------------------------------------
+- [ ] Add transitions and micro-animations. Fade-in on mount.
+     Smooth highlight transitions on list item hover/active.
+     Subtle scale on command palette appear. Use CSS
+     transitions only, no animation libraries.
+--------------------------------------------------------------------------------
+- [ ] Polish and pixel-perfect review. Compare side-by-side
+     with Raycast screenshots. Adjust spacing, colors, font
+     sizes, border radius, shadows until visually identical.
+     Test at different viewport sizes.
+--------------------------------------------------------------------------------
