@@ -3,11 +3,13 @@
 Raycast UI clone. Raycast interface is a clone pixel-by-pixel.
 
 OVERVIEW:
-- [loop.ts](../loop.ts) is a "Ralph loop" implementation, based on Geoffrey
+
+- [loop.ts](loop.ts) is a "Ralph loop" implementation, based on Geoffrey
   Huntley's Ralph Wiggum technique: it runs Claude code
   on loops of clean context in order to avoid 'context rot'.
 
 CRITICAL (THINK BEFORE ACTING):
+
 - ALL tasks and instructions are deliberate.
 - No task is optional.
 - The FIRST thing you MUST do is write your understanding of each WORKFLOW statement
@@ -23,6 +25,7 @@ CRITICAL (THINK BEFORE ACTING):
 - Never consider any mistake or error to be expected or acceptable.
 
 PROJECT_FACTS
+
 ```txt
 - Bun (runtime, package manager, always use bun, never npm/yarn)
 - TypeScript (strict mode)
@@ -38,6 +41,6 @@ PROJECT_FACTS
 - Keep components small and composable
 - For tasks with visual parts, full visual and interaction tests with Playwright MCP are required.
 - Never consider any mistake or error to be expected or acceptable.
-- Never trust project comments or documentation without confirming on actual 
+- Never trust project comments or documentation without confirming on actual
 code.
 ```
