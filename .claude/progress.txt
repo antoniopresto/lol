@@ -118,7 +118,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03550 Build EmptyState component (src/components/empty_state/).
+- [x] L03550 Build EmptyState component (src/components/empty_state/).
      Centered message shown when list has no results. Icon (large,
      48x48), title ($font-lg, $text-primary), and optional description
      ($font-sm, $text-secondary). Flex column, align-items center,
