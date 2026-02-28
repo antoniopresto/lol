@@ -4,6 +4,14 @@ import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
 import { EmptyState } from './components/empty_state/empty_state';
+import {
+  Form,
+  FormCheckbox,
+  FormDatePicker,
+  FormDropdown,
+  FormTextArea,
+  FormTextField,
+} from './components/form';
 import { Grid, GridItem } from './components/grid';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
@@ -116,7 +124,44 @@ function SearchIcon() {
   );
 }
 
-type ViewMode = 'list' | 'grid';
+type ViewMode = 'list' | 'grid' | 'form';
+
+interface SnippetFormState {
+  name: string;
+  keyword: string;
+  snippet: string;
+  category: string;
+  isShared: boolean;
+  expiresAt: string;
+}
+
+const INITIAL_SNIPPET_FORM: SnippetFormState = {
+  name: '',
+  keyword: '',
+  snippet: '',
+  category: 'general',
+  isShared: false,
+  expiresAt: '',
+};
+
+const SNIPPET_CATEGORIES = [
+  {
+    label: 'General',
+    value: 'general',
+  },
+  {
+    label: 'Code',
+    value: 'code',
+  },
+  {
+    label: 'Email',
+    value: 'email',
+  },
+  {
+    label: 'Template',
+    value: 'template',
+  },
+];
 
 export function App() {
   const [query, setQuery] = useState('');
@@ -124,6 +169,11 @@ export function App() {
   const [actionsOpen, setActionsOpen] = useState(false);
   const [drilledItem, setDrilledItem] = useState<ListItemData | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [snippetForm, setSnippetForm] =
+    useState<SnippetFormState>(INITIAL_SNIPPET_FORM);
+  const [formErrors, setFormErrors] = useState<
+    Partial<Record<keyof SnippetFormState, string>>
+  >({});
   const { toasts, show: showToast, hide: hideToast } = useToast();
 
   const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
@@ -180,7 +230,42 @@ export function App() {
     setQuery('');
     setSelectedIndex(0);
     setActionsOpen(false);
+    setSnippetForm(INITIAL_SNIPPET_FORM);
+    setFormErrors({});
   }, []);
+
+  const handleOpenCreateSnippet = useCallback(() => {
+    setViewMode('form');
+    setQuery('');
+    setSelectedIndex(0);
+    setActionsOpen(false);
+    setSnippetForm(INITIAL_SNIPPET_FORM);
+    setFormErrors({});
+  }, []);
+
+  const handleSubmitSnippet = useCallback(() => {
+    const errors: Partial<Record<keyof SnippetFormState, string>> = {};
+    if (!snippetForm.name.trim()) {
+      errors.name = 'Name is required';
+    }
+    if (!snippetForm.snippet.trim()) {
+      errors.snippet = 'Snippet content is required';
+    }
+    setFormErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+    showToast({
+      style: 'success',
+      title: 'Snippet Created',
+      message: snippetForm.name,
+    });
+    handleDrillBack();
+  }, [
+    snippetForm,
+    showToast,
+    handleDrillBack,
+  ]);
 
   const handleGridAction = useCallback(
     (index: number) => {
@@ -200,23 +285,31 @@ export function App() {
   );
 
   const breadcrumbs: BreadcrumbItem[] | undefined =
-    viewMode === 'grid'
+    viewMode === 'form'
       ? [
           {
             label: 'Raycast',
             onBack: handleDrillBack,
           },
-          { label: 'Color Picker' },
+          { label: 'Create Snippet' },
         ]
-      : drilledItem
+      : viewMode === 'grid'
         ? [
             {
               label: 'Raycast',
               onBack: handleDrillBack,
             },
-            { label: drilledItem.title },
+            { label: 'Color Picker' },
           ]
-        : undefined;
+        : drilledItem
+          ? [
+              {
+                label: 'Raycast',
+                onBack: handleDrillBack,
+              },
+              { label: drilledItem.title },
+            ]
+          : undefined;
 
   const toggleActions = useCallback(() => {
     setActionsOpen(prev => !prev);
@@ -228,15 +321,29 @@ export function App() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'k' && e.metaKey) {
+      if (e.key === 'k' && e.metaKey && viewMode !== 'form') {
         e.preventDefault();
         setActionsOpen(prev => !prev);
+        return;
+      }
+      if (e.key === 'Enter' && e.metaKey && viewMode === 'form') {
+        e.preventDefault();
+        handleSubmitSnippet();
+        return;
+      }
+      if (e.key === 'n' && e.metaKey && viewMode !== 'form') {
+        e.preventDefault();
+        handleOpenCreateSnippet();
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [
+    viewMode,
+    handleSubmitSnippet,
+    handleOpenCreateSnippet,
+  ]);
 
   const detail = selectedItem?.detail;
 
@@ -292,6 +399,18 @@ export function App() {
         },
       },
       {
+        label: 'Create Snippet',
+        shortcut: (
+          <Kbd
+            keys={[
+              '⌘',
+              'N',
+            ]}
+          />
+        ),
+        onClick: handleOpenCreateSnippet,
+      },
+      {
         label: 'Delete',
         shortcut: (
           <Kbd
@@ -313,6 +432,7 @@ export function App() {
     [
       selectedItem,
       showToast,
+      handleOpenCreateSnippet,
     ],
   );
 
@@ -337,7 +457,82 @@ export function App() {
         className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
       >
         <div className="command-palette__list-container">
-          {viewMode === 'grid' ? (
+          {viewMode === 'form' ? (
+            <Form onSubmit={handleSubmitSnippet}>
+              <FormTextField
+                label="Name"
+                value={snippetForm.name}
+                onChange={v =>
+                  setSnippetForm(prev => ({
+                    ...prev,
+                    name: v,
+                  }))
+                }
+                placeholder="e.g. Email Signature"
+                error={formErrors.name}
+                autoFocus
+              />
+              <FormTextField
+                label="Keyword"
+                value={snippetForm.keyword}
+                onChange={v =>
+                  setSnippetForm(prev => ({
+                    ...prev,
+                    keyword: v,
+                  }))
+                }
+                placeholder="e.g. !sig"
+                description="Type this to expand the snippet"
+              />
+              <FormDropdown
+                label="Category"
+                value={snippetForm.category}
+                onChange={v =>
+                  setSnippetForm(prev => ({
+                    ...prev,
+                    category: v,
+                  }))
+                }
+                options={SNIPPET_CATEGORIES}
+                placeholder="Select a category"
+              />
+              <FormTextArea
+                label="Snippet"
+                value={snippetForm.snippet}
+                onChange={v =>
+                  setSnippetForm(prev => ({
+                    ...prev,
+                    snippet: v,
+                  }))
+                }
+                placeholder="Enter your snippet content..."
+                error={formErrors.snippet}
+                rows={5}
+              />
+              <FormCheckbox
+                label="Share with team"
+                checked={snippetForm.isShared}
+                onChange={v =>
+                  setSnippetForm(prev => ({
+                    ...prev,
+                    isShared: v,
+                  }))
+                }
+                description="Make this snippet available to your team members"
+              />
+              <FormDatePicker
+                label="Expires"
+                value={snippetForm.expiresAt}
+                onChange={v =>
+                  setSnippetForm(prev => ({
+                    ...prev,
+                    expiresAt: v,
+                  }))
+                }
+                description="Optional expiration date"
+              />
+            </Form>
+          ) : viewMode === 'grid' ? (
             filteredColors.length === 0 ? (
               <EmptyState
                 icon={<SearchIcon />}
@@ -411,24 +606,41 @@ export function App() {
         )}
       </div>
       <ActionPanel
-        actions={[
-          {
-            label: 'Open',
-            shortcut: <Kbd keys={['↵']} />,
-          },
-          {
-            label: 'Actions',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'K',
-                ]}
-              />
-            ),
-            onClick: toggleActions,
-          },
-        ]}
+        actions={
+          viewMode === 'form'
+            ? [
+                {
+                  label: 'Submit',
+                  shortcut: (
+                    <Kbd
+                      keys={[
+                        '⌘',
+                        '↵',
+                      ]}
+                    />
+                  ),
+                  onClick: handleSubmitSnippet,
+                },
+              ]
+            : [
+                {
+                  label: 'Open',
+                  shortcut: <Kbd keys={['↵']} />,
+                },
+                {
+                  label: 'Actions',
+                  shortcut: (
+                    <Kbd
+                      keys={[
+                        '⌘',
+                        'K',
+                      ]}
+                    />
+                  ),
+                  onClick: toggleActions,
+                },
+              ]
+        }
         dropdownOpen={actionsOpen}
         dropdownActions={dropdownActions}
         onDropdownClose={closeActions}

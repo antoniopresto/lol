@@ -261,13 +261,29 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P3] L03660 Build Form view component (src/components/form/).
+- [x] [P3] L03660 Build Form view component (src/components/form/).
      Input form for creating/editing content. Components: FormTextField
      (text input), FormTextArea (multiline), FormDropdown (select),
      FormCheckbox, FormDatePicker. Each field has label, optional
      description, validation error display. Submit button in ActionPanel.
      Create form.tsx, form_field.tsx, form.scss. Demo with a "Create
      Snippet" form accessible from a list action.
+     Sub-tasks:
+     - [x] L03660a Create FormTextField and FormTextArea components
+       (form_text_field.tsx, form_text_area.tsx) with label, placeholder,
+       error display, description, aria-invalid, aria-describedby.
+     - [x] L03660b Create FormDropdown component (form_dropdown.tsx) with
+       label, options list, selected value, error display.
+     - [x] L03660c Create FormCheckbox component (form_checkbox.tsx) with
+       hidden native input, label on right, checked state, description,
+       error support.
+     - [x] L03660d Create FormDatePicker component (form_date_picker.tsx)
+       with label, native date input, error display.
+     - [x] L03660e Create Form container (form.tsx, form.scss) that wraps
+       all form fields with vertical layout, scrollable, ⌘+Enter submit.
+     - [x] L03660f Wire demo "Create Snippet" form in App.tsx accessible
+       from actions dropdown (⌘+N), with breadcrumb navigation, inline
+       validation errors, submit via ActionPanel ⌘+Enter.
 
 --------------------------------------------------------------------------------
 
