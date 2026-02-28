@@ -14,7 +14,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L0333 Create Sass design tokens file (src/styles/_tokens.scss).
+- [x] L0333 Create Sass design tokens file (src/styles/_tokens.scss).
      Define variables for: colors (background #1a1a1c, surface #262628,
      surface-hover #2e2e30, border #3a3a3c, text-primary #f5f5f7,
      text-secondary #98989d, text-tertiary #6e6e73, accent #007aff,
