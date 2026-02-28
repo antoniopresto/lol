@@ -14,8 +14,53 @@
   color: $color-text-tertiary;
 }
 
+.search-bar__breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: $space-half;
+}
+
+.search-bar__breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  padding: $space-half $space-2;
+  border: none;
+  border-radius: $radius-sm;
+  background: $color-surface-hover;
+  font-family: $font-family;
+  font-size: $font-sm;
+  color: $color-text-secondary;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color $transition-fast ease;
+
+  &:hover {
+    background: $color-border;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: -1px;
+  }
+
+  &--current {
+    cursor: default;
+
+    &:hover {
+      background: $color-surface-hover;
+    }
+  }
+}
+
+.search-bar__breadcrumb-chevron {
+  flex-shrink: 0;
+  color: $color-text-tertiary;
+}
+
 .search-bar__input {
   flex: 1;
+  min-width: 0;
   height: 100%;
   border: none;
   outline: none;

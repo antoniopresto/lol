@@ -204,7 +204,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P1] L03620 Add breadcrumb/navigation bar to SearchBar. When user
+- [x] [P1] L03620 Add breadcrumb/navigation bar to SearchBar. When user
      drills into a command, show a breadcrumb trail in the search bar area
      (e.g. "Raycast > Clipboard History"). Breadcrumb appears as a small
      tag/chip to the left of the search input. Clicking the breadcrumb or

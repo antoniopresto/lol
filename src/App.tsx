@@ -6,6 +6,7 @@ import { DetailMetadata } from './components/detail/detail_metadata';
 import { EmptyState } from './components/empty_state/empty_state';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
+import type { BreadcrumbItem } from './components/search_bar/search_bar';
 import { SearchBar } from './components/search_bar/search_bar';
 import { MOCK_SECTIONS } from './data/mock_data';
 import type { ListItemData, ListItemMetadataEntry, SectionData } from './types';
@@ -92,10 +93,11 @@ export function App() {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [drilledItem, setDrilledItem] = useState<ListItemData | null>(null);
 
   const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
-  const selectedItem = allItems[selectedIndex];
+  const selectedItem = drilledItem ?? allItems[selectedIndex];
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -107,6 +109,37 @@ export function App() {
     setSelectedIndex(index);
     setActionsOpen(false);
   }, []);
+
+  const handleDrillIn = useCallback(() => {
+    const item = allItems[selectedIndex];
+    if (item) {
+      setDrilledItem(item);
+      setQuery('');
+      setActionsOpen(false);
+    }
+  }, [
+    allItems,
+    selectedIndex,
+  ]);
+
+  const handleDrillBack = useCallback(() => {
+    setDrilledItem(null);
+    setQuery('');
+    setSelectedIndex(0);
+    setActionsOpen(false);
+  }, []);
+
+  const breadcrumbs: BreadcrumbItem[] | undefined = drilledItem
+    ? [
+        {
+          label: 'Raycast',
+          onBack: handleDrillBack,
+        },
+        {
+          label: drilledItem.title,
+        },
+      ]
+    : undefined;
 
   const toggleActions = useCallback(() => {
     setActionsOpen(prev => !prev);
@@ -181,6 +214,7 @@ export function App() {
         activeDescendantId={
           allItems.length > 0 ? `list-item-${selectedIndex}` : undefined
         }
+        breadcrumbs={breadcrumbs}
       />
       <div
         className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
@@ -196,6 +230,7 @@ export function App() {
             <List
               itemCount={allItems.length}
               onActiveIndexChange={handleActiveIndexChange}
+              onAction={handleDrillIn}
             >
               {(() => {
                 let globalIndex = 0;
