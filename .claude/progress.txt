@@ -177,5 +177,91 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L000X1 Plan next tasks
+- [x] L000X1 Plan next tasks
+
+--------------------------------------------------------------------------------
+
+- [ ] [P0] L03600 Add SVG icons to list items in mock data. Raycast always
+     shows icons next to every list item. Create an icon set in
+     src/components/icons/ with reusable SVG icon components matching
+     Raycast's icon style (16x16, 1.5px stroke, currentColor). Icons needed:
+     ClipboardIcon, SnippetsIcon, EmojiIcon, WindowIcon, CalculatorIcon,
+     DefineWordIcon, SystemMonitorIcon, SafariIcon, VscodeIcon, TerminalIcon,
+     FigmaIcon, SlackIcon. Update mock_data.ts to assign icons to each item.
+     Each icon should be a clean React component returning an SVG element.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P0] L03610 Build actions dropdown overlay (⌘K submenu). When user
+     presses ⌘K (or clicks "Actions" in ActionPanel), show a floating
+     dropdown anchored to the ActionPanel. The dropdown lists all available
+     actions for the selected item. Each action row shows label + shortcut.
+     Overlay closes on Escape, click-outside, or action selection.
+     Background: $color-surface with border and $shadow-popover. Rounded
+     corners $radius-lg. Animate in with scale + fade (similar to palette).
+     Create src/components/action_panel/actions_dropdown.tsx and
+     actions_dropdown.scss. Wire ⌘K keyboard shortcut in App.tsx.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] L03620 Add breadcrumb/navigation bar to SearchBar. When user
+     drills into a command, show a breadcrumb trail in the search bar area
+     (e.g. "Raycast > Clipboard History"). Breadcrumb appears as a small
+     tag/chip to the left of the search input. Clicking the breadcrumb or
+     pressing Escape navigates back. Update SearchBar component to accept
+     optional breadcrumb prop (array of {label, onBack}). Style the
+     breadcrumb as a subtle pill with $color-surface-hover background,
+     $font-sm, $color-text-secondary text. Add chevron separator.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] L03630 Add loading/skeleton state. Create a subtle top-bar
+     loading indicator (thin animated gradient line at top of command
+     palette, similar to Raycast's loading bar). Add isLoading prop to
+     CommandPalette. When true, show the animated loading bar below the
+     search bar. CSS-only animation (linear gradient sliding left-to-right).
+     Create loading_bar.tsx and loading_bar.scss in
+     src/components/loading_bar/. Wire into CommandPalette.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P2] L03640 Build Toast notification component. Floating notification
+     that appears at bottom-center of the command palette. Supports styles:
+     success (green), error (red), info (default). Shows icon, title, and
+     optional message. Auto-dismisses after 3s or on click. Animated
+     entrance (slide-up + fade-in) and exit. Create src/components/toast/
+     with toast.tsx, toast.scss. Create a useToast hook in
+     src/hooks/use_toast.ts that returns {show, hide} and renders via
+     portal. Toast stacks if multiple.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P2] L03650 Build Grid view component (src/components/grid/).
+     Alternative to List for image-heavy content. Responsive grid layout
+     (CSS Grid). Each GridItem shows an image/icon (larger, ~64x64),
+     title below, optional subtitle. Configurable columns (3-6).
+     Keyboard navigation (arrow keys: left/right/up/down). Active item
+     with accent border. GridItem has hover scale effect. Create grid.tsx,
+     grid_item.tsx, grid.scss, grid_item.scss. Add a "Color Picker" mock
+     section using Grid view to demonstrate.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P3] L03660 Build Form view component (src/components/form/).
+     Input form for creating/editing content. Components: FormTextField
+     (text input), FormTextArea (multiline), FormDropdown (select),
+     FormCheckbox, FormDatePicker. Each field has label, optional
+     description, validation error display. Submit button in ActionPanel.
+     Create form.tsx, form_field.tsx, form.scss. Demo with a "Create
+     Snippet" form accessible from a list action.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1000] L03670 Add unit tests for core components. Test keyboard
+     navigation in List (arrow up/down cycles, Enter triggers action).
+     Test SearchBar filtering (query filters sections, empty state shows).
+     Test ListItem rendering (title, subtitle, icon, accessories, active
+     state). Test ActionPanel rendering (primary/secondary actions). Use
+     vitest + @testing-library/react. Minimum 80% coverage for tested
+     components.
 
