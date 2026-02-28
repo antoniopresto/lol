@@ -151,7 +151,7 @@ WORKFLOW:
    (they are not ignorable); If the task takes longer and there are other 
    non-low-priority tasks, document progress and revert the status to "- [ ]".
    
-2. If NO pending tasks exist, signal completion (see OUTPUT STATUS below) and stop
+2. If NO pending tasks exist, plan next improvements, add tasks and stop
 3. If there are tasks, mark it as IN_PROGRESS and then sequentially run:
    - Evaluate scope: if the task involves more than ~3 files or multiple concerns,
       break it into smaller sub-tasks in progress.txt BEFORE starting. Each sub-task
