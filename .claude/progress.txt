@@ -96,7 +96,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03530 Build ActionPanel component (src/components/action_panel/).
+- [x] L03530 Build ActionPanel component (src/components/action_panel/).
      Footer bar at bottom of command palette. Shows available actions
      for the selected item. Height ~36px. Background slightly different
      from main surface. Each action has a label and keyboard shortcut
