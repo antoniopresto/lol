@@ -181,7 +181,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P0] L03600 Add SVG icons to list items in mock data. Raycast always
+- [x] [P0] L03600 Add SVG icons to list items in mock data. Raycast always
      shows icons next to every list item. Create an icon set in
      src/components/icons/ with reusable SVG icon components matching
      Raycast's icon style (16x16, 1.5px stroke, currentColor). Icons needed:

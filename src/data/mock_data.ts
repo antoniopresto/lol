@@ -1,3 +1,16 @@
+import {
+  CalculatorIcon,
+  ChatIcon,
+  ClipboardIcon,
+  CodeIcon,
+  CpuIcon,
+  EmojiIcon,
+  FigmaIcon,
+  SafariIcon,
+  SnippetsIcon,
+  TerminalIcon,
+  WindowIcon,
+} from '../components/icons/icons';
 import type { SectionData } from '../types';
 
 export const MOCK_SECTIONS: SectionData[] = [
@@ -8,6 +21,7 @@ export const MOCK_SECTIONS: SectionData[] = [
         id: 'clipboard-history',
         title: 'Clipboard History',
         subtitle: 'Search Clipboard History',
+        icon: ClipboardIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# Clipboard History
@@ -52,6 +66,7 @@ View and manage your clipboard history. Search through previously copied items a
         id: 'snippets',
         title: 'Search Snippets',
         subtitle: 'Search Snippets',
+        icon: SnippetsIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# Search Snippets
@@ -80,6 +95,7 @@ Quickly find and insert your saved text snippets. Create shortcuts for frequentl
         id: 'emoji',
         title: 'Search Emoji & Symbols',
         subtitle: 'Search Emoji',
+        icon: EmojiIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# Search Emoji & Symbols
@@ -108,6 +124,7 @@ Find and copy emoji and special characters instantly. Supports skin tone modifie
         id: 'window-management',
         title: 'Window Management',
         subtitle: 'Organize Windows',
+        icon: WindowIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# Window Management
@@ -153,6 +170,7 @@ Organize and resize windows efficiently with keyboard shortcuts.
         id: 'calculator',
         title: 'Calculator',
         subtitle: 'Quick Calculations',
+        icon: CalculatorIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# Calculator
@@ -176,6 +194,7 @@ Perform quick calculations right from the command bar. Supports basic arithmetic
         id: 'define-word',
         title: 'Define Word',
         subtitle: 'Dictionary',
+        icon: ChatIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# Define Word
@@ -199,6 +218,7 @@ Look up word definitions, synonyms, and usage examples using the built-in dictio
         id: 'system-monitor',
         title: 'System Monitor',
         subtitle: 'CPU, Memory, Disk',
+        icon: CpuIcon(),
         accessories: [{ text: 'Raycast' }],
         detail: {
           markdown: `# System Monitor
@@ -227,6 +247,7 @@ Monitor your system resources in real-time. Check CPU usage, memory, disk space,
         id: 'app-safari',
         title: 'Safari',
         subtitle: 'Application',
+        icon: SafariIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Safari
@@ -251,6 +272,7 @@ Apple's web browser for macOS. Fast, energy-efficient, and privacy-focused.`,
         id: 'app-vscode',
         title: 'Visual Studio Code',
         subtitle: 'Application',
+        icon: CodeIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Visual Studio Code
@@ -275,6 +297,7 @@ Lightweight but powerful source code editor by Microsoft. Supports hundreds of l
         id: 'app-terminal',
         title: 'Terminal',
         subtitle: 'Application',
+        icon: TerminalIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Terminal
@@ -298,6 +321,7 @@ The built-in terminal emulator for macOS. Provides command-line access to the op
         id: 'app-figma',
         title: 'Figma',
         subtitle: 'Application',
+        icon: FigmaIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Figma
@@ -322,6 +346,7 @@ Collaborative design tool for building meaningful products. Design, prototype, a
         id: 'app-slack',
         title: 'Slack',
         subtitle: 'Application',
+        icon: ChatIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Slack
