@@ -1,4 +1,4 @@
-- [ ] L03239 Setup Vite + React + TypeScript + Sass project scaffold.
+- [x] L03239 Setup Vite + React + TypeScript + Sass project scaffold.
      Install dependencies with bun: react, react-dom, @types/react,
      @types/react-dom, vite, @vitejs/plugin-react, sass, eslint,
      @eslint/js, typescript-eslint, eslint-plugin-react-hooks,

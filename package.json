@@ -18,7 +18,7 @@
   },
   "scripts": {
     "build": "vite build",
-    "dev": "vite build --watch",
+    "dev": "vite",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest --watch --passWithNoTests",
     "coverage": "vitest --coverage",
@@ -29,11 +29,30 @@
   },
   "devDependencies": {
     "@belt/prettier-plugin": "latest",
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/bun": "latest",
+    "@types/jsdom": "^28.0.0",
     "@types/node": "^25.0.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.4",
+    "eslint": "^10.0.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "jsdom": "^28.1.0",
     "npm-run-all": "^4.1.5",
     "prettier": "^3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
+    "sass": "^1.97.3",
     "typescript": "^5.9.3",
-    "@types/bun": "latest"
+    "typescript-eslint": "^8.56.1",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   }
 }

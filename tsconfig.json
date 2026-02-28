@@ -2,9 +2,14 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "strict": true,
     "strictNullChecks": true,
@@ -24,7 +29,14 @@
     "declarationMap": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "exclude": ["node_modules", "dist"]
+  "include": ["src"],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

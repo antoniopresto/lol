@@ -3,11 +3,13 @@
 Raycast clone for internal use.
 
 # Stack
+
 - Bun.js
 - Typescript
 - Sass
 
 # CRITICAL (THINK BEFORE ACTING):
+
 - ALL tasks and instructions are deliberate.
 - No task is optional.
 - The FIRST thing you MUST do is write your understanding of each WORKFLOW statement

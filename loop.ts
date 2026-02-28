@@ -114,7 +114,10 @@ class LogBuffer {
   }
 }
 
-const logBuffer = new LogBuffer(logFilePath('startup'), CONFIG.logFlushInterval);
+const logBuffer = new LogBuffer(
+  logFilePath('startup'),
+  CONFIG.logFlushInterval,
+);
 
 type Color = 'green' | 'yellow' | 'red' | 'blue' | 'blackBright';
 
@@ -509,7 +512,10 @@ async function main(): Promise<void> {
       syslog('Claude Code completed successfully', 'green');
       consecutiveFailures = 0;
     } else if (timedOut) {
-      syslog('Iteration timed out — progress may persist in progress.txt', 'yellow');
+      syslog(
+        'Iteration timed out — progress may persist in progress.txt',
+        'yellow',
+      );
     } else {
       syslog(`Claude Code exited with code ${exitCode}`, 'yellow');
       consecutiveFailures++;
@@ -529,7 +535,11 @@ async function main(): Promise<void> {
     }
 
     const status = parseRalphStatus(output);
-    const taskSlug = status ? slugify(status.task) : timedOut ? 'timeout' : 'no-status';
+    const taskSlug = status
+      ? slugify(status.task)
+      : timedOut
+        ? 'timeout'
+        : 'no-status';
     logBuffer.renameFile(logFilePath(taskSlug));
 
     if (status?.exit) {
