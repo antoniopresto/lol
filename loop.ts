@@ -172,7 +172,6 @@ CRITICAL:
 - ALL tasks and instructions are deliberate. 
 - No task is optional.
 - If more work is necessary, add a new task to the file, set "exit": false, and Stop
-- Only set "exit": true when ALL tasks in progress.txt are completed
 - Never remove tasks, unless to update status;
 - Never include workarounds and add tasks to fix all you found ('as any' for example is a workaround)
 - No task should be submitted as "look reasonable." 
