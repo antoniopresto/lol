@@ -33,7 +33,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03450 Create global styles (src/styles/global.scss). Reset
+- [x] L03450 Create global styles (src/styles/global.scss). Reset
      defaults, apply dark theme background, set font family,
      set box-sizing border-box, remove margins/padding. Import
      tokens. Style scrollbars to match Raycast (thin, subtle,
@@ -169,10 +169,5 @@
 
 --------------------------------------------------------------------------------
 
-NOTES:
-- Project uses Bun exclusively (never npm/yarn)
-- File naming: snake_case (file_name.ts, home.tsx, use_keyboard.ts)
-- No CSS modules, no styled-components, no tailwind - only Sass
-- Each component gets its own .scss file
-- No comments in code unless JSDoc needed for public API
-- Raycast dark theme colors from official theme explorer
+- [ ] L000X1 Plan next tasks
+
