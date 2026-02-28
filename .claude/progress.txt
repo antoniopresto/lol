@@ -43,7 +43,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03459 Build root layout component (src/components/command_palette/).
+- [x] L03459 Build root layout component (src/components/command_palette/).
      Full-screen centered container with frosted-glass card (the command
      palette window). Fixed width ~750px, dynamic height with max ~500px.
      Rounded corners ($radius-xl), subtle border (1px solid $border),
@@ -54,7 +54,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03488 Build SearchBar component (src/components/search_bar/).
+- [x] L03488 Build SearchBar component (src/components/search_bar/).
      Input field at top of command palette. Magnifying glass icon on the
      left (SVG inline or icon component). Placeholder text "Search...".
      No visible border, bottom border-bottom 1px solid $border.
