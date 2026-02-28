@@ -1,11 +1,36 @@
-/tmp
-/out-tsc
+# Dependencies
+node_modules/
+.bun/
 
-/node_modules
+# Build outputs
+dist/
+.turbo/
+*.tsbuildinfo
+
+# Tauri
+apps/desktop/src-tauri/target/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-/.pnp
-.pnp.js
+bun-debug.log*
 
-.vscode/*
+# Test
+coverage/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+bun.lock

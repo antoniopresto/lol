@@ -1,38 +1,23 @@
 # lol
 
-Raycast UI clone for internal use. V1 is UI-only with no OS
-integrations. Visually identical to Raycast's design system.
+Raycast clone for internal use.
 
-## Stack
+# Stack
+- Bun.js
+- Typescript
+- Sass
 
-- Runtime: Bun
-- Package manager: pnpm
-- Framework: React + TypeScript
-- Bundler: Vite
-- Styling: Sass
-
-## Architecture
-
-Single-page app that replicates Raycast's visual interface.
-Components render a command palette with search, list views,
-detail panels, forms, and action panels. No backend, no IPC,
-no native integrations. Pure UI.
-
-## Development
-
-```
-pnpm install
-pnpm dev
-```
-
-## Project structure
-
-```
-src/
-  components/    UI components (List, Detail, Form, ActionPanel)
-  styles/        Sass files, design tokens, variables
-  hooks/         React hooks
-  types/         TypeScript type definitions
-  App.tsx        Root component
-  main.tsx       Entry point
-```
+# CRITICAL (THINK BEFORE ACTING):
+- ALL tasks and instructions are deliberate.
+- No task is optional.
+- The FIRST thing you MUST do is write your understanding of each WORKFLOW statement
+- The SECOND thing you MUST do is write your understanding of the work in progress described in progress.txt
+- Only AFTER completing steps above, proceed with the task execution
+- If more work is necessary, add a new task to the file, set "exit": false, and Stop
+- Only set "exit": true when ALL tasks in progress.txt are completed
+- Never remove tasks, unless to update status;
+- Never include workarounds and add tasks to fix all you found ('as any' for example is a workaround)
+- No task should be submitted as "look reasonable."
+- Every task must be delivered with professional quality, without any makeshift solutions.
+- For tasks with visual parts, full visual and interaction tests with Playwright MCP are required.
+- Never consider any mistake or error to be expected or acceptable.
