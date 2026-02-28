@@ -192,7 +192,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P0] L03610 Build actions dropdown overlay (⌘K submenu). When user
+- [x] [P0] L03610 Build actions dropdown overlay (⌘K submenu). When user
      presses ⌘K (or clicks "Actions" in ActionPanel), show a floating
      dropdown anchored to the ActionPanel. The dropdown lists all available
      actions for the selected item. Each action row shows label + shortcut.

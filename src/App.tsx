@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionPanel } from './components/action_panel/action_panel';
 import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
@@ -91,6 +91,7 @@ function SearchIcon() {
 export function App() {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
@@ -99,13 +100,78 @@ export function App() {
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
     setSelectedIndex(0);
+    setActionsOpen(false);
   }, []);
 
   const handleActiveIndexChange = useCallback((index: number) => {
     setSelectedIndex(index);
+    setActionsOpen(false);
+  }, []);
+
+  const toggleActions = useCallback(() => {
+    setActionsOpen(prev => !prev);
+  }, []);
+
+  const closeActions = useCallback(() => {
+    setActionsOpen(false);
+  }, []);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'k' && e.metaKey) {
+        e.preventDefault();
+        setActionsOpen(prev => !prev);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const detail = selectedItem?.detail;
+
+  const dropdownActions = useMemo(
+    () => [
+      {
+        label: 'Open',
+        shortcut: <Kbd keys={['↵']} />,
+      },
+      {
+        label: 'Copy Name',
+        shortcut: (
+          <Kbd
+            keys={[
+              '⌘',
+              'C',
+            ]}
+          />
+        ),
+      },
+      {
+        label: 'Show Detail',
+        shortcut: (
+          <Kbd
+            keys={[
+              '⌘',
+              'D',
+            ]}
+          />
+        ),
+      },
+      {
+        label: 'Pin to Top',
+        shortcut: (
+          <Kbd
+            keys={[
+              '⌘',
+              'P',
+            ]}
+          />
+        ),
+      },
+    ],
+    [],
+  );
 
   return (
     <CommandPalette>
@@ -183,8 +249,12 @@ export function App() {
                 ]}
               />
             ),
+            onClick: toggleActions,
           },
         ]}
+        dropdownOpen={actionsOpen}
+        dropdownActions={dropdownActions}
+        onDropdownClose={closeActions}
       />
     </CommandPalette>
   );
