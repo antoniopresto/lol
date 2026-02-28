@@ -9,6 +9,8 @@
   border-top: 1px solid $color-border;
   background-color: $color-surface-footer;
   flex-shrink: 0;
+  animation: action-panel-slide-up $transition-slow ease-out both;
+  animation-delay: $transition-fast;
 
   &__primary,
   &__secondary {

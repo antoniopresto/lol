@@ -21,6 +21,7 @@
   border: 1px solid $color-border;
   box-shadow: $shadow-window;
   overflow: hidden;
+  animation: palette-appear $transition-slow ease-out both;
 }
 
 .command-palette__body {

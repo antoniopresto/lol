@@ -150,7 +150,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03580 Add transitions and micro-animations. Fade-in on mount
+- [x] L03580 Add transitions and micro-animations. Fade-in on mount
      for command palette (opacity 0->1, translateY slight).
      Smooth highlight transitions on list item hover/active
      (transition: background-color $transition-fast ease).
