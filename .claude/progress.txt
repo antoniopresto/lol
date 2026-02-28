@@ -107,7 +107,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03540 Build Kbd component (src/components/kbd/).
+- [x] L03540 Build Kbd component (src/components/kbd/).
      Small inline element that renders a keyboard shortcut like
      "⌘K" or "↵". Styled as subtle bordered pill/box matching
      Raycast's shortcut indicators. Background slightly lighter than
