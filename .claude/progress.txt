@@ -86,7 +86,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03520 Build ListSection component (src/components/list/list_section/).
+- [x] L03520 Build ListSection component (src/components/list/list_section/).
      Groups ListItems under a section header. Small uppercase label
      ($font-xs, $text-secondary, text-transform uppercase,
      letter-spacing 0.5px) with horizontal padding $space-3.

@@ -1,0 +1,16 @@
+@use '../../../styles/tokens' as *;
+
+.list-section {
+  &:not(:first-child) {
+    margin-top: $space-2;
+  }
+}
+
+.list-section__header {
+  font-size: $font-xs;
+  color: $color-text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: $space-1 $space-3;
+  line-height: 1;
+}
