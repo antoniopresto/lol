@@ -8,13 +8,36 @@ export type TagColor =
   | 'purple'
   | 'yellow';
 
-const TAG_COLORS: Record<TagColor, string> = {
-  blue: '#007aff',
-  green: '#30d158',
-  orange: '#ff9f0a',
-  red: '#ff453a',
-  purple: '#bf5af2',
-  yellow: '#ffd60a',
+interface TagColorValue {
+  background: string;
+  text: string;
+}
+
+const TAG_COLORS: Record<TagColor, TagColorValue> = {
+  blue: {
+    background: '#007aff',
+    text: '#ffffff',
+  },
+  green: {
+    background: '#30d158',
+    text: '#ffffff',
+  },
+  orange: {
+    background: '#ff9f0a',
+    text: '#1a1a1c',
+  },
+  red: {
+    background: '#ff453a',
+    text: '#ffffff',
+  },
+  purple: {
+    background: '#bf5af2',
+    text: '#ffffff',
+  },
+  yellow: {
+    background: '#ffd60a',
+    text: '#1a1a1c',
+  },
 };
 
 export interface MetadataLabelProps {
@@ -70,7 +93,14 @@ export function MetadataTag({ text, color }: MetadataTagProps) {
   return (
     <span
       className="detail-metadata__tag"
-      style={color ? { backgroundColor: TAG_COLORS[color] } : undefined}
+      style={
+        color
+          ? {
+              backgroundColor: TAG_COLORS[color].background,
+              color: TAG_COLORS[color].text,
+            }
+          : undefined
+      }
     >
       {text}
     </span>

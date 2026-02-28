@@ -94,7 +94,7 @@ export function List({
 
   return (
     <ListContext value={contextValue}>
-      <div ref={containerRef} className="list" role="listbox">
+      <div ref={containerRef} className="list" role="listbox" id="command-list">
         {children}
       </div>
     </ListContext>

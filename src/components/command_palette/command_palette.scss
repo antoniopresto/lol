@@ -11,6 +11,7 @@
 
 .command-palette {
   width: 750px;
+  max-width: calc(100vw - $space-6 * 2);
   max-height: 500px;
   display: flex;
   flex-direction: column;
@@ -34,7 +35,11 @@
 .command-palette__list-container {
   display: flex;
   flex-direction: column;
-  flex: 0 0 40%;
+  flex: 1;
   min-width: 0;
   overflow: hidden;
+
+  .command-palette__body--has-detail & {
+    flex: 0 0 40%;
+  }
 }

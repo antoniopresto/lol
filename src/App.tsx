@@ -109,8 +109,16 @@ export function App() {
 
   return (
     <CommandPalette>
-      <SearchBar value={query} onChange={handleQueryChange} />
-      <div className="command-palette__body">
+      <SearchBar
+        value={query}
+        onChange={handleQueryChange}
+        activeDescendantId={
+          allItems.length > 0 ? `list-item-${selectedIndex}` : undefined
+        }
+      />
+      <div
+        className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
+      >
         <div className="command-palette__list-container">
           {allItems.length === 0 ? (
             <EmptyState

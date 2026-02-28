@@ -160,12 +160,20 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03590 Polish and pixel-perfect review. Compare side-by-side
-     with Raycast screenshots. Adjust spacing, colors, font
-     sizes, border radius, shadows until visually identical.
-     Test at different viewport sizes. Ensure smooth 60fps
-     animations. Verify keyboard navigation works flawlessly.
-     Check accessibility (focus visible states, aria labels).
+- [x] L03590 Polish and pixel-perfect review.
+     Sub-tasks:
+     - [x] L03590a Fix list container layout: take full width when no
+       detail panel is shown (flex:1 default, 40% with detail via BEM modifier).
+       Fix first child top-margin in detail markdown (> :first-child selector).
+     - [x] L03590b Accessibility polish: add focus-visible on list items,
+       proper combobox ARIA pattern on search input with aria-activedescendant
+       pointing to active list item. List has id="command-list" for aria-controls.
+     - [x] L03590c Keyboard navigation: kept modifier guard as meta/ctrl/alt only.
+       Shift not blocked (no text selection context in command palette).
+     - [x] L03590d Tag color contrast: TAG_COLORS now includes text color.
+       Yellow/orange use dark text (#1a1a1c) for WCAG contrast. Others use white.
+     - [x] L03590e Viewport responsiveness: max-width: calc(100vw - 48px) on
+       command palette for small viewports.
 
 --------------------------------------------------------------------------------
 

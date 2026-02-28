@@ -36,6 +36,7 @@ export function ListItem({
 
   return (
     <div
+      id={`list-item-${index}`}
       className={`list-item${isActive ? ' list-item--active' : ''}`}
       data-list-index={index}
       role="option"

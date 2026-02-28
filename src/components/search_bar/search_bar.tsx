@@ -5,12 +5,14 @@ interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  activeDescendantId?: string;
 }
 
 export function SearchBar({
   value,
   onChange,
   placeholder = 'Search...',
+  activeDescendantId,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +48,10 @@ export function SearchBar({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder={placeholder}
+        role="combobox"
+        aria-expanded={true}
+        aria-controls="command-list"
+        aria-activedescendant={activeDescendantId}
         aria-label="Search commands"
         spellCheck={false}
         autoComplete="off"
