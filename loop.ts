@@ -137,9 +137,10 @@ function syslog(message = '', color?: Color): void {
 }
 
 const TASK_PROMPT = `
-- The FIRST thing you MUST do is write your understanding of each WORKFLOW AND CRITICAL statement
-- The SECOND thing you MUST do is write your understanding of the work in progress described in progress.txt
-- Only AFTER completing steps above, proceed with the task execution
+1 - Understand and write your understanding of every single and 
+each WORKFLOW AND CRITICAL statement.
+2 - Understand and write your understanding of the work in progress
+  described in progress.txt and compared with the actual files.
 
 WORKFLOW:
 0. Understand Project
