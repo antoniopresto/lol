@@ -127,7 +127,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03560 Build Detail component (src/components/detail/).
+- [x] L03560 Build Detail component (src/components/detail/).
      Right panel view for showing detail content when an item is
      selected. Supports markdown-rendered content area with title,
      metadata rows (label/value pairs), and body text. Used in
