@@ -65,7 +65,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] L03500 Build List component (src/components/list/). Vertical
+- [x] L03500 Build List component (src/components/list/). Vertical
      scrollable list below search bar. Accepts children (ListItem or
      ListSection). Keyboard navigation with arrow keys (up/down).
      Track active index with state. Scroll active item into view
