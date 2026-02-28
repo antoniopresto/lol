@@ -154,3 +154,15 @@ export function ChatIcon(props: IconProps = {}) {
     </svg>
   );
 }
+
+export function PaletteIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgProps(props)}>
+      <circle cx="10" cy="10" r="7.5" {...STROKE} />
+      <circle cx="8" cy="7" r="1.25" fill="currentColor" />
+      <circle cx="12" cy="7" r="1.25" fill="currentColor" />
+      <circle cx="6.5" cy="10.5" r="1.25" fill="currentColor" />
+      <circle cx="10" cy="12.5" r="1.25" fill="currentColor" />
+    </svg>
+  );
+}

@@ -1,0 +1,10 @@
+@use '../../styles/tokens' as *;
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-columns, 4), 1fr);
+  gap: $space-2;
+  flex: 1;
+  overflow-y: auto;
+  padding: $space-2;
+}

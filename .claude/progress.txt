@@ -242,7 +242,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P2] L03650 Build Grid view component (src/components/grid/).
+- [x] [P2] L03650 Build Grid view component (src/components/grid/).
      Alternative to List for image-heavy content. Responsive grid layout
      (CSS Grid). Each GridItem shows an image/icon (larger, ~64x64),
      title below, optional subtitle. Configurable columns (3-6).
@@ -250,6 +250,14 @@
      with accent border. GridItem has hover scale effect. Create grid.tsx,
      grid_item.tsx, grid.scss, grid_item.scss. Add a "Color Picker" mock
      section using Grid view to demonstrate.
+     Sub-tasks:
+     - [x] L03650a Create GridItem component (grid_item.tsx, grid_item.scss)
+       with icon/image (64x64), title, subtitle, hover scale, active accent border
+     - [x] L03650b Create Grid component (grid.tsx, grid.scss) with CSS Grid
+       layout, configurable columns (3-6), keyboard nav (all 4 arrows), context
+     - [x] L03650c Add GridItemData/ColorItemData types to types.ts and Color
+       Picker mock data to mock_data.ts, PaletteIcon to icons
+     - [x] L03650d Wire Grid view demo in App.tsx with Color Picker section
 
 --------------------------------------------------------------------------------
 

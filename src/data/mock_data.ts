@@ -6,12 +6,13 @@ import {
   CpuIcon,
   EmojiIcon,
   FigmaIcon,
+  PaletteIcon,
   SafariIcon,
   SnippetsIcon,
   TerminalIcon,
   WindowIcon,
 } from '../components/icons/icons';
-import type { SectionData } from '../types';
+import type { ColorItemData, SectionData } from '../types';
 
 export const MOCK_SECTIONS: SectionData[] = [
   {
@@ -238,6 +239,13 @@ Monitor your system resources in real-time. Check CPU usage, memory, disk space,
           ],
         },
       },
+      {
+        id: 'color-picker',
+        title: 'Color Picker',
+        subtitle: 'Pick Colors',
+        icon: PaletteIcon(),
+        accessories: [{ text: 'Raycast' }],
+      },
     ],
   },
   {
@@ -368,5 +376,80 @@ Business communication platform for teams. Channels, direct messages, and integr
         },
       },
     ],
+  },
+];
+
+export const MOCK_COLORS: ColorItemData[] = [
+  {
+    id: 'color-red',
+    title: 'Red',
+    subtitle: '#FF3B30',
+    color: '#FF3B30',
+  },
+  {
+    id: 'color-orange',
+    title: 'Orange',
+    subtitle: '#FF9500',
+    color: '#FF9500',
+  },
+  {
+    id: 'color-yellow',
+    title: 'Yellow',
+    subtitle: '#FFCC00',
+    color: '#FFCC00',
+  },
+  {
+    id: 'color-green',
+    title: 'Green',
+    subtitle: '#34C759',
+    color: '#34C759',
+  },
+  {
+    id: 'color-teal',
+    title: 'Teal',
+    subtitle: '#5AC8FA',
+    color: '#5AC8FA',
+  },
+  {
+    id: 'color-blue',
+    title: 'Blue',
+    subtitle: '#007AFF',
+    color: '#007AFF',
+  },
+  {
+    id: 'color-indigo',
+    title: 'Indigo',
+    subtitle: '#5856D6',
+    color: '#5856D6',
+  },
+  {
+    id: 'color-purple',
+    title: 'Purple',
+    subtitle: '#AF52DE',
+    color: '#AF52DE',
+  },
+  {
+    id: 'color-pink',
+    title: 'Pink',
+    subtitle: '#FF2D55',
+    color: '#FF2D55',
+  },
+  {
+    id: 'color-brown',
+    title: 'Brown',
+    subtitle: '#A2845E',
+    color: '#A2845E',
+  },
+  {
+    id: 'color-gray',
+    title: 'Gray',
+    subtitle: '#8E8E93',
+    color: '#8E8E93',
+  },
+  {
+    id: 'color-white',
+    title: 'White',
+    subtitle: '#FFFFFF',
+    color: '#FFFFFF',
   },
 ];

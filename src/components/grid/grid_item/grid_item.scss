@@ -1,0 +1,62 @@
+@use '../../../styles/tokens' as *;
+
+.grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $space-2;
+  padding: $space-3;
+  border-radius: $radius-md;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition:
+    transform $transition-fast ease,
+    border-color $transition-fast ease,
+    background-color $transition-fast ease;
+
+  &:hover {
+    background-color: $color-surface-hover;
+    transform: scale(1.05);
+  }
+
+  &--active {
+    border-color: $color-accent;
+    background-color: $color-surface-hover;
+  }
+}
+
+.grid-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $size-grid-icon;
+  height: $size-grid-icon;
+  flex-shrink: 0;
+}
+
+.grid-item__color-swatch {
+  width: $size-grid-icon;
+  height: $size-grid-icon;
+  border-radius: $radius-lg;
+}
+
+.grid-item__title {
+  font-size: $font-sm;
+  color: $color-text-primary;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.grid-item__subtitle {
+  font-size: $font-xs;
+  color: $color-text-secondary;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}

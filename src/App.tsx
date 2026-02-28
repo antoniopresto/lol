@@ -4,14 +4,20 @@ import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
 import { EmptyState } from './components/empty_state/empty_state';
+import { Grid, GridItem } from './components/grid';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
 import type { BreadcrumbItem } from './components/search_bar/search_bar';
 import { SearchBar } from './components/search_bar/search_bar';
 import { ToastContainer } from './components/toast/toast_container';
-import { MOCK_SECTIONS } from './data/mock_data';
+import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useToast } from './hooks/use_toast';
-import type { ListItemData, ListItemMetadataEntry, SectionData } from './types';
+import type {
+  ColorItemData,
+  ListItemData,
+  ListItemMetadataEntry,
+  SectionData,
+} from './types';
 
 function filterSections(sections: SectionData[], query: string): SectionData[] {
   if (!query) return sections;
@@ -26,6 +32,16 @@ function filterSections(sections: SectionData[], query: string): SectionData[] {
       ),
     }))
     .filter(section => section.items.length > 0);
+}
+
+function filterColors(colors: ColorItemData[], query: string): ColorItemData[] {
+  if (!query) return colors;
+  const lower = query.toLowerCase();
+  return colors.filter(
+    c =>
+      c.title.toLowerCase().includes(lower) ||
+      c.subtitle?.toLowerCase().includes(lower),
+  );
 }
 
 function flattenItems(sections: SectionData[]): ListItemData[] {
@@ -68,6 +84,15 @@ function renderMetadataEntry(entry: ListItemMetadataEntry, index: number) {
   }
 }
 
+function ColorSwatch({ color }: { color: string }) {
+  return (
+    <div
+      className="grid-item__color-swatch"
+      style={{ backgroundColor: color }}
+    />
+  );
+}
+
 function SearchIcon() {
   return (
     <svg
@@ -91,16 +116,24 @@ function SearchIcon() {
   );
 }
 
+type ViewMode = 'list' | 'grid';
+
 export function App() {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [drilledItem, setDrilledItem] = useState<ListItemData | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const { toasts, show: showToast, hide: hideToast } = useToast();
 
   const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
-  const selectedItem = drilledItem ?? allItems[selectedIndex];
+  const filteredColors = useMemo(
+    () => filterColors(MOCK_COLORS, query),
+    [query],
+  );
+  const selectedItem =
+    viewMode === 'list' ? (drilledItem ?? allItems[selectedIndex]) : undefined;
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -116,13 +149,24 @@ export function App() {
   const handleDrillIn = useCallback(() => {
     const item = allItems[selectedIndex];
     if (item) {
-      setDrilledItem(item);
-      setQuery('');
-      setActionsOpen(false);
-      showToast({
-        style: 'success',
-        title: `Opened ${item.title}`,
-      });
+      if (item.id === 'color-picker') {
+        setViewMode('grid');
+        setQuery('');
+        setSelectedIndex(0);
+        setActionsOpen(false);
+        showToast({
+          style: 'success',
+          title: 'Opened Color Picker',
+        });
+      } else {
+        setDrilledItem(item);
+        setQuery('');
+        setActionsOpen(false);
+        showToast({
+          style: 'success',
+          title: `Opened ${item.title}`,
+        });
+      }
     }
   }, [
     allItems,
@@ -132,22 +176,47 @@ export function App() {
 
   const handleDrillBack = useCallback(() => {
     setDrilledItem(null);
+    setViewMode('list');
     setQuery('');
     setSelectedIndex(0);
     setActionsOpen(false);
   }, []);
 
-  const breadcrumbs: BreadcrumbItem[] | undefined = drilledItem
-    ? [
-        {
-          label: 'Raycast',
-          onBack: handleDrillBack,
-        },
-        {
-          label: drilledItem.title,
-        },
-      ]
-    : undefined;
+  const handleGridAction = useCallback(
+    (index: number) => {
+      const color = filteredColors[index];
+      if (color) {
+        showToast({
+          style: 'info',
+          title: 'Copied color',
+          message: color.color,
+        });
+      }
+    },
+    [
+      filteredColors,
+      showToast,
+    ],
+  );
+
+  const breadcrumbs: BreadcrumbItem[] | undefined =
+    viewMode === 'grid'
+      ? [
+          {
+            label: 'Raycast',
+            onBack: handleDrillBack,
+          },
+          { label: 'Color Picker' },
+        ]
+      : drilledItem
+        ? [
+            {
+              label: 'Raycast',
+              onBack: handleDrillBack,
+            },
+            { label: drilledItem.title },
+          ]
+        : undefined;
 
   const toggleActions = useCallback(() => {
     setActionsOpen(prev => !prev);
@@ -247,21 +316,53 @@ export function App() {
     ],
   );
 
+  const activeDescendantId =
+    viewMode === 'grid'
+      ? filteredColors.length > 0
+        ? `grid-item-${selectedIndex}`
+        : undefined
+      : allItems.length > 0
+        ? `list-item-${selectedIndex}`
+        : undefined;
+
   return (
     <CommandPalette isLoading>
       <SearchBar
         value={query}
         onChange={handleQueryChange}
-        activeDescendantId={
-          allItems.length > 0 ? `list-item-${selectedIndex}` : undefined
-        }
+        activeDescendantId={activeDescendantId}
         breadcrumbs={breadcrumbs}
       />
       <div
         className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
       >
         <div className="command-palette__list-container">
-          {allItems.length === 0 ? (
+          {viewMode === 'grid' ? (
+            filteredColors.length === 0 ? (
+              <EmptyState
+                icon={<SearchIcon />}
+                title="No Colors"
+                description="Try a different search term"
+              />
+            ) : (
+              <Grid
+                itemCount={filteredColors.length}
+                columns={4}
+                onActiveIndexChange={handleActiveIndexChange}
+                onAction={handleGridAction}
+              >
+                {filteredColors.map((color, index) => (
+                  <GridItem
+                    key={color.id}
+                    index={index}
+                    icon={<ColorSwatch color={color.color} />}
+                    title={color.title}
+                    subtitle={color.subtitle}
+                  />
+                ))}
+              </Grid>
+            )
+          ) : allItems.length === 0 ? (
             <EmptyState
               icon={<SearchIcon />}
               title="No Results"

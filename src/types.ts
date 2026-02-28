@@ -46,3 +46,14 @@ export interface SectionData {
   title: string;
   items: ListItemData[];
 }
+
+export interface GridItemData {
+  id: string;
+  title: string;
+  subtitle?: string;
+  icon?: ReactNode;
+}
+
+export interface ColorItemData extends GridItemData {
+  color: string;
+}
