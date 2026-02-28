@@ -225,7 +225,7 @@
 
 --------------------------------------------------------------------------------
 
-- [ ] [P2] L03640 Build Toast notification component. Floating notification
+- [x] [P2] L03640 Build Toast notification component. Floating notification
      that appears at bottom-center of the command palette. Supports styles:
      success (green), error (red), info (default). Shows icon, title, and
      optional message. Auto-dismisses after 3s or on click. Animated
@@ -233,6 +233,12 @@
      with toast.tsx, toast.scss. Create a useToast hook in
      src/hooks/use_toast.ts that returns {show, hide} and renders via
      portal. Toast stacks if multiple.
+     Sub-tasks:
+     - [x] L03640a Create Toast component (toast.tsx, toast.scss) with
+       success/error/info styles, icon, title, message, dismiss on click
+     - [x] L03640b Create useToast hook (use_toast.ts) with show/hide,
+       auto-dismiss, stacking, ToastContainer rendering
+     - [x] L03640c Wire demo in App.tsx to demonstrate toast functionality
 
 --------------------------------------------------------------------------------
 

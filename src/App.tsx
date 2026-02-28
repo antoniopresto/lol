@@ -8,7 +8,9 @@ import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
 import type { BreadcrumbItem } from './components/search_bar/search_bar';
 import { SearchBar } from './components/search_bar/search_bar';
+import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_SECTIONS } from './data/mock_data';
+import { useToast } from './hooks/use_toast';
 import type { ListItemData, ListItemMetadataEntry, SectionData } from './types';
 
 function filterSections(sections: SectionData[], query: string): SectionData[] {
@@ -94,6 +96,7 @@ export function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [drilledItem, setDrilledItem] = useState<ListItemData | null>(null);
+  const { toasts, show: showToast, hide: hideToast } = useToast();
 
   const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
@@ -116,10 +119,15 @@ export function App() {
       setDrilledItem(item);
       setQuery('');
       setActionsOpen(false);
+      showToast({
+        style: 'success',
+        title: `Opened ${item.title}`,
+      });
     }
   }, [
     allItems,
     selectedIndex,
+    showToast,
   ]);
 
   const handleDrillBack = useCallback(() => {
@@ -168,6 +176,14 @@ export function App() {
       {
         label: 'Open',
         shortcut: <Kbd keys={['↵']} />,
+        onClick: () => {
+          if (selectedItem) {
+            showToast({
+              style: 'success',
+              title: `Opened ${selectedItem.title}`,
+            });
+          }
+        },
       },
       {
         label: 'Copy Name',
@@ -179,6 +195,15 @@ export function App() {
             ]}
           />
         ),
+        onClick: () => {
+          if (selectedItem) {
+            showToast({
+              style: 'info',
+              title: 'Copied to clipboard',
+              message: selectedItem.title,
+            });
+          }
+        },
       },
       {
         label: 'Show Detail',
@@ -190,20 +215,36 @@ export function App() {
             ]}
           />
         ),
+        onClick: () => {
+          showToast({
+            style: 'info',
+            title: 'Detail panel toggled',
+          });
+        },
       },
       {
-        label: 'Pin to Top',
+        label: 'Delete',
         shortcut: (
           <Kbd
             keys={[
               '⌘',
-              'P',
+              '⌫',
             ]}
           />
         ),
+        onClick: () => {
+          showToast({
+            style: 'error',
+            title: 'Cannot delete',
+            message: 'This item is read-only',
+          });
+        },
       },
     ],
-    [],
+    [
+      selectedItem,
+      showToast,
+    ],
   );
 
   return (
@@ -291,6 +332,7 @@ export function App() {
         dropdownActions={dropdownActions}
         onDropdownClose={closeActions}
       />
+      <ToastContainer toasts={toasts} onDismiss={hideToast} />
     </CommandPalette>
   );
 }
