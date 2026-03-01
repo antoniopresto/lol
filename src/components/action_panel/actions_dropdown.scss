@@ -11,7 +11,7 @@
   border: 1px solid $border-100;
   border-radius: $radius-lg;
   box-shadow: $shadow-popover;
-  z-index: 100;
+  z-index: $z-dropdown;
   animation: dropdown-appear $transition-normal ease-out both;
 }
 

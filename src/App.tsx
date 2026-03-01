@@ -17,6 +17,8 @@ import { Grid, GridItem } from './components/grid';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
 import { SearchBar } from './components/search_bar/search_bar';
+import type { SearchDropdownSection } from './components/search_bar/search_dropdown';
+import { SearchDropdown } from './components/search_bar/search_dropdown';
 import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useAlert } from './hooks/use_alert';
@@ -352,6 +354,7 @@ function DetailView({ item }: { item: ListItemData }) {
 
 export function App() {
   const [query, setQuery] = useState('');
+  const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const { toasts, show: showToast, hide: hideToast } = useToast();
@@ -361,15 +364,56 @@ export function App() {
 
   const viewType = nav.currentEntry?.data.type ?? 'root';
 
+  const searchFilterSections: SearchDropdownSection[] = useMemo(
+    () => [
+      {
+        options: [
+          {
+            label: 'All',
+            value: 'all',
+          },
+        ],
+      },
+      {
+        title: 'Types',
+        options: [
+          {
+            label: 'Commands',
+            value: 'commands',
+          },
+          {
+            label: 'Applications',
+            value: 'applications',
+          },
+        ],
+      },
+    ],
+    [],
+  );
+
   useEffect(() => {
     if (nav.stackDepth === 0) {
       setQuery('');
+      setFilterValue('all');
       setSelectedIndex(0);
       setActionsOpen(false);
     }
   }, [nav.stackDepth]);
 
-  const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
+  const filtered = useMemo(() => {
+    let sections = MOCK_SECTIONS;
+    if (filterValue === 'commands') {
+      sections = sections.filter(
+        s => s.title === 'Suggestions' || s.title === 'Commands',
+      );
+    } else if (filterValue === 'applications') {
+      sections = sections.filter(s => s.title === 'Applications');
+    }
+    return filterSections(sections, query);
+  }, [
+    query,
+    filterValue,
+  ]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
   const filteredColors = useMemo(
     () => filterColors(MOCK_COLORS, query),
@@ -383,6 +427,11 @@ export function App() {
     setQuery(value);
     setSelectedIndex(0);
     setActionsOpen(false);
+  }, []);
+
+  const handleFilterChange = useCallback((value: string) => {
+    setFilterValue(value);
+    setSelectedIndex(0);
   }, []);
 
   const handleActiveIndexChange = useCallback((index: number) => {
@@ -736,6 +785,15 @@ export function App() {
           onChange={handleQueryChange}
           activeDescendantId={activeDescendantId}
           breadcrumbs={nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined}
+          dropdown={
+            viewType === 'root' ? (
+              <SearchDropdown
+                sections={searchFilterSections}
+                value={filterValue}
+                onChange={handleFilterChange}
+              />
+            ) : undefined
+          }
         />
         {nav.currentEntry ? (
           <div

@@ -453,12 +453,21 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   parent position). App.tsx demo with "Copy As..." submenu (3 child actions).
   45 dropdown tests (5 new for submenu), all 93 tests pass.
 
-- [ ] [P0] COMP005 - Build List.Dropdown component (search bar filter). A small
+- [x] [P0] COMP005 - Build List.Dropdown component (search bar filter). A small
   dropdown selector inside the SearchBar (right side) for secondary filtering
   (e.g., filter by type: All, Commands, Applications). Create
   src/components/search_bar/search_dropdown.tsx and search_dropdown.scss.
   Dropdown appears below search bar on click, styled like actions_dropdown.
   Supports sections. Update SearchBar to accept optional dropdown prop.
+  Done: SearchDropdown component with sections support, keyboard navigation
+  (ArrowUp/Down, Enter, Escape, Tab closes), click-outside dismiss, check
+  icon for selected option, chevron rotation animation. Proper ARIA: listbox
+  role, option role on divs, aria-selected, aria-activedescendant, useId()
+  for unique IDs, aria-label on trigger. All values tokenized
+  ($search-dropdown-trigger-height, $search-dropdown-menu-min-width,
+  $search-dropdown-menu-max-height, $z-dropdown, $z-search-dropdown).
+  SearchBar accepts optional dropdown ReactNode prop. App.tsx demo with
+  All/Commands/Applications filter. 93 tests pass, bun run check passes.
 
 - [ ] [P1] COMP006 - Build HUD notification component. Compact floating pill
   shown at bottom-center of screen after an action completes (like "Copied to

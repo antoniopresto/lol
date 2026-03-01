@@ -1,4 +1,10 @@
-import { type KeyboardEvent, Fragment, useEffect, useRef } from 'react';
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  Fragment,
+  useEffect,
+  useRef,
+} from 'react';
 import type { BreadcrumbItem } from '../../hooks/use_navigation';
 import './search_bar.scss';
 
@@ -8,6 +14,7 @@ interface SearchBarProps {
   placeholder?: string;
   activeDescendantId?: string;
   breadcrumbs?: BreadcrumbItem[];
+  dropdown?: ReactNode;
 }
 
 export function SearchBar({
@@ -16,6 +23,7 @@ export function SearchBar({
   placeholder = 'Search...',
   activeDescendantId,
   breadcrumbs,
+  dropdown,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -126,6 +134,7 @@ export function SearchBar({
         spellCheck={false}
         autoComplete="off"
       />
+      {dropdown}
     </div>
   );
 }
