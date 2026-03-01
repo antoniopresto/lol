@@ -1,0 +1,153 @@
+@use '../../styles/tokens' as *;
+
+.alert__backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $backdrop-overlay;
+  backdrop-filter: blur($backdrop-blur);
+  -webkit-backdrop-filter: blur($backdrop-blur);
+  z-index: 200;
+  border-radius: $radius-window;
+  animation: alert-backdrop-enter $transition-normal ease-out both;
+
+  &--exiting {
+    animation: alert-backdrop-exit $transition-normal ease-in both;
+  }
+}
+
+.alert__dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: $alert-dialog-width;
+  padding: $space-5 $space-4 $space-4;
+  background: $color-surface;
+  border: 1px solid $border-100;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-popover;
+  animation: alert-dialog-enter $transition-normal ease-out both;
+
+  &--exiting {
+    animation: alert-dialog-exit $transition-normal ease-in both;
+  }
+}
+
+.alert__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $space-8;
+  height: $space-8;
+  margin-bottom: $space-3;
+  color: $text-600;
+}
+
+.alert__title {
+  margin: 0;
+  font-size: $font-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  text-align: center;
+}
+
+.alert__message {
+  margin: $space-1 0 0;
+  font-size: $font-sm;
+  color: $text-600;
+  text-align: center;
+}
+
+.alert__actions {
+  display: flex;
+  gap: $space-2;
+  width: 100%;
+  margin-top: $space-4;
+}
+
+.alert__button {
+  flex: 1;
+  height: $space-8;
+  padding: 0 $space-3;
+  border: none;
+  border-radius: $radius-md;
+  font-family: $font-family;
+  font-size: $font-sm;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: background-color $transition-fast ease;
+
+  &--default {
+    background: $color-accent;
+    color: $color-text-on-accent;
+
+    &:hover {
+      background: $color-accent-hover;
+    }
+  }
+
+  &--destructive {
+    background: $color-destructive;
+    color: $color-text-on-accent;
+
+    &:hover {
+      background: lighten($color-destructive, 5%);
+    }
+  }
+
+  &--cancel {
+    background: $border-100;
+    color: $color-text-primary;
+
+    &:hover {
+      background: $border-200;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-accent;
+    outline-offset: -2px;
+  }
+}
+
+@keyframes alert-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes alert-backdrop-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes alert-dialog-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes alert-dialog-exit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}

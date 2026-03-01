@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionPanel } from './components/action_panel/action_panel';
+import { Alert } from './components/alert/alert';
 import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
@@ -19,6 +20,7 @@ import type { BreadcrumbItem } from './components/search_bar/search_bar';
 import { SearchBar } from './components/search_bar/search_bar';
 import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
+import { useAlert } from './hooks/use_alert';
 import { useToast } from './hooks/use_toast';
 import type {
   ColorItemData,
@@ -175,6 +177,7 @@ export function App() {
     Partial<Record<keyof SnippetFormState, string>>
   >({});
   const { toasts, show: showToast, hide: hideToast } = useToast();
+  const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
 
   const filtered = useMemo(() => filterSections(MOCK_SECTIONS, query), [query]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
@@ -421,10 +424,46 @@ export function App() {
           />
         ),
         onClick: () => {
-          showToast({
-            style: 'error',
-            title: 'Cannot delete',
-            message: 'This item is read-only',
+          if (!selectedItem) return;
+          const itemTitle = selectedItem.title;
+          setActionsOpen(false);
+          confirmAlert({
+            title: `Delete "${itemTitle}"?`,
+            message: 'This action cannot be undone.',
+            icon: (
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  fill="currentColor"
+                  opacity="0.15"
+                />
+                <path
+                  d="M12 13V22M16 13V22M20 13V22M10 10H22M13 10V9C13 8.45 13.45 8 14 8H18C18.55 8 19 8.45 19 9V10"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ),
+            primaryAction: {
+              label: 'Delete',
+              style: 'destructive',
+              onAction: () => {
+                showToast({
+                  style: 'error',
+                  title: 'Deleted',
+                  message: itemTitle,
+                });
+              },
+            },
+            dismissAction: {
+              label: 'Cancel',
+              style: 'cancel',
+              onAction: () => {},
+            },
           });
         },
       },
@@ -433,6 +472,7 @@ export function App() {
       selectedItem,
       showToast,
       handleOpenCreateSnippet,
+      confirmAlert,
     ],
   );
 
@@ -654,6 +694,16 @@ export function App() {
         dropdownActions={dropdownActions}
         onDropdownClose={closeActions}
       />
+      {alertState && (
+        <Alert
+          title={alertState.title}
+          message={alertState.message}
+          icon={alertState.icon}
+          primaryAction={alertState.primaryAction}
+          dismissAction={alertState.dismissAction}
+          onDismiss={dismissAlert}
+        />
+      )}
       <ToastContainer toasts={toasts} onDismiss={hideToast} />
     </CommandPalette>
   );

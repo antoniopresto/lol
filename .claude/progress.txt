@@ -392,13 +392,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 
 === CORE MISSING COMPONENTS ===
 
-- [ ] [P0] COMP001 - Build Alert/Confirm dialog component. Blocking modal overlay
+- [x] [P0] COMP001 - Build Alert/Confirm dialog component. Blocking modal overlay
   for destructive or important confirmations. Fields: title, message, icon,
   primaryAction (label + style: Default/Destructive/Cancel), dismissAction.
   Animate in with backdrop blur + scale. Create src/components/alert/ with
   alert.tsx and alert.scss. Create useAlert hook in src/hooks/use_alert.ts that
   returns confirmAlert(options) -> Promise<boolean>. Wire demo: add "Delete"
   action to list items that triggers confirm dialog before toast.
+  Done: Alert component with backdrop blur overlay, scale+fade enter/exit
+  animations, focus trap (Tab cycling), Escape to dismiss, backdrop click to
+  dismiss. useAlert hook with Promise-based confirmAlert() using ref-based
+  resolve (no double-resolve). All SCSS values tokenized ($alert-dialog-width,
+  $backdrop-blur, $backdrop-overlay added to _tokens.scss). Unique IDs via
+  useId(). Stable callback refs to avoid stale closures. Delete action in
+  dropdown triggers destructive confirm dialog before showing toast.
 
 - [ ] [P0] COMP002 - Build proper navigation stack system (push/pop). Replace
   current breadcrumb-only drill-in with a real stack-based navigation. Create
