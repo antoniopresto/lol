@@ -332,12 +332,11 @@ screens, plan next tasks and fix it.
     Update list_item.scss: active bg from $color-accent to rgba($color-accent, 0.1).
     Active title/subtitle/accessory text stays primary color (no white override).
     Add new token $color-selection-background: rgba($color-accent, 0.1).
-  - [ ] UXDS002c - [P0] Fix window dimensions and glass effect. Window radius 12→18px
+  - [x] UXDS002c - [P0] Fix window dimensions and glass effect. Window radius 12→18px
     (add $radius-window: 18px token). Search bar height 46→56px. Search bar font
-    15→16px. Backdrop blur 64→72px. Background: gradient from backgroundPrimary(40%)
-    to backgroundSecondary(40%) instead of single rgba. Border: text at 20% opacity
-    inset instead of rgba(255,255,255,0.08). Action panel bottom radius matches
-    window radius.
+    15→16px ($font-search: 16px). Backdrop blur 64→72px. Background: linear-gradient
+    from backgroundPrimary(40%) to backgroundSecondary(40%). Border: inset box-shadow
+    1px with text at 20% opacity. Action panel bottom radius uses $radius-window.
   - [ ] UXDS002d - [P1] Fix list item spacing and radius. Border-radius 8→10px
     (add $radius-list-item: 10px token). Icon-text gap 8→12px. Left padding 8px
     stays. These match Raycast's ray-so source exactly.
