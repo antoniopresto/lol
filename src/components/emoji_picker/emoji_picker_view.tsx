@@ -9,6 +9,7 @@ import {
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { isStringArray, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
@@ -133,11 +134,10 @@ export function EmojiPickerView() {
       emojis = emojis.filter(e => e.category === filterValue);
     }
     if (query) {
-      const lower = query.toLowerCase();
       emojis = emojis.filter(
         e =>
-          e.name.toLowerCase().includes(lower) ||
-          e.keywords.some(k => k.includes(lower)) ||
+          fuzzyMatch(query, e.name) ||
+          e.keywords.some(k => fuzzyMatch(query, k)) ||
           e.char === query,
       );
     }

@@ -12,6 +12,7 @@ import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { formatRelativeDate } from '../../utils/format_date';
+import { fuzzyMatch } from '../../utils/fuzzy_search';
 import {
   isBooleanRecord,
   isStringArray,
@@ -206,11 +207,8 @@ export function ClipboardHistoryView() {
       items = items.filter(e => e.contentType === filterValue);
     }
     if (query) {
-      const lower = query.toLowerCase();
       items = items.filter(
-        e =>
-          e.content.toLowerCase().includes(lower) ||
-          e.sourceApp.toLowerCase().includes(lower),
+        e => fuzzyMatch(query, e.content) || fuzzyMatch(query, e.sourceApp),
       );
     }
     return items;
@@ -533,6 +531,7 @@ export function ClipboardHistoryView() {
                                 tooltip: entry.copiedAt.toLocaleString(),
                               },
                             ]}
+                            query={query || undefined}
                           />
                         );
                       })}
@@ -558,6 +557,7 @@ export function ClipboardHistoryView() {
                                 tooltip: entry.copiedAt.toLocaleString(),
                               },
                             ]}
+                            query={query || undefined}
                           />
                         );
                       })}

@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { TAG_COLOR_HEX } from '../../../constants/tag_colors';
 import type { ListItemAccessoryData } from '../../../types';
 import { formatRelativeDate } from '../../../utils/format_date';
+import { HighlightedText } from '../../highlighted_text/highlighted_text';
 import { Tooltip } from '../../tooltip/tooltip';
 import { useListContext } from '../list_context';
 import './list_item.scss';
@@ -14,6 +15,7 @@ export interface ListItemProps {
   subtitle?: string;
   accessories?: ListItemAccessoryData[];
   onClick?: () => void;
+  query?: string;
 }
 
 function AccessoryWrapper({
@@ -36,6 +38,7 @@ export function ListItem({
   subtitle,
   accessories,
   onClick,
+  query,
 }: ListItemProps) {
   const { activeIndex, setActiveIndex } = useListContext();
   const isActive = activeIndex === index;
@@ -60,8 +63,25 @@ export function ListItem({
     >
       <div className="list-item__left">
         {icon && <span className="list-item__icon">{icon}</span>}
-        <span className="list-item__title">{title}</span>
-        {subtitle && <span className="list-item__subtitle">{subtitle}</span>}
+        {query ? (
+          <HighlightedText
+            text={title}
+            query={query}
+            className="list-item__title"
+          />
+        ) : (
+          <span className="list-item__title">{title}</span>
+        )}
+        {subtitle &&
+          (query ? (
+            <HighlightedText
+              text={subtitle}
+              query={query}
+              className="list-item__subtitle"
+            />
+          ) : (
+            <span className="list-item__subtitle">{subtitle}</span>
+          ))}
       </div>
       {accessories && accessories.length > 0 && (
         <div className="list-item__accessories">

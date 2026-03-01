@@ -28,6 +28,7 @@ import { useWindow } from './hooks/use_window';
 import { getCommand, getSections, searchCommands } from './registry';
 import type { ListItemData, ListItemMetadataEntry, SectionData } from './types';
 import { evaluate } from './utils/calculator';
+import { fuzzyMatch } from './utils/fuzzy_search';
 
 type NavViewData =
   | {
@@ -329,11 +330,10 @@ export function App() {
       .filter((item): item is ListItemData => !!item);
 
     if (query) {
-      const lower = query.toLowerCase();
       const filteredFavs = favoriteItems.filter(
         item =>
-          item.title.toLowerCase().includes(lower) ||
-          item.subtitle?.toLowerCase().includes(lower),
+          fuzzyMatch(query, item.title) ||
+          fuzzyMatch(query, item.subtitle ?? ''),
       );
       if (filteredFavs.length > 0) {
         const favIds = new Set(filteredFavs.map(f => f.id));
@@ -981,6 +981,7 @@ export function App() {
                                       subtitle={item.subtitle}
                                       icon={item.icon}
                                       accessories={itemAccessories}
+                                      query={query || undefined}
                                     />
                                   );
                                 })}

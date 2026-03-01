@@ -1,0 +1,7 @@
+@use '../../styles/tokens' as *;
+
+.highlighted-text__match {
+  background: none;
+  color: inherit;
+  font-weight: $font-weight-semibold;
+}

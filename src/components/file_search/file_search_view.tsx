@@ -13,6 +13,7 @@ import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { formatRelativeDate } from '../../utils/format_date';
 import { formatFileSize } from '../../utils/format_file_size';
+import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
@@ -157,11 +158,8 @@ export function FileSearchView() {
       items = items.filter(e => e.fileType === filterValue);
     }
     if (query) {
-      const lower = query.toLowerCase();
       items = items.filter(
-        e =>
-          e.name.toLowerCase().includes(lower) ||
-          e.path.toLowerCase().includes(lower),
+        e => fuzzyMatch(query, e.name) || fuzzyMatch(query, e.path),
       );
     }
     return items;
@@ -437,6 +435,7 @@ export function FileSearchView() {
             tooltip: entry.modifiedAt.toLocaleString(),
           },
         ]}
+        query={query || undefined}
       />
     );
   }

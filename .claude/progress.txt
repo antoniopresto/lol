@@ -1280,7 +1280,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 === SEARCH & INTERACTION ===
 
-- [ ] [P1] SRCH001 - Implement fuzzy search matching. Replace current
+- [x] [P1] SRCH001 - Implement fuzzy search matching. Replace current
   substring search with fuzzy matching (Fuse.js-style scoring). Match
   characters don't need to be contiguous: "clhist" matches "Clipboard
   History". Score based on: consecutive matches (bonus), match at word
@@ -1288,6 +1288,30 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   matched characters in results (bold or underline). Create
   src/utils/fuzzy_search.ts with score() and match() functions. Apply to
   root search and all view search bars.
+  Done: Recursive-descent fuzzy scorer with greedy fallback when recursion
+  cap (10k calls) is reached. Scoring: consecutive match (+8), word boundary
+  (+10), first char (+12), case match (+1), position bonus (1-idx/len)*2,
+  exact match (+50), gap penalties (-3 start, -1 per). Word boundary detection
+  handles separators, camelCase, and digit-letter transitions. HighlightedText
+  component accepts optional pre-computed indices to avoid double scoring.
+  Uses <span> (not <mark>) for accessibility. SCSS uses $font-weight-semibold
+  token. command_registry.ts searchCommands() scores and sorts by relevance.
+  All 4 view search bars (Clipboard, Snippets, Emoji, Files) use fuzzyMatch
+  for filtering and pass query to ListItem for highlighting. App.tsx root
+  search passes query to ListItem. All 93 tests pass, bun run check passes.
+  Sub-tasks:
+  - [x] SRCH001a - Create src/utils/fuzzy_search.ts with fuzzyScore() and
+    fuzzyMatch() functions. Score: consecutive match bonus, word boundary bonus,
+    early position bonus, gap penalty. Return matched indices for highlighting.
+  - [x] SRCH001b - Create HighlightedText component (src/components/highlighted_text/)
+    that renders text with matched characters highlighted (bold). Takes text + query.
+  - [x] SRCH001c - Update command_registry.ts searchCommands() to use fuzzy search
+    with scoring and result sorting by score.
+  - [x] SRCH001d - Update ListItem to accept optional query prop, use HighlightedText
+    for title and subtitle rendering. Update App.tsx to pass query to ListItem.
+  - [x] SRCH001e - Update all view search bars (ClipboardHistoryView,
+    SnippetManagerView, EmojiPickerView, FileSearchView) to use fuzzy search
+    for filtering and pass query for highlighting.
 
 - [ ] [P1] SRCH002 - Add recent commands tracking. Track last 10 opened
   commands with timestamps. Show "Recent Commands" section in root search
@@ -1351,14 +1375,9 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Wrap each pushed view in error boundary. Log errors to console with
   component stack. Create error_boundary.scss.
 
-- [ ] [P2] INFRA007 - Add state management with Zustand. Replace prop-
-  drilling and scattered useState across App.tsx. Create stores:
-  useAppStore (query, selectedIndex, actionsOpen, isFullView),
-  useNavigationStore (stack, push, pop, breadcrumbs — replaces hook),
-  useSettingsStore (general settings, extension states). Zustand selected
-  for minimal API (no providers), TypeScript inference, devtools support,
-  middleware (persist). Install zustand, create src/stores/ directory.
-  Migrate App.tsx state to stores incrementally.
+- [ ] [P2] INFRA007 - Add state management with @belt/tools state-machine.
+Replace prop-drilling and scattered useState across App - belt/tools is an
+internal package public available in npm. See docs and examples at /Users/anotonio.silva/antonio/belt/packages/tools
 
 - [ ] [P2] INFRA008 - Add proper build configuration for production. Vite
   production build: minification (terser), tree-shaking, chunk splitting

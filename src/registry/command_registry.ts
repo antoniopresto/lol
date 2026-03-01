@@ -1,4 +1,5 @@
 import type { ListItemData, SectionData } from '../types';
+import { fuzzyScore } from '../utils/fuzzy_search';
 import type { CommandRegistration } from './types';
 
 const commands = new Map<string, CommandRegistration>();
@@ -55,31 +56,69 @@ export function getSections(): SectionData[] {
   return sections;
 }
 
+interface ScoredItem {
+  item: ListItemData;
+  score: number;
+  section: string;
+}
+
+function scoreItem(item: ListItemData, query: string): number {
+  const cmd = commands.get(item.id);
+  const candidates: string[] = [item.title];
+  if (item.subtitle) candidates.push(item.subtitle);
+  if (cmd?.keywords) candidates.push(...cmd.keywords);
+  if (cmd?.aliases) candidates.push(...cmd.aliases);
+
+  let best = -Infinity;
+  for (const text of candidates) {
+    const result = fuzzyScore(query, text);
+    if (result && result.score > best) {
+      best = result.score;
+    }
+  }
+  return best;
+}
+
 export function searchCommands(query: string): SectionData[] {
   if (!query) return getSections();
-  const lower = query.toLowerCase();
 
   const sections = getSections();
-  return sections
-    .map(section => ({
-      ...section,
-      items: section.items.filter(item => {
-        if (
-          item.title.toLowerCase().includes(lower) ||
-          item.subtitle?.toLowerCase().includes(lower)
-        ) {
-          return true;
-        }
-        const cmd = commands.get(item.id);
-        if (!cmd) return false;
-        if (cmd.keywords?.some(kw => kw.toLowerCase().includes(lower))) {
-          return true;
-        }
-        if (cmd.aliases?.some(a => a.toLowerCase().includes(lower))) {
-          return true;
-        }
-        return false;
-      }),
-    }))
-    .filter(section => section.items.length > 0);
+  const scored: ScoredItem[] = [];
+
+  for (const section of sections) {
+    for (const item of section.items) {
+      const s = scoreItem(item, query);
+      if (s > -Infinity) {
+        scored.push({
+          item,
+          score: s,
+          section: section.title,
+        });
+      }
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+
+  const sectionMap = new Map<string, ListItemData[]>();
+  for (const { item, section } of scored) {
+    let items = sectionMap.get(section);
+    if (!items) {
+      items = [];
+      sectionMap.set(section, items);
+    }
+    items.push(item);
+  }
+
+  const result: SectionData[] = [];
+  for (const section of sections) {
+    const items = sectionMap.get(section.title);
+    if (items && items.length > 0) {
+      result.push({
+        title: section.title,
+        items,
+      });
+    }
+  }
+  return result;
 }

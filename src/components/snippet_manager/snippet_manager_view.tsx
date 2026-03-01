@@ -18,6 +18,7 @@ import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { formatRelativeDate } from '../../utils/format_date';
+import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { isRecord, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
@@ -359,12 +360,11 @@ export function SnippetManagerView() {
       items = items.filter(e => e.category === filterValue);
     }
     if (query) {
-      const lower = query.toLowerCase();
       items = items.filter(
         e =>
-          e.name.toLowerCase().includes(lower) ||
-          e.keyword.toLowerCase().includes(lower) ||
-          e.content.toLowerCase().includes(lower),
+          fuzzyMatch(query, e.name) ||
+          fuzzyMatch(query, e.keyword) ||
+          fuzzyMatch(query, e.content),
       );
     }
     return items;
@@ -853,6 +853,7 @@ export function SnippetManagerView() {
                                 tooltip: entry.createdAt.toLocaleString(),
                               },
                             ]}
+                            query={query || undefined}
                           />
                         );
                       })}
