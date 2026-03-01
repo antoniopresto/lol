@@ -453,6 +453,35 @@ export function FigmaIcon(props: IconProps = {}) {
   );
 }
 
+export function NotesIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgBase(props)}>
+      <defs>
+        <linearGradient id="notes-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FFCC00" />
+          <stop offset="100%" stopColor="#FF9500" />
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="18" height="18" rx="4" fill="url(#notes-bg)" />
+      <path d="M6 5.5h8M6 8h8M6 10.5h5" {...WHITE_STROKE} strokeWidth={1.2} />
+      <path
+        d="M11.5 13l1.5-1.5L14.5 13"
+        {...WHITE_STROKE}
+        strokeWidth={1.2}
+        fill="none"
+      />
+      <line
+        x1="13"
+        y1="11.5"
+        x2="13"
+        y2="14.5"
+        {...WHITE_STROKE}
+        strokeWidth={1.2}
+      />
+    </svg>
+  );
+}
+
 export function SlackIcon(props: IconProps = {}) {
   const s = props.size ?? DEFAULTS.size;
   return (

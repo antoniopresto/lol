@@ -7,6 +7,7 @@ export {
   CpuIcon,
   EmojiIcon,
   FigmaIcon,
+  NotesIcon,
   PaletteIcon,
   SafariIcon,
   SlackIcon,

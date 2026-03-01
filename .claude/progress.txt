@@ -1330,7 +1330,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Web mode: visual demo (HUD feedback). Tauri integration deferred to
   TAURI platform tasks. All 93 tests pass, bun run check passes.
 
-- [ ] [P2] SCRN012 - Build Floating Notes screen. Markdown-enabled note
+- [x] [P2] SCRN012 - Build Floating Notes screen. Markdown-enabled note
   editor that floats above other apps. In-memory list of notes with titles.
   Notes list view with search. Click note to open editor. Editor: simple
   textarea with markdown preview toggle. Auto-save on change (debounced
@@ -1338,6 +1338,18 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   via localStorage/SQLite. Push from "Floating Notes" command. Create
   src/components/floating_notes/floating_notes_view.tsx and
   floating_notes_editor.tsx.
+  Done: FloatingNotesView with self-contained UI (SearchBar, List, ActionPanel,
+  Alert, HUDContainer). 10 mock note entries in notes_data.ts. NoteEditorView
+  subcomponent with debounced auto-save (500ms), markdown preview toggle
+  (⌘⇧P) using marked + DOMPurify with detail__markdown styling, edit/preview
+  mode switch button. Notes list: Recent/Older sections (24h threshold),
+  fuzzy search + FTS5 via useDbSearch, DocumentIcon per item, relative date
+  accessories. Keyboard shortcuts: ⌘K actions, ⌘C copy, ⌘N create,
+  ⌘⌫ delete with confirm, ⌘S flush save, Escape back to list. NotesIcon
+  (golden gradient) added to icon system. Extension registered in
+  extensions/index.ts. Database persistence via noteDb (CRUD). Consistent
+  renderNow for date formatting. TrashIcon from icon system for delete alert.
+  All 93 tests pass, bun run check passes.
 
 - [ ] [P2] SCRN013 - Build Translator screen. Two-panel layout: source text
   (left/top) and translated text (right/bottom). Language selector dropdowns
