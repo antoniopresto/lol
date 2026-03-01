@@ -5,7 +5,7 @@ import {
   SlackIcon,
   TerminalIcon,
   VscodeIcon,
-} from '../components/icons/icons';
+} from '../components/icons';
 
 export interface ClipboardEntry {
   id: string;

@@ -582,12 +582,30 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   presses. Quick Look stays open during list navigation (content updates with
   selection). All 93 tests pass, bun run check passes.
 
-- [ ] [P2] COMP014 - Expand icon system to 50+ icons. Add missing Raycast Icon
+- [x] [P2] COMP014 - Expand icon system to 50+ icons. Add missing Raycast Icon
   enum equivalents: arrows (up/down/left/right, chevrons), UI controls (check,
   circle, dot, ellipsis, plus, minus), actions (copy, paste, download, upload,
   trash, duplicate, edit, refresh), objects (document, folder, calendar, clock,
   gear, globe, link, lock, key, star, heart), status (battery, wifi, bolt,
   cloud). Create organized icon categories in src/components/icons/.
+  Done: Created shared icon_shared.ts (IconProps with size+className, svgBase for
+  16x16 viewBox, STROKE_DEFAULTS with currentColor). 5 category files:
+  arrow_icons.tsx (8: ArrowUp/Down/Left/Right, ChevronUp/Down/Left/Right),
+  control_icons.tsx (6: Check, Circle, Dot, Ellipsis, Plus, Minus),
+  action_icons.tsx (8: Copy, Paste, Download, Upload, Trash, Duplicate, Edit,
+  Refresh), object_icons.tsx (11: Document, Folder, Calendar, Clock, Gear,
+  Globe, Link, Lock, Key, Star, Heart), status_icons.tsx (4: Battery, Wifi,
+  Bolt, Cloud). Created index.ts barrel export. Updated icons.tsx to use shared
+  IconProps type. Updated mock_data.ts and clipboard_data.ts imports to use
+  index. All SVG paths use explicit arc flag spacing. Total: 50 icons
+  (13 app/command + 37 utility). All 93 tests pass.
+  Sub-tasks:
+  - [x] COMP014a - Create arrow icons in arrow_icons.tsx
+  - [x] COMP014b - Create UI control icons in control_icons.tsx
+  - [x] COMP014c - Create action icons in action_icons.tsx
+  - [x] COMP014d - Create object icons in object_icons.tsx
+  - [x] COMP014e - Create status icons in status_icons.tsx
+  - [x] COMP014f - Create index.ts and update imports
 
 - [ ] [P2] COMP015 - Add Grid.Dropdown component (same as List.Dropdown but
   for Grid view). Reuse SearchDropdown component from COMP005. Wire into Grid

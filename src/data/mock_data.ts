@@ -12,7 +12,7 @@ import {
   TerminalIcon,
   VscodeIcon,
   WindowIcon,
-} from '../components/icons/icons';
+} from '../components/icons';
 import type { ColorItemData, SectionData } from '../types';
 
 export const MOCK_SECTIONS: SectionData[] = [

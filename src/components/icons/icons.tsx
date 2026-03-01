@@ -1,16 +1,15 @@
-interface IconProps {
-  size?: number;
-}
+import { type IconProps } from './icon_shared';
 
-const defaults: Required<IconProps> = { size: 20 };
+const DEFAULTS = { size: 20 };
 
 function svgBase(props: IconProps) {
-  const s = props.size ?? defaults.size;
+  const s = props.size ?? DEFAULTS.size;
   return {
     width: s,
     height: s,
     viewBox: '0 0 20 20',
     xmlns: 'http://www.w3.org/2000/svg',
+    className: props.className,
   };
 }
 
@@ -326,7 +325,7 @@ export function PaletteIcon(props: IconProps = {}) {
 }
 
 export function SafariIcon(props: IconProps = {}) {
-  const s = props.size ?? defaults.size;
+  const s = props.size ?? DEFAULTS.size;
   return (
     <svg
       width={s}
@@ -356,7 +355,7 @@ export function SafariIcon(props: IconProps = {}) {
 }
 
 export function VscodeIcon(props: IconProps = {}) {
-  const s = props.size ?? defaults.size;
+  const s = props.size ?? DEFAULTS.size;
   return (
     <svg
       width={s}
@@ -393,7 +392,7 @@ export function VscodeIcon(props: IconProps = {}) {
 }
 
 export function TerminalIcon(props: IconProps = {}) {
-  const s = props.size ?? defaults.size;
+  const s = props.size ?? DEFAULTS.size;
   return (
     <svg
       width={s}
@@ -434,7 +433,7 @@ export function TerminalIcon(props: IconProps = {}) {
 }
 
 export function FigmaIcon(props: IconProps = {}) {
-  const s = props.size ?? defaults.size;
+  const s = props.size ?? DEFAULTS.size;
   return (
     <svg
       width={s}
@@ -455,7 +454,7 @@ export function FigmaIcon(props: IconProps = {}) {
 }
 
 export function SlackIcon(props: IconProps = {}) {
-  const s = props.size ?? defaults.size;
+  const s = props.size ?? DEFAULTS.size;
   return (
     <svg
       width={s}
