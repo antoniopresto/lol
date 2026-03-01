@@ -709,6 +709,14 @@ export function RemindersView() {
   );
   useKeyboardShortcut(
     {
+      key: 'l',
+      meta: true,
+    },
+    handleCopy,
+    { enabled: subView === 'list' },
+  );
+  useKeyboardShortcut(
+    {
       key: 'n',
       meta: true,
     },

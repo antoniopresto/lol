@@ -343,6 +343,25 @@ export function TranslatorView() {
     handleCopyShortcut,
     { preventDefault: false },
   );
+  const handleCopyValue = useCallback(() => {
+    if (subView === 'translate') {
+      handleCopyTranslation();
+    } else {
+      handleHistoryCopy();
+    }
+  }, [
+    subView,
+    handleCopyTranslation,
+    handleHistoryCopy,
+  ]);
+
+  useKeyboardShortcut(
+    {
+      key: 'l',
+      meta: true,
+    },
+    handleCopyValue,
+  );
   useKeyboardShortcut(
     {
       key: 's',

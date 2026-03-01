@@ -431,6 +431,13 @@ export function FileSearchView() {
   );
   useKeyboardShortcut(
     {
+      key: 'l',
+      meta: true,
+    },
+    handleCopyPath,
+  );
+  useKeyboardShortcut(
+    {
       key: 'f',
       meta: true,
       shift: true,

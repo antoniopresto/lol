@@ -264,6 +264,13 @@ export function EmojiPickerView() {
     },
     () => handleCopyEmoji(),
   );
+  useKeyboardShortcut(
+    {
+      key: 'l',
+      meta: true,
+    },
+    () => handleCopyEmoji(),
+  );
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

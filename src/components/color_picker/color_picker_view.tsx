@@ -164,6 +164,33 @@ export function ColorPickerView() {
     toggleActions,
   );
 
+  const handleCopySelected = useCallback(() => {
+    const color = filteredColors[selectedIndex];
+    if (color) {
+      handleCopyColor(color);
+    }
+  }, [
+    filteredColors,
+    selectedIndex,
+    handleCopyColor,
+  ]);
+
+  useKeyboardShortcut(
+    {
+      key: 'c',
+      meta: true,
+    },
+    handleCopySelected,
+  );
+
+  useKeyboardShortcut(
+    {
+      key: 'l',
+      meta: true,
+    },
+    handleCopySelected,
+  );
+
   const dropdownSections: DropdownSection[] = useMemo(
     () => [
       {

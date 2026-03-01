@@ -1658,11 +1658,27 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   CYCLING_PLACEHOLDERS constant in root_search_view.tsx. Timer cleanup on
   unmount handles mid-transition teardown. All 93 tests pass.
 
-- [ ] [P2] SRCH004 - Add ⌘L to copy current item URL/value. Universal
+- [x] [P2] SRCH004 - Add ⌘L to copy current item URL/value. Universal
   shortcut that copies the most relevant value of the selected item (URL
   for links, path for files, content for snippets, hex for colors). Show
   HUD with what was copied. Register via useKeyboardShortcut. Works across
   all views.
+  Done: Added ⌘L keyboard shortcut via useKeyboardShortcut to all 11 views.
+  Root search: handleCopyValue copies calculator result (when calculator item
+  selected) or item title. Full-view screens reuse same handler as ⌘C:
+  ClipboardHistory (content), Snippets (content), Emoji (char), FileSearch
+  (path), Quicklinks (link), WindowManagement (name), FloatingNotes (content),
+  Reminders (title), ColorPicker (hex). Translator: dedicated handleCopyValue
+  handler that always copies translation (unlike ⌘C which skips when textarea
+  is focused for native copy). ColorPicker: also added missing ⌘C shortcut
+  for consistency with other views. All 93 tests pass, bun run check passes.
+  Sub-tasks:
+  - [x] SRCH004a - Add ⌘L to root search view (copies title, or calculator
+    result when calculator item is selected).
+  - [x] SRCH004b - Add ⌘L to all full-view screens: ClipboardHistory (content),
+    Snippets (content), Emoji (char), FileSearch (path), Quicklinks (link),
+    WindowManagement (name), FloatingNotes (content), Reminders (title),
+    Translator (translation), ColorPicker (hex).
 
 - [ ] [P2] SRCH005 - Add search debouncing and loading state. Debounce
   search input by 150ms to avoid excessive re-renders during fast typing.

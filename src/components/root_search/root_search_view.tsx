@@ -514,6 +514,32 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     { enabled: !!selectedItem },
   );
 
+  const handleCopyValue = useCallback(() => {
+    if (!selectedItem) return;
+    setActionsOpen(false);
+    if (selectedItem.id === '__calculator__' && calculatorResult) {
+      performCopy(calculatorResult, showHUD, {
+        hudIcon: <ClipboardHUDIcon />,
+        hudTitle: `Copied ${calculatorResult}`,
+      });
+      return;
+    }
+    performCopy(selectedItem.title, showHUD);
+  }, [
+    selectedItem,
+    calculatorResult,
+    showHUD,
+  ]);
+
+  useKeyboardShortcut(
+    {
+      key: 'l',
+      meta: true,
+    },
+    handleCopyValue,
+    { enabled: !!selectedItem },
+  );
+
   const handleMoveFavoriteUp = useCallback(() => {
     if (!selectedItem || !isFavorite(selectedItem.id)) return;
     moveFavorite(selectedItem.id, 'up');

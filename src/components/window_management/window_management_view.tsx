@@ -223,6 +223,13 @@ export function WindowManagementView() {
     },
     handleCopyName,
   );
+  useKeyboardShortcut(
+    {
+      key: 'l',
+      meta: true,
+    },
+    handleCopyName,
+  );
 
   const dropdownSections: DropdownSection[] = useMemo(
     () => [

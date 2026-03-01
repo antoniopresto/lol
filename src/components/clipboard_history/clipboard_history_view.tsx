@@ -347,6 +347,14 @@ export function ClipboardHistoryView() {
 
   useKeyboardShortcut(
     {
+      key: 'l',
+      meta: true,
+    },
+    handleCopy,
+  );
+
+  useKeyboardShortcut(
+    {
       key: 'p',
       meta: true,
       shift: true,

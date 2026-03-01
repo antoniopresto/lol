@@ -764,6 +764,14 @@ export function QuicklinksView() {
   );
   useKeyboardShortcut(
     {
+      key: 'l',
+      meta: true,
+    },
+    handleCopyLink,
+    { enabled: subView === 'list' },
+  );
+  useKeyboardShortcut(
+    {
       key: 'e',
       meta: true,
     },
