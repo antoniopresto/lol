@@ -1,0 +1,26 @@
+import { registerExtension } from '../registry/command_registry';
+import { applicationsExtension } from './applications/manifest';
+import { calculatorExtension } from './calculator/manifest';
+import { clipboardExtension } from './clipboard/manifest';
+import { colorPickerExtension } from './color_picker/manifest';
+import { dictionaryExtension } from './dictionary/manifest';
+import { emojiExtension } from './emoji/manifest';
+import { fileSearchExtension } from './file_search/manifest';
+import { quicklinksExtension } from './quicklinks/manifest';
+import { settingsExtension } from './settings/manifest';
+import { snippetsExtension } from './snippets/manifest';
+import { systemMonitorExtension } from './system_monitor/manifest';
+import { windowManagementExtension } from './window_management/manifest';
+
+registerExtension(clipboardExtension);
+registerExtension(snippetsExtension);
+registerExtension(fileSearchExtension);
+registerExtension(quicklinksExtension);
+registerExtension(emojiExtension);
+registerExtension(windowManagementExtension);
+registerExtension(calculatorExtension);
+registerExtension(dictionaryExtension);
+registerExtension(systemMonitorExtension);
+registerExtension(colorPickerExtension);
+registerExtension(settingsExtension);
+registerExtension(applicationsExtension);

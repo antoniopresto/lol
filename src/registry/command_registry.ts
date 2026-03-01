@@ -1,15 +1,38 @@
 import type { ListItemData, SectionData } from '../types';
 import { fuzzyScore } from '../utils/fuzzy_search';
-import type { CommandRegistration } from './types';
+import type { CommandRegistration, ExtensionManifest } from './types';
 
 const commands = new Map<string, CommandRegistration>();
 
 const sectionOrder: string[] = [];
 
 export function registerCommand(cmd: CommandRegistration): void {
+  if (import.meta.env.DEV && commands.has(cmd.id)) {
+    console.warn(`Command "${cmd.id}" is already registered. Overwriting.`);
+  }
   commands.set(cmd.id, cmd);
   if (!sectionOrder.includes(cmd.section)) {
     sectionOrder.push(cmd.section);
+  }
+}
+
+export function registerExtension(manifest: ExtensionManifest): void {
+  for (const cmd of manifest.commands) {
+    const section = cmd.section ?? manifest.name;
+    registerCommand({
+      id: cmd.name,
+      name: cmd.title,
+      subtitle: cmd.subtitle,
+      icon: cmd.icon,
+      keywords: cmd.keywords,
+      aliases: cmd.aliases,
+      section,
+      accessories: cmd.accessories,
+      detail: cmd.detail,
+      component: cmd.component,
+      fullView: cmd.fullView,
+      extensionId: manifest.id,
+    });
   }
 }
 

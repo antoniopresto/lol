@@ -1416,7 +1416,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 === INFRASTRUCTURE ===
 
-- [ ] [P1] INFRA004 - Build extension architecture. Formalize each screen
+- [x] [P1] INFRA004 - Build extension architecture. Formalize each screen
   as an "extension" with a manifest. Create ExtensionManifest type in
   src/registry/types.ts: id, name, icon, description, author, commands[].
   Each command has: name, title, subtitle, keywords, mode (view/no-view/
@@ -1424,6 +1424,28 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Create src/extensions/ directory with one folder per extension (clipboard/,
   snippets/, emoji/, etc). Each extension exports its manifest. Auto-discover
   extensions via barrel import.
+  Done: Created ExtensionManifest (id, name, icon, description, author,
+  commands[]) and ExtensionCommand (name, title, subtitle, icon, keywords,
+  aliases, mode, component, fullView, section, accessories, detail) types in
+  types.ts. CommandMode union type: 'view' | 'no-view' | 'menu-bar'. Added
+  extensionId to CommandRegistration for traceability. registerExtension() in
+  command_registry.ts maps manifest commands to registerCommand calls (cmd.name
+  as ID for backward compatibility). Dev-mode duplicate ID warning via
+  import.meta.env.DEV. Created 12 extension manifests in src/extensions/:
+  clipboard, snippets, file_search, quicklinks, emoji, window_management,
+  color_picker, settings, calculator, dictionary, system_monitor, applications
+  (5 app commands). Barrel import in extensions/index.ts auto-registers all
+  extensions. Section order preserved (Suggestions→Commands→Applications).
+  Deleted old registry/commands.ts. Registry index.ts imports from extensions
+  instead. All 16 command IDs preserved exactly. bun run check passes.
+  Sub-tasks:
+  - [x] INFRA004a - Create ExtensionManifest and ExtensionCommand types in
+    types.ts. Add registerExtension() to command_registry.ts. Export from index.ts.
+  - [x] INFRA004b - Create src/extensions/ directory with manifest files for
+    each built-in extension: clipboard, snippets, file-search, quicklinks,
+    emoji, window-management, color-picker, settings, and applications bundle.
+  - [x] INFRA004c - Replace commands.ts with barrel import from extensions/,
+    create extensions/index.ts for auto-discovery. Clean up dead code.
 
 - [x] [P1] INFRA005 - Create Tauri IPC bridge layer. Abstract all
   platform-specific operations behind a unified interface. Create
