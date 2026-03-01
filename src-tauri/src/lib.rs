@@ -3,6 +3,7 @@ use std::time::Duration;
 use base64::Engine;
 use serde::Serialize;
 use tauri::{Emitter, Manager};
+use tauri_plugin_sql::{Migration, MigrationKind};
 use walkdir::WalkDir;
 #[cfg(desktop)]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
@@ -639,11 +640,147 @@ fn set_window_position_pref(
     }
 }
 
+fn db_migrations() -> Vec<Migration> {
+    vec![
+        Migration {
+            version: 1,
+            description: "create_initial_tables",
+            sql: "
+                CREATE TABLE IF NOT EXISTS clipboard_entries (
+                    id TEXT PRIMARY KEY,
+                    content TEXT NOT NULL,
+                    content_type TEXT NOT NULL DEFAULT 'text',
+                    source_app TEXT NOT NULL DEFAULT '',
+                    copied_at TEXT NOT NULL,
+                    pinned INTEGER NOT NULL DEFAULT 0
+                );
+
+                CREATE TABLE IF NOT EXISTS snippets (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    keyword TEXT NOT NULL DEFAULT '',
+                    content TEXT NOT NULL,
+                    category TEXT NOT NULL DEFAULT 'general',
+                    tags TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(tags)),
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS quicklinks (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    link TEXT NOT NULL,
+                    type TEXT NOT NULL DEFAULT 'url',
+                    application TEXT,
+                    tags TEXT NOT NULL DEFAULT '[]' CHECK(json_valid(tags)),
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS notes (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    content TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS recent_commands (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    command_id TEXT NOT NULL,
+                    used_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+                );
+
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                );
+
+                CREATE TRIGGER IF NOT EXISTS notes_auto_updated_at
+                AFTER UPDATE ON notes
+                BEGIN
+                    UPDATE notes SET updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+                    WHERE id = NEW.id;
+                END;
+            ",
+            kind: MigrationKind::Up,
+        },
+        Migration {
+            version: 2,
+            description: "add_fts_and_indexes",
+            sql: "
+                CREATE VIRTUAL TABLE IF NOT EXISTS clipboard_entries_fts USING fts5(
+                    content,
+                    content='clipboard_entries',
+                    content_rowid='rowid'
+                );
+
+                CREATE TRIGGER IF NOT EXISTS clipboard_entries_ai AFTER INSERT ON clipboard_entries BEGIN
+                    INSERT INTO clipboard_entries_fts(rowid, content) VALUES (NEW.rowid, NEW.content);
+                END;
+                CREATE TRIGGER IF NOT EXISTS clipboard_entries_ad AFTER DELETE ON clipboard_entries BEGIN
+                    INSERT INTO clipboard_entries_fts(clipboard_entries_fts, rowid, content) VALUES ('delete', OLD.rowid, OLD.content);
+                END;
+                CREATE TRIGGER IF NOT EXISTS clipboard_entries_au AFTER UPDATE ON clipboard_entries BEGIN
+                    INSERT INTO clipboard_entries_fts(clipboard_entries_fts, rowid, content) VALUES ('delete', OLD.rowid, OLD.content);
+                    INSERT INTO clipboard_entries_fts(rowid, content) VALUES (NEW.rowid, NEW.content);
+                END;
+
+                CREATE VIRTUAL TABLE IF NOT EXISTS snippets_fts USING fts5(
+                    name,
+                    keyword,
+                    content,
+                    content='snippets',
+                    content_rowid='rowid'
+                );
+
+                CREATE TRIGGER IF NOT EXISTS snippets_ai AFTER INSERT ON snippets BEGIN
+                    INSERT INTO snippets_fts(rowid, name, keyword, content) VALUES (NEW.rowid, NEW.name, NEW.keyword, NEW.content);
+                END;
+                CREATE TRIGGER IF NOT EXISTS snippets_ad AFTER DELETE ON snippets BEGIN
+                    INSERT INTO snippets_fts(snippets_fts, rowid, name, keyword, content) VALUES ('delete', OLD.rowid, OLD.name, OLD.keyword, OLD.content);
+                END;
+                CREATE TRIGGER IF NOT EXISTS snippets_au AFTER UPDATE ON snippets BEGIN
+                    INSERT INTO snippets_fts(snippets_fts, rowid, name, keyword, content) VALUES ('delete', OLD.rowid, OLD.name, OLD.keyword, OLD.content);
+                    INSERT INTO snippets_fts(rowid, name, keyword, content) VALUES (NEW.rowid, NEW.name, NEW.keyword, NEW.content);
+                END;
+
+                CREATE VIRTUAL TABLE IF NOT EXISTS quicklinks_fts USING fts5(
+                    name,
+                    link,
+                    content='quicklinks',
+                    content_rowid='rowid'
+                );
+
+                CREATE TRIGGER IF NOT EXISTS quicklinks_ai AFTER INSERT ON quicklinks BEGIN
+                    INSERT INTO quicklinks_fts(rowid, name, link) VALUES (NEW.rowid, NEW.name, NEW.link);
+                END;
+                CREATE TRIGGER IF NOT EXISTS quicklinks_ad AFTER DELETE ON quicklinks BEGIN
+                    INSERT INTO quicklinks_fts(quicklinks_fts, rowid, name, link) VALUES ('delete', OLD.rowid, OLD.name, OLD.link);
+                END;
+                CREATE TRIGGER IF NOT EXISTS quicklinks_au AFTER UPDATE ON quicklinks BEGIN
+                    INSERT INTO quicklinks_fts(quicklinks_fts, rowid, name, link) VALUES ('delete', OLD.rowid, OLD.name, OLD.link);
+                    INSERT INTO quicklinks_fts(rowid, name, link) VALUES (NEW.rowid, NEW.name, NEW.link);
+                END;
+
+                CREATE INDEX IF NOT EXISTS idx_clipboard_copied_at ON clipboard_entries(copied_at);
+                CREATE INDEX IF NOT EXISTS idx_clipboard_pinned ON clipboard_entries(pinned);
+                CREATE INDEX IF NOT EXISTS idx_recent_commands_used_at ON recent_commands(used_at);
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_snippets_keyword ON snippets(keyword) WHERE keyword != '';
+            ",
+            kind: MigrationKind::Up,
+        },
+    ]
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(
+            tauri_plugin_sql::Builder::default()
+                .add_migrations("sqlite:raycast_clone.db", db_migrations())
+                .build(),
+        )
         .manage(Mutex::new(WindowConfig::default()))
         .manage(Mutex::new(AppCache::default()))
         .invoke_handler(tauri::generate_handler![

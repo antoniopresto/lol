@@ -1181,13 +1181,32 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     - [x] TAURI007c: Root search integration - useApplications hook with loading state,
       AppIcon with onError fallback, fuzzy search, cache refresh on focus, launch+hide.
 
-- [ ] [P2] TAURI008 - Add SQLite persistence layer via Tauri. Use
-  @tauri-apps/plugin-sql with SQLite. Create database schema: clipboard_
-  entries, snippets, quicklinks, notes, recent_commands, settings tables.
-  Migrate from localStorage to SQLite for all persistence (use localStorage
-  as web fallback when Tauri is not available). Create src/utils/database.ts
-  with typed query helpers. Rust-side migrations for schema versioning.
-  Full-text search index on text content for fast querying.
+- [IN_PROGRESS] [P2] TAURI008 - Add SQLite persistence layer via Tauri.
+  Broken into sub-tasks:
+  - [x] TAURI008a - Add tauri-plugin-sql dependency (Rust + JS), register
+    plugin in lib.rs, configure permissions in capabilities. Verify plugin
+    loads with empty DB.
+  - [x] TAURI008b - Create database schema SQL and Rust-side migrations.
+    Tables: clipboard_entries, snippets, quicklinks, notes, recent_commands,
+    settings. Schema versioning via migrations table. Full-text search index
+    on text content columns. FTS5 sync triggers for clipboard, snippets,
+    quicklinks. JSON validation on tags columns. Auto-update trigger for
+    notes.updated_at. All timestamps use ISO 8601 UTC format.
+  - [ ] TAURI008c - Create src/utils/database.ts with typed query helpers.
+    Platform-aware: uses SQLite via Tauri when available, falls back to
+    localStorage (existing storage.ts) on web. Typed insert/select/update/
+    delete helpers for each table.
+  - [ ] TAURI008d - Migrate clipboard_entries persistence to database.ts.
+    Update use_clipboard_history.ts to use database helpers instead of
+    direct localStorage.
+  - [ ] TAURI008e - Migrate snippets persistence to database.ts. Update
+    snippet_manager_view.tsx to use database helpers.
+  - [ ] TAURI008f - Migrate quicklinks persistence to database.ts. Update
+    quicklinks_view.tsx to use database helpers.
+  - [ ] TAURI008g - Migrate settings, recent_commands, favorites, theme,
+    emoji_recent to database.ts. Update respective hooks/components.
+  - [ ] TAURI008h - Add full-text search queries in database.ts for
+    clipboard, snippets, quicklinks content search.
 
 - [ ] [P2] TAURI009 - Configure auto-launch on login. Use
   @tauri-apps/plugin-autostart to register app for login auto-start.
