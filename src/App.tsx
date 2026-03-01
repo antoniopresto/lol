@@ -24,6 +24,7 @@ import {
 } from './hooks/use_navigation';
 import { useTheme } from './hooks/use_theme';
 import { useToast } from './hooks/use_toast';
+import { useWindow } from './hooks/use_window';
 import { getCommand, getSections, searchCommands } from './registry';
 import type { ListItemData, ListItemMetadataEntry, SectionData } from './types';
 import { evaluate } from './utils/calculator';
@@ -168,6 +169,22 @@ export function App() {
   const { push } = nav;
   const { favoriteIds, isFavorite, toggleFavorite, moveFavorite } =
     useFavorites();
+
+  useWindow({
+    onShow: () => {
+      const input =
+        document.querySelector<HTMLInputElement>('.search-bar__input');
+      input?.focus();
+    },
+    onHide: () => {
+      setQuery('');
+      nav.popToRoot();
+      setActionsOpen(false);
+      setQuickLookOpen(false);
+      setSelectedIndex(0);
+      setFilterValue('all');
+    },
+  });
 
   const currentNavData = nav.currentEntry?.data;
   const isRoot = !currentNavData;

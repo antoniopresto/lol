@@ -981,13 +981,26 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   scripts to package.json. cargo check passes, all 93 tests pass, bun run check
   passes.
 
-- [ ] [P0] TAURI002 - Implement global hotkey to toggle window visibility.
+- [x] [P0] TAURI002 - Implement global hotkey to toggle window visibility.
   Use @tauri-apps/plugin-global-shortcut to register Option+Space (macOS)
   / Alt+Space (Windows) as global hotkey. Toggle window show/hide on
   keypress. When showing: center window on active monitor, focus search
   input. When hiding: clear search query, pop navigation to root. Create
   src-tauri/src/lib.rs commands for show/hide. Handle edge case: if window
   is visible but unfocused, bring to front instead of hiding.
+  Done: Installed tauri-plugin-global-shortcut v2.3.1 (Rust) and
+  @tauri-apps/plugin-global-shortcut v2.3.1 (JS). Rust-side handler in lib.rs
+  with 3-state logic: visible+focused→hide, visible+unfocused→focus,
+  hidden→center+show+focus. Error logging via eprintln for all window ops.
+  Center called before show to prevent single-frame position flicker.
+  Capabilities updated with core:window (show/hide/set-focus/is-visible/
+  is-focused/center) and global-shortcut (register/unregister/is-registered)
+  permissions. React-side useWindow hook (src/hooks/use_window.ts) with
+  onShow/onHide callbacks via ref pattern, Tauri env detection, async
+  listener setup with cancelled-flag guard for unmount race condition,
+  hideWindow() utility. App.tsx wired: onShow focuses search input,
+  onHide clears query/selectedIndex/actionsOpen/quickLookOpen/filterValue
+  and calls popToRoot. All 93 tests pass, cargo check passes.
 
 - [ ] [P0] TAURI003 - Add system tray with menu. Use @tauri-apps/api/tray
   to create system tray icon (Raycast logo). Tray menu items: Show Raycast
