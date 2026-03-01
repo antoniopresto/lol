@@ -1,18 +1,16 @@
-import { type ReactNode, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import { useCallback } from 'react';
+import { TAG_COLOR_HEX } from '../../../constants/tag_colors';
+import type { ListItemAccessoryData } from '../../../types';
 import { useListContext } from '../list_context';
 import './list_item.scss';
-
-export interface ListItemAccessory {
-  text?: string;
-  icon?: ReactNode;
-}
 
 export interface ListItemProps {
   index: number;
   icon?: ReactNode;
   title: string;
   subtitle?: string;
-  accessories?: ListItemAccessory[];
+  accessories?: ListItemAccessoryData[];
   onClick?: () => void;
 }
 
@@ -51,16 +49,39 @@ export function ListItem({
       </div>
       {accessories && accessories.length > 0 && (
         <div className="list-item__accessories">
-          {accessories.map((accessory, i) => (
-            <span key={i} className="list-item__accessory">
-              {accessory.icon}
-              {accessory.text && (
-                <span className="list-item__accessory-text">
-                  {accessory.text}
+          {accessories.map((accessory, i) => {
+            if (accessory.tag) {
+              const hex = accessory.tag.color
+                ? TAG_COLOR_HEX[accessory.tag.color]
+                : undefined;
+              return (
+                <span
+                  key={i}
+                  className="list-item__accessory-tag"
+                  style={
+                    hex
+                      ? {
+                          color: hex,
+                          backgroundColor: `${hex}26`,
+                        }
+                      : undefined
+                  }
+                >
+                  {accessory.tag.text}
                 </span>
-              )}
-            </span>
-          ))}
+              );
+            }
+            return (
+              <span key={i} className="list-item__accessory">
+                {accessory.icon}
+                {accessory.text && (
+                  <span className="list-item__accessory-text">
+                    {accessory.text}
+                  </span>
+                )}
+              </span>
+            );
+          })}
         </div>
       )}
     </div>

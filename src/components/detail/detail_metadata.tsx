@@ -1,12 +1,7 @@
 import type { ReactNode } from 'react';
-
-export type TagColor =
-  | 'blue'
-  | 'green'
-  | 'orange'
-  | 'red'
-  | 'purple'
-  | 'yellow';
+import type { TagColor } from '../../constants/tag_colors';
+import { TAG_COLOR_HEX } from '../../constants/tag_colors';
+export type { TagColor } from '../../constants/tag_colors';
 
 interface TagColorValue {
   background: string;
@@ -15,27 +10,27 @@ interface TagColorValue {
 
 const TAG_COLORS: Record<TagColor, TagColorValue> = {
   blue: {
-    background: '#007aff',
+    background: TAG_COLOR_HEX.blue,
     text: '#ffffff',
   },
   green: {
-    background: '#30d158',
+    background: TAG_COLOR_HEX.green,
     text: '#ffffff',
   },
   orange: {
-    background: '#ff9f0a',
+    background: TAG_COLOR_HEX.orange,
     text: '#1a1a1c',
   },
   red: {
-    background: '#ff453a',
+    background: TAG_COLOR_HEX.red,
     text: '#ffffff',
   },
   purple: {
-    background: '#bf5af2',
+    background: TAG_COLOR_HEX.purple,
     text: '#ffffff',
   },
   yellow: {
-    background: '#ffd60a',
+    background: TAG_COLOR_HEX.yellow,
     text: '#1a1a1c',
   },
 };

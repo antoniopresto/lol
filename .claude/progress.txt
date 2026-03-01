@@ -364,10 +364,16 @@ screens, plan next tasks and fix it.
     flat colors ($color-text-secondary, $color-text-tertiary, $color-border) with
     alpha variants of $color-text-primary. Add tokens: $text-100 (10%), $text-400
     (40%), $text-600 (60%), $border-100 (text 10%), $border-200 (text 20%).
-  - [ ] UXDS002j - [P2] Add colored accessory tags on list items. Raycast shows
+  - [x] UXDS002j - [P2] Add colored accessory tags on list items. Raycast shows
     colored tag pills in list item accessories (22px tall, rounded-md 6px, color
     text on 15% alpha bg). Update ListItemAccessoryData type to support tag
     accessories with color. Create accessory tag styles in list_item.scss.
+    Done: Added `tag` field to `ListItemAccessoryData` type with `{text, color?}`.
+    Extracted shared `TAG_COLOR_HEX` to `src/constants/tag_colors.ts` (used by
+    both detail_metadata and list_item). Tag pills: 22px tall, 6px radius, 12px
+    font, medium weight, colored text on 15% alpha bg (hex + "26" suffix).
+    Removed duplicate `ListItemAccessory` interface from list_item.tsx (now uses
+    `ListItemAccessoryData` from types.ts). Added demo tags to 3 mock items.
 
 --------------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { TagColor } from './components/detail/detail_metadata';
+import type { TagColor } from './constants/tag_colors';
 
 export interface ListItemData {
   id: string;
@@ -13,6 +13,10 @@ export interface ListItemData {
 export interface ListItemAccessoryData {
   text?: string;
   icon?: ReactNode;
+  tag?: {
+    text: string;
+    color?: TagColor;
+  };
 }
 
 export interface ListItemDetailData {

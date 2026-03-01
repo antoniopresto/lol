@@ -2,14 +2,15 @@ import {
   CalculatorIcon,
   ChatIcon,
   ClipboardIcon,
-  CodeIcon,
   CpuIcon,
   EmojiIcon,
   FigmaIcon,
   PaletteIcon,
   SafariIcon,
+  SlackIcon,
   SnippetsIcon,
   TerminalIcon,
+  VscodeIcon,
   WindowIcon,
 } from '../components/icons/icons';
 import type { ColorItemData, SectionData } from '../types';
@@ -23,7 +24,15 @@ export const MOCK_SECTIONS: SectionData[] = [
         title: 'Clipboard History',
         subtitle: 'Search Clipboard History',
         icon: ClipboardIcon(),
-        accessories: [{ text: 'Raycast' }],
+        accessories: [
+          {
+            tag: {
+              text: 'Productivity',
+              color: 'blue',
+            },
+          },
+          { text: 'Raycast' },
+        ],
         detail: {
           markdown: `# Clipboard History
 
@@ -126,7 +135,15 @@ Find and copy emoji and special characters instantly. Supports skin tone modifie
         title: 'Window Management',
         subtitle: 'Organize Windows',
         icon: WindowIcon(),
-        accessories: [{ text: 'Raycast' }],
+        accessories: [
+          {
+            tag: {
+              text: 'Layout',
+              color: 'purple',
+            },
+          },
+          { text: 'Raycast' },
+        ],
         detail: {
           markdown: `# Window Management
 
@@ -220,7 +237,15 @@ Look up word definitions, synonyms, and usage examples using the built-in dictio
         title: 'System Monitor',
         subtitle: 'CPU, Memory, Disk',
         icon: CpuIcon(),
-        accessories: [{ text: 'Raycast' }],
+        accessories: [
+          {
+            tag: {
+              text: 'System',
+              color: 'orange',
+            },
+          },
+          { text: 'Raycast' },
+        ],
         detail: {
           markdown: `# System Monitor
 
@@ -280,7 +305,7 @@ Apple's web browser for macOS. Fast, energy-efficient, and privacy-focused.`,
         id: 'app-vscode',
         title: 'Visual Studio Code',
         subtitle: 'Application',
-        icon: CodeIcon(),
+        icon: VscodeIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Visual Studio Code
@@ -354,7 +379,7 @@ Collaborative design tool for building meaningful products. Design, prototype, a
         id: 'app-slack',
         title: 'Slack',
         subtitle: 'Application',
-        icon: ChatIcon(),
+        icon: SlackIcon(),
         accessories: [{ text: 'App' }],
         detail: {
           markdown: `# Slack
