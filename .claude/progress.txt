@@ -963,7 +963,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 === TAURI DESKTOP INTEGRATION ===
 
-- [ ] [P0] TAURI001 - Initialize Tauri v2 project structure. Run `bun add -D
+- [x] [P0] TAURI001 - Initialize Tauri v2 project structure. Run `bun add -D
   @tauri-apps/cli@next` and `bunx tauri init`. Configure src-tauri/ with
   Cargo.toml, tauri.conf.json (identifier, window settings, bundle config).
   Set up frameless window (decorations: false) with transparent background.
@@ -971,6 +971,15 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   allowlist for needed Tauri APIs. Verify `bun run tauri dev` launches the
   app with the existing React frontend. Update package.json scripts:
   "tauri:dev", "tauri:build".
+  Done: Installed @tauri-apps/cli@2.10.0 (devDep) and @tauri-apps/api@2.10.1
+  (dep). Ran `bunx tauri init` to scaffold src-tauri/. Configured tauri.conf.json:
+  frameless (decorations:false), transparent, 750x500, centered, alwaysOnTop,
+  non-resizable, non-maximizable, shadow enabled. Identifier: com.antoniopresto.
+  raycastclone. frontendDist points to ../dist (Vite output). Cargo.toml: package
+  name raycast-clone, proper author/repo/license. Minimal lib.rs (no plugins yet).
+  Pinned time@0.3.36 for Rust 1.87.0 compatibility. Added tauri:dev and tauri:build
+  scripts to package.json. cargo check passes, all 93 tests pass, bun run check
+  passes.
 
 - [ ] [P0] TAURI002 - Implement global hotkey to toggle window visibility.
   Use @tauri-apps/plugin-global-shortcut to register Option+Space (macOS)

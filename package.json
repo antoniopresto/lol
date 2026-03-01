@@ -25,11 +25,14 @@
     "check": "run-s check:*",
     "check:types": "tsc --noEmit",
     "check:lint": "eslint src --fix",
-    "check:format": "prettier --write ."
+    "check:format": "prettier --write .",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "devDependencies": {
     "@belt/prettier-plugin": "latest",
     "@eslint/js": "^10.0.1",
+    "@tauri-apps/cli": "^2.10.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -55,6 +58,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.10.1",
     "dompurify": "^3.3.1",
     "marked": "^17.0.3",
     "react": "^19.2.4",
