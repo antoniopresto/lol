@@ -13,6 +13,7 @@ import {
   getQuicklinkIcon,
 } from '../../data/quicklinks_data';
 import { useAlert } from '../../hooks/use_alert';
+import { useDbSearch } from '../../hooks/use_db_search';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -486,12 +487,19 @@ export function QuicklinksView() {
     };
   }, []);
 
+  const dbSearchFn = useCallback((q: string) => quicklinkDb.search(q), []);
+  const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
+    query,
+    dbSearchFn,
+    rowToEntry,
+  );
+
   const filtered = useMemo(() => {
-    let items = entries;
+    let items = ftsResults ?? entries;
     if (filterValue !== 'all') {
       items = items.filter(e => e.type === filterValue);
     }
-    if (query) {
+    if (!ftsResults && query) {
       items = items.filter(
         e => fuzzyMatch(query, e.name) || fuzzyMatch(query, e.link),
       );
@@ -501,6 +509,7 @@ export function QuicklinksView() {
     entries,
     query,
     filterValue,
+    ftsResults,
   ]);
 
   const urlItems = useMemo(
@@ -647,6 +656,7 @@ export function QuicklinksView() {
         onAction: () => {
           setEntries(prev => prev.filter(e => e.id !== entryId));
           quicklinkDb.delete(entryId).catch(console.error);
+          invalidateFts();
           showHUD({
             icon: <QuicklinkHUDIcon />,
             title: `Deleted "${entryName}"`,
@@ -663,6 +673,7 @@ export function QuicklinksView() {
     selectedEntry,
     confirmAlert,
     showHUD,
+    invalidateFts,
   ]);
 
   const handleFormSubmit = useCallback(
@@ -686,6 +697,7 @@ export function QuicklinksView() {
             application: form.application.trim() || null,
           })
           .catch(console.error);
+        invalidateFts();
         showHUD({
           icon: <QuicklinkHUDIcon />,
           title: `Updated "${form.name.trim()}"`,
@@ -705,6 +717,7 @@ export function QuicklinksView() {
           ...prev,
         ]);
         quicklinkDb.insert(entryToRow(newEntry)).catch(console.error);
+        invalidateFts();
         showHUD({
           icon: <QuicklinkHUDIcon />,
           title: `Created "${form.name.trim()}"`,
@@ -717,6 +730,7 @@ export function QuicklinksView() {
       subView,
       editingEntry,
       showHUD,
+      invalidateFts,
     ],
   );
 

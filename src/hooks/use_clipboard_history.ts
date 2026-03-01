@@ -21,7 +21,7 @@ function validContentType(value: string): ClipboardEntry['contentType'] {
     : 'text';
 }
 
-function rowToEntry(row: ClipboardEntryRow): ClipboardEntry {
+export function rowToEntry(row: ClipboardEntryRow): ClipboardEntry {
   const date = new Date(row.copied_at);
   return {
     id: row.id,

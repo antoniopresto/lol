@@ -14,6 +14,7 @@ import {
   SNIPPET_TAGS,
 } from '../../data/snippet_data';
 import { useAlert } from '../../hooks/use_alert';
+import { useDbSearch } from '../../hooks/use_db_search';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -356,12 +357,19 @@ export function SnippetManagerView() {
     };
   }, []);
 
+  const dbSearchFn = useCallback((q: string) => snippetDb.search(q), []);
+  const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
+    query,
+    dbSearchFn,
+    rowToEntry,
+  );
+
   const filtered = useMemo(() => {
-    let items = entries;
+    let items = ftsResults ?? entries;
     if (filterValue !== 'all') {
       items = items.filter(e => e.category === filterValue);
     }
-    if (query) {
+    if (!ftsResults && query) {
       items = items.filter(
         e =>
           fuzzyMatch(query, e.name) ||
@@ -374,6 +382,7 @@ export function SnippetManagerView() {
     entries,
     query,
     filterValue,
+    ftsResults,
   ]);
 
   const groupedByCategory = useMemo(() => {
@@ -501,6 +510,7 @@ export function SnippetManagerView() {
         onAction: () => {
           setEntries(prev => prev.filter(e => e.id !== entryId));
           snippetDb.delete(entryId).catch(console.error);
+          invalidateFts();
           showHUD({
             icon: <SnippetHUDIcon />,
             title: 'Deleted',
@@ -517,6 +527,7 @@ export function SnippetManagerView() {
     selectedEntry,
     confirmAlert,
     showHUD,
+    invalidateFts,
   ]);
 
   const handleFormSubmit = useCallback(
@@ -549,6 +560,7 @@ export function SnippetManagerView() {
             tags: JSON.stringify(tags),
           })
           .catch(console.error);
+        invalidateFts();
         showHUD({
           icon: <SnippetHUDIcon />,
           title: 'Snippet Updated',
@@ -568,6 +580,7 @@ export function SnippetManagerView() {
           ...prev,
         ]);
         snippetDb.insert(entryToRow(newEntry)).catch(console.error);
+        invalidateFts();
         showHUD({
           icon: <SnippetHUDIcon />,
           title: 'Snippet Created',
@@ -580,6 +593,7 @@ export function SnippetManagerView() {
       subView,
       editingSnippet,
       showHUD,
+      invalidateFts,
     ],
   );
 

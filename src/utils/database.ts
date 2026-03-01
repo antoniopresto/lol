@@ -149,6 +149,10 @@ function buildUpdateQuery(
   };
 }
 
+function escapeLikeQuery(query: string): string {
+  return query.replace(/[\\%_]/g, ch => `\\${ch}`);
+}
+
 function escapeFts5Query(query: string): string {
   return query
     .split(/\s+/)
@@ -595,6 +599,31 @@ export const noteDb = {
       'notes',
       all.filter(r => r.id !== id),
     );
+  },
+  async search(query: string, limit = 50): Promise<NoteRow[]> {
+    if (isTauri) {
+      const db = await getDb();
+      const escaped = escapeLikeQuery(query);
+      return db.select<NoteRow[]>(
+        `SELECT id, title, content, created_at, updated_at FROM notes
+         WHERE title LIKE $1 ESCAPE '\\' OR content LIKE $1 ESCAPE '\\'
+         ORDER BY updated_at DESC
+         LIMIT $2`,
+        [
+          `%${escaped}%`,
+          limit,
+        ],
+      );
+    }
+    const all = await this.getAll();
+    const q = query.toLowerCase();
+    return all
+      .filter(
+        r =>
+          r.title.toLowerCase().includes(q) ||
+          r.content.toLowerCase().includes(q),
+      )
+      .slice(0, limit);
   },
 };
 

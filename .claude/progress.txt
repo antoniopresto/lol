@@ -1181,7 +1181,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     - [x] TAURI007c: Root search integration - useApplications hook with loading state,
       AppIcon with onError fallback, fuzzy search, cache refresh on focus, launch+hide.
 
-- [IN_PROGRESS] [P2] TAURI008 - Add SQLite persistence layer via Tauri.
+- [x] [P2] TAURI008 - Add SQLite persistence layer via Tauri.
   Broken into sub-tasks:
   - [x] TAURI008a - Add tauri-plugin-sql dependency (Rust + JS), register
     plugin in lib.rs, configure permissions in capabilities. Verify plugin
@@ -1267,8 +1267,20 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     from synchronous init to async useEffect with cancelled-flag abort
     guards. All DB writes fire-and-forget with .catch(console.error).
     All 93 tests pass, bun run check passes.
-  - [ ] TAURI008h - Add full-text search queries in database.ts for
+  - [x] TAURI008h - Add full-text search queries in database.ts for
     clipboard, snippets, quicklinks content search.
+    Done: Created useDbSearch hook (src/hooks/use_db_search.ts) with async
+    FTS5 search, request ID tracking for race-safe cancellation, unmount
+    cleanup, and invalidate() callback for mutation consistency. Wired into
+    ClipboardHistoryView, SnippetManagerView, and QuicklinksView: in Tauri
+    mode, search queries use FTS5 MATCH via db.search() instead of client-side
+    fuzzyMatch. Type/category filters still applied client-side after FTS5
+    results. Web mode falls back to existing fuzzyMatch filtering. All mutation
+    points (pin/delete/create/edit) call invalidateFts() to prevent stale FTS5
+    snapshots. Added noteDb.search() with LIKE queries (escaped for % and _
+    metacharacters) since no FTS5 table exists for notes. Added escapeLikeQuery
+    helper in database.ts. Exported rowToEntry from use_clipboard_history.ts.
+    All 93 tests pass, bun run check passes.
 
 - [ ] [P2] TAURI009 - Configure auto-launch on login. Use
   @tauri-apps/plugin-autostart to register app for login auto-start.

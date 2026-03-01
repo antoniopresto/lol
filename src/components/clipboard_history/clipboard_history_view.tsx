@@ -7,10 +7,15 @@ import {
 } from 'react';
 import type { ClipboardEntry } from '../../data/clipboard_data';
 import { useAlert } from '../../hooks/use_alert';
-import { useClipboardHistory } from '../../hooks/use_clipboard_history';
+import {
+  rowToEntry as clipboardRowToEntry,
+  useClipboardHistory,
+} from '../../hooks/use_clipboard_history';
+import { useDbSearch } from '../../hooks/use_db_search';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { clipboardDb } from '../../utils/database';
 import { formatRelativeDate } from '../../utils/format_date';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { ActionPanel } from '../action_panel/action_panel';
@@ -154,13 +159,19 @@ export function ClipboardHistoryView() {
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const now = useMemo(() => new Date(), []);
+  const dbSearchFn = useCallback((q: string) => clipboardDb.search(q), []);
+  const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
+    query,
+    dbSearchFn,
+    clipboardRowToEntry,
+  );
 
   const filtered = useMemo(() => {
-    let items = entries;
+    let items = ftsResults ?? entries;
     if (filterValue !== 'all') {
       items = items.filter(e => e.contentType === filterValue);
     }
-    if (query) {
+    if (!ftsResults && query) {
       items = items.filter(
         e => fuzzyMatch(query, e.content) || fuzzyMatch(query, e.sourceApp),
       );
@@ -170,6 +181,7 @@ export function ClipboardHistoryView() {
     entries,
     query,
     filterValue,
+    ftsResults,
   ]);
 
   const pinnedItems = useMemo(() => filtered.filter(e => e.pinned), [filtered]);
@@ -247,6 +259,7 @@ export function ClipboardHistoryView() {
     setActionsOpen(false);
     const wasPinned = selectedEntry.pinned;
     togglePin(selectedEntry.id);
+    invalidateFts();
     showHUD({
       icon: <PinIcon />,
       title: wasPinned ? 'Unpinned' : 'Pinned',
@@ -255,6 +268,7 @@ export function ClipboardHistoryView() {
     selectedEntry,
     showHUD,
     togglePin,
+    invalidateFts,
   ]);
 
   const handleDelete = useCallback(() => {
@@ -282,6 +296,7 @@ export function ClipboardHistoryView() {
         style: 'destructive',
         onAction: () => {
           deleteEntry(entryId);
+          invalidateFts();
           showHUD({
             icon: <ClipboardHUDIcon />,
             title: 'Deleted',
@@ -299,6 +314,7 @@ export function ClipboardHistoryView() {
     confirmAlert,
     showHUD,
     deleteEntry,
+    invalidateFts,
   ]);
 
   const handleAction = useCallback(() => {
