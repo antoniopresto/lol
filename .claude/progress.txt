@@ -345,7 +345,7 @@ screens, plan next tasks and fix it.
     color from $color-text-secondary to rgba($color-text-primary, 0.6) for
     proper alpha-based approach. Remove text-transform uppercase (Raycast section
     headers are mixed case).
-  - [ ] UXDS002f - [P1] Fix action bar layout. Left side: add Raycast logo icon
+  - [x] UXDS002f - [P1] Fix action bar layout. Left side: add Raycast logo icon
     (small 16x16 SVG) + context label (current extension/view name) in $font-sm
     at 60% text opacity. Right side: primary action label in $font-xs font-semibold
     full text color + Enter kbd badge + vertical separator (2x12px at text/10%) +

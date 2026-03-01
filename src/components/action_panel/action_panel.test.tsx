@@ -11,17 +11,13 @@ function renderActionPanel(
     dropdownOpen?: boolean;
     dropdownActions?: DropdownAction[];
     onDropdownClose?: () => void;
+    contextLabel?: string;
   } = {},
 ) {
   const defaultActions: Action[] = [
     {
       label: 'Open',
       shortcut: <span>Enter</span>,
-      onClick: vi.fn(),
-    },
-    {
-      label: 'Copy',
-      shortcut: <span>⌘C</span>,
       onClick: vi.fn(),
     },
     {
@@ -49,6 +45,7 @@ function renderActionPanel(
     dropdownOpen: overrides.dropdownOpen ?? false,
     dropdownActions: overrides.dropdownActions ?? defaultDropdownActions,
     onDropdownClose: overrides.onDropdownClose ?? vi.fn(),
+    contextLabel: overrides.contextLabel,
   };
 
   return {
@@ -63,16 +60,15 @@ describe('ActionPanel', () => {
     expect(screen.getByText('Open')).toBeInTheDocument();
   });
 
-  it('renders secondary actions', () => {
+  it('renders actions trigger with label and shortcut', () => {
     renderActionPanel();
-    expect(screen.getByText('Copy')).toBeInTheDocument();
     expect(screen.getByText('Actions')).toBeInTheDocument();
+    expect(screen.getByText('⌘K')).toBeInTheDocument();
   });
 
-  it('renders shortcuts', () => {
+  it('renders primary shortcut', () => {
     renderActionPanel();
     expect(screen.getByText('Enter')).toBeInTheDocument();
-    expect(screen.getByText('⌘C')).toBeInTheDocument();
   });
 
   it('returns null when no actions provided', () => {
@@ -104,7 +100,7 @@ describe('ActionPanel', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('calls onClick when secondary action is clicked', async () => {
+  it('calls onClick when actions trigger is clicked', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
     renderActionPanel({
@@ -114,14 +110,14 @@ describe('ActionPanel', () => {
           shortcut: <span>Enter</span>,
         },
         {
-          label: 'Copy',
-          shortcut: <span>⌘C</span>,
+          label: 'Actions',
+          shortcut: <span>⌘K</span>,
           onClick,
         },
       ],
     });
 
-    await user.click(screen.getByText('Copy'));
+    await user.click(screen.getByText('Actions'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
@@ -142,9 +138,26 @@ describe('ActionPanel', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
-  it('last secondary action has aria-haspopup', () => {
+  it('actions trigger has aria-haspopup', () => {
     renderActionPanel();
     const actionsButton = screen.getByText('Actions').closest('button')!;
     expect(actionsButton).toHaveAttribute('aria-haspopup', 'menu');
+  });
+
+  it('renders context label when provided', () => {
+    renderActionPanel({ contextLabel: 'Raycast' });
+    expect(screen.getByText('Raycast')).toBeInTheDocument();
+  });
+
+  it('renders separator between primary action and actions trigger', () => {
+    const { container } = renderActionPanel();
+    expect(
+      container.querySelector('.action-panel__separator'),
+    ).toBeInTheDocument();
+  });
+
+  it('renders Raycast logo', () => {
+    const { container } = renderActionPanel();
+    expect(container.querySelector('.action-panel__logo')).toBeInTheDocument();
   });
 });

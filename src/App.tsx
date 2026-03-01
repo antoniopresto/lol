@@ -606,6 +606,15 @@ export function App() {
         )}
       </div>
       <ActionPanel
+        contextLabel={
+          viewMode === 'form'
+            ? 'Create Snippet'
+            : viewMode === 'grid'
+              ? 'Color Picker'
+              : drilledItem
+                ? drilledItem.title
+                : 'Raycast'
+        }
         actions={
           viewMode === 'form'
             ? [
