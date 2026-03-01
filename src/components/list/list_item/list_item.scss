@@ -20,27 +20,7 @@
   }
 
   &--active {
-    background-color: $color-accent;
-
-    .list-item__title {
-      color: $color-text-on-accent;
-    }
-
-    .list-item__subtitle {
-      color: $color-text-on-accent-secondary;
-    }
-
-    .list-item__icon {
-      color: $color-text-on-accent;
-    }
-
-    .list-item__accessory {
-      color: $color-text-on-accent-secondary;
-    }
-
-    .list-item__accessory-text {
-      color: $color-text-on-accent-secondary;
-    }
+    background-color: $color-selection-background;
   }
 }
 

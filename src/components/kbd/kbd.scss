@@ -22,9 +22,3 @@
   color: $color-text-secondary;
   white-space: nowrap;
 }
-
-.list-item--active .kbd__key {
-  background-color: $color-kbd-background-on-accent;
-  border-color: $color-kbd-border-on-accent;
-  color: $color-text-on-accent-secondary;
-}

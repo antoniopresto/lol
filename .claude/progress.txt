@@ -327,7 +327,7 @@ screens, plan next tasks and fix it.
     Done: Inter prioritized in $font-family, letter-spacing -0.011em on body,
     added $font-weight-regular (400) and $font-weight-medium (500) tokens.
     Inter was already loaded in index.html (weights 400, 500, 600).
-  - [ ] UXDS002b - [P0] Fix selection/active item style. Raycast uses selection
+  - [x] UXDS002b - [P0] Fix selection/active item style. Raycast uses selection
     color at 10% alpha for active items (subtle highlight), NOT full accent blue.
     Update list_item.scss: active bg from $color-accent to rgba($color-accent, 0.1).
     Active title/subtitle/accessory text stays primary color (no white override).
