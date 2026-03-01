@@ -1,10 +1,6 @@
 import { type KeyboardEvent, Fragment, useEffect, useRef } from 'react';
+import type { BreadcrumbItem } from '../../hooks/use_navigation';
 import './search_bar.scss';
-
-export interface BreadcrumbItem {
-  label: string;
-  onBack?: () => void;
-}
 
 interface SearchBarProps {
   value: string;

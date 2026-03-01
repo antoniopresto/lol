@@ -407,13 +407,29 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   useId(). Stable callback refs to avoid stale closures. Delete action in
   dropdown triggers destructive confirm dialog before showing toast.
 
-- [ ] [P0] COMP002 - Build proper navigation stack system (push/pop). Replace
+- [x] [P0] COMP002 - Build proper navigation stack system (push/pop). Replace
   current breadcrumb-only drill-in with a real stack-based navigation. Create
   src/hooks/use_navigation.ts with push(component), pop(), popToRoot(). Each
   pushed view is a full-screen replacement inside CommandPalette. Escape pops
   the stack. Breadcrumb updates automatically from stack. Animate transitions
   (slide-left on push, slide-right on pop). Update App.tsx to use navigation
   stack instead of viewMode state. Action.Push should be declarative.
+  Done: useNavigationStack hook with push/pop/popToRoot, monotonic counter for
+  stable animation keys, functional updater guards for race-safe pop/popToRoot,
+  shared BreadcrumbItem type between hook and SearchBar, extracted ColorPickerView
+  and DetailView as standalone components, CSS slide transitions in
+  command_palette.scss, SearchBar Escape-to-pop with query-clear-first behavior.
+  Sub-tasks:
+  - [x] COMP002a - Create use_navigation hook (src/hooks/use_navigation.ts) with
+    NavigationStack type, push(title, component), pop(), popToRoot(). Derive
+    breadcrumbs automatically from stack. Export NavigationProvider context.
+  - [x] COMP002b - Add navigation transition styles to command_palette.scss.
+    Slide-left on push, slide-right on pop. CSS-only transitions.
+  - [x] COMP002c - Refactor App.tsx to use navigation stack. Replace viewMode/
+    drilledItem/breadcrumbs state with useNavigation hook. Extract ColorPickerView
+    and CreateSnippetView as standalone pushed components. Root view stays inline.
+  - [x] COMP002d - Update SearchBar to consume breadcrumbs from navigation
+    context (or keep prop-based) and wire Escape to pop().
 
 - [ ] [P0] COMP003 - Add ActionPanel.Section support. Group actions in the
   dropdown with visual section separators and optional section titles. Update

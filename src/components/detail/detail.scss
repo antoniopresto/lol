@@ -4,7 +4,10 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-  border-left: 1px solid $border-100;
+
+  .command-palette__body--has-detail & {
+    border-left: 1px solid $border-100;
+  }
 }
 
 .detail--with-metadata {

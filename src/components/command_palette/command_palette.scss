@@ -37,6 +37,45 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  position: relative;
+}
+
+.command-palette__nav-view {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+
+  &--push {
+    animation: nav-slide-in-left $transition-slow ease-out both;
+  }
+
+  &--pop {
+    animation: nav-slide-in-right $transition-slow ease-out both;
+  }
+}
+
+@keyframes nav-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes nav-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .command-palette__list-container {
