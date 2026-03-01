@@ -1,3 +1,4 @@
+use std::sync::Mutex;
 use tauri::{Emitter, Manager};
 #[cfg(desktop)]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
@@ -6,10 +7,57 @@ use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent}
 #[cfg(desktop)]
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
-fn show_and_focus(window: &tauri::WebviewWindow) {
-    if let Err(e) = window.center() {
+struct WindowConfig {
+    position_pref: String,
+}
+
+impl Default for WindowConfig {
+    fn default() -> Self {
+        Self {
+            position_pref: "top-third".to_string(),
+        }
+    }
+}
+
+fn position_near_top(window: &tauri::WebviewWindow) {
+    let monitor = window
+        .current_monitor()
+        .ok()
+        .flatten()
+        .or_else(|| window.primary_monitor().ok().flatten());
+
+    if let Some(monitor) = monitor {
+        let monitor_size = monitor.size();
+        let monitor_pos = monitor.position();
+
+        if let Ok(window_size) = window.outer_size() {
+            let x = monitor_pos.x + (monitor_size.width as i32 - window_size.width as i32) / 2;
+            let y = monitor_pos.y + (monitor_size.height as i32) / 5;
+
+            if let Err(e) = window.set_position(tauri::PhysicalPosition::new(x, y)) {
+                eprintln!("failed to position window: {e}");
+            }
+        }
+    } else if let Err(e) = window.center() {
         eprintln!("failed to center window: {e}");
     }
+}
+
+fn show_and_focus(window: &tauri::WebviewWindow) {
+    let position_pref = window
+        .app_handle()
+        .try_state::<Mutex<WindowConfig>>()
+        .and_then(|state| state.lock().ok().map(|s| s.position_pref.clone()))
+        .unwrap_or_else(|| "top-third".to_string());
+
+    if position_pref == "center" {
+        if let Err(e) = window.center() {
+            eprintln!("failed to center window: {e}");
+        }
+    } else {
+        position_near_top(window);
+    }
+
     if let Err(e) = window.show() {
         eprintln!("failed to show window: {e}");
     }
@@ -27,17 +75,35 @@ fn toggle_window(window: &tauri::WebviewWindow) {
             eprintln!("failed to hide window: {e}");
         }
     } else if visible {
-        if let Err(e) = window.set_focus() {
-            eprintln!("failed to focus window: {e}");
-        }
+        show_and_focus(window);
     } else {
         show_and_focus(window);
+    }
+}
+
+#[tauri::command]
+fn set_window_position_pref(
+    state: tauri::State<'_, Mutex<WindowConfig>>,
+    position: String,
+) -> Result<(), String> {
+    match position.as_str() {
+        "center" | "top-third" => {
+            if let Ok(mut config) = state.lock() {
+                config.position_pref = position;
+                Ok(())
+            } else {
+                Err("failed to acquire config lock".to_string())
+            }
+        }
+        _ => Err(format!("invalid position: {position}")),
     }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .manage(Mutex::new(WindowConfig::default()))
+        .invoke_handler(tauri::generate_handler![set_window_position_pref])
         .setup(|app| {
             #[cfg(desktop)]
             {
@@ -45,6 +111,27 @@ pub fn run() {
                 let window = app
                     .get_webview_window("main")
                     .expect("main window not found");
+
+                let window_for_blur = window.clone();
+                window.on_window_event(move |event| {
+                    if let tauri::WindowEvent::Focused(false) = event {
+                        if let Err(e) = window_for_blur.hide() {
+                            eprintln!("failed to hide on blur: {e}");
+                        }
+                    }
+                });
+
+                #[cfg(target_os = "macos")]
+                {
+                    use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
+                    if let Err(e) =
+                        apply_vibrancy(&window, NSVisualEffectMaterial::HudWindow, None, None)
+                    {
+                        eprintln!("failed to apply vibrancy: {e}");
+                    }
+                }
+
+                position_near_top(&window);
 
                 let window_for_shortcut = window.clone();
                 app.handle().plugin(
@@ -97,7 +184,9 @@ pub fn run() {
                 let window_for_tray = window.clone();
 
                 TrayIconBuilder::new()
-                    .icon(tauri::image::Image::from_bytes(include_bytes!("../icons/tray-icon@2x.png"))?)
+                    .icon(tauri::image::Image::from_bytes(include_bytes!(
+                        "../icons/tray-icon@2x.png"
+                    ))?)
                     .icon_as_template(true)
                     .tooltip("Raycast Clone")
                     .menu(&menu)

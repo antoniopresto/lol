@@ -94,6 +94,10 @@ body {
   letter-spacing: -0.011em;
   background-color: var(--color-background);
   color: var(--color-text-primary);
+
+  [data-tauri] & {
+    background: transparent;
+  }
 }
 
 ::selection {

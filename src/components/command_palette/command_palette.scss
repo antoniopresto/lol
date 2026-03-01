@@ -7,6 +7,10 @@
   align-items: flex-start;
   justify-content: center;
   padding-top: 15vh;
+
+  [data-tauri] & {
+    padding-top: 0;
+  }
 }
 
 .command-palette {

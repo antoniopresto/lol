@@ -10,6 +10,7 @@
     "beforeBuildCommand": "bun run build"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "main",
@@ -23,7 +24,8 @@
         "maximizable": false,
         "fullscreen": false,
         "alwaysOnTop": true,
-        "shadow": true
+        "shadow": true,
+        "visible": false
       }
     ],
     "security": {

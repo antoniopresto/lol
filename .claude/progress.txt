@@ -1022,13 +1022,37 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Capabilities: core:event:allow-listen added. All 93 tests pass, cargo check
   passes, bun run check passes.
 
-- [ ] [P0] TAURI004 - Configure window behavior to match Raycast. Hide on
-  blur (window loses focus → hide, like Spotlight). Disable window
+- [x] [P0] TAURI004 - Configure window behavior to match Raycast.
+  Hide on blur (window loses focus → hide, like Spotlight). Disable window
   resize/maximize. Position window: top-third of screen vertically, centered
   horizontally. Persist window position preference in settings. Add
   vibrancy/blur effect on macOS (NSVisualEffectView via Tauri window
   effects). Handle multi-monitor: show on monitor where mouse cursor is.
   Create src/hooks/use_window.ts for window management from React side.
+  Done: Rust-side: hide on blur via on_window_event(Focused(false)), position_near_top
+  using current_monitor() with fallback to primary_monitor()/center(), macOS vibrancy
+  via window-vibrancy 0.7 HudWindow material (macOSPrivateApi enabled), validated
+  set_window_position_pref Tauri command (rejects invalid values). toggle_window with
+  3-state logic: visible+focused→hide, visible+unfocused→reposition+focus,
+  hidden→show_and_focus. Window starts hidden (visible:false in tauri.conf.json).
+  CSS: data-tauri attribute on html via shared isTauri const, body transparent in
+  Tauri mode, overlay padding-top removed. React: useWindow hook with onShow/onHide/
+  onTrayNavigate callbacks, hideWindow/setPositionPreference utilities, syncs stored
+  position preference from localStorage to Rust backend on startup. Settings: Window
+  Position dropdown (Top Third/Center) in GeneralTab, calls setPositionPreference on
+  change and on reset. All 93 tests pass, cargo check passes, bun run check passes.
+  Sub-tasks:
+  - [x] TAURI004a - Rust-side window behavior: hide on blur via on_window_event,
+    near-top positioning via current_monitor()+set_position, macOS vibrancy via
+    window-vibrancy crate, validated set_window_position_pref Tauri command.
+    Files: lib.rs, Cargo.toml, tauri.conf.json.
+  - [x] TAURI004b - CSS adjustments for Tauri mode: detect Tauri via shared isTauri
+    const, set data-tauri attribute, make body transparent, remove overlay padding-top.
+    Files: main.tsx, global.scss, command_palette.scss.
+  - [x] TAURI004c - Window position preference in settings: setPositionPreference
+    in use_window.ts (invokes Tauri command), Window Position dropdown in
+    settings_view.tsx, stored pref synced to Rust backend on startup.
+    Files: use_window.ts, settings_view.tsx.
 
 - [ ] [P1] TAURI005 - Add native clipboard access via Tauri plugin. Use
   @tauri-apps/plugin-clipboard-manager for real clipboard read/write.

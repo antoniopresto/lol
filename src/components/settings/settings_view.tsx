@@ -5,6 +5,7 @@ import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useTheme } from '../../hooks/use_theme';
+import { useWindow } from '../../hooks/use_window';
 import {
   isBooleanRecord,
   isRecord,
@@ -40,6 +41,7 @@ function isSettingsTab(value: string): value is SettingsTab {
 
 interface GeneralSettings {
   appearance: string;
+  windowPosition: string;
   windowWidth: string;
   showRecentApps: boolean;
   showDock: boolean;
@@ -51,6 +53,7 @@ const EXTENSIONS_STORAGE_KEY = 'settings-extensions';
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   appearance: 'dark',
+  windowPosition: 'top-third',
   windowWidth: 'medium',
   showRecentApps: true,
   showDock: true,
@@ -64,7 +67,9 @@ function isGeneralSettings(value: unknown): value is GeneralSettings {
     typeof value.windowWidth === 'string' &&
     typeof value.showRecentApps === 'boolean' &&
     typeof value.showDock === 'boolean' &&
-    typeof value.fontSize === 'string'
+    typeof value.fontSize === 'string' &&
+    (value.windowPosition === undefined ||
+      typeof value.windowPosition === 'string')
   );
 }
 
@@ -135,6 +140,17 @@ const WINDOW_WIDTH_OPTIONS = [
   {
     label: 'Large (820px)',
     value: 'large',
+  },
+];
+
+const WINDOW_POSITION_OPTIONS = [
+  {
+    label: 'Top Third',
+    value: 'top-third',
+  },
+  {
+    label: 'Center',
+    value: 'center',
   },
 ];
 
@@ -288,9 +304,11 @@ function RefreshIconSmall() {
 function GeneralTab({
   settings,
   onSettingsChange,
+  onWindowPositionChange,
 }: {
   settings: GeneralSettings;
   onSettingsChange: (settings: GeneralSettings) => void;
+  onWindowPositionChange: (position: string) => void;
 }) {
   return (
     <div className="form">
@@ -305,6 +323,18 @@ function GeneralTab({
             })
           }
           options={APPEARANCE_OPTIONS}
+        />
+        <FormDropdown
+          label="Window Position"
+          value={settings.windowPosition}
+          onChange={v => {
+            onSettingsChange({
+              ...settings,
+              windowPosition: v,
+            });
+            onWindowPositionChange(v);
+          }}
+          options={WINDOW_POSITION_OPTIONS}
         />
         <FormDropdown
           label="Window Width"
@@ -572,6 +602,7 @@ function AdvancedTab({
 export function SettingsView() {
   const nav = useNavigation();
   const { preference: themePreference, setTheme } = useTheme();
+  const { setPositionPreference } = useWindow();
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -672,6 +703,7 @@ export function SettingsView() {
           setSettings({ ...DEFAULT_SETTINGS });
           storageRemove(SETTINGS_STORAGE_KEY);
           setTheme('dark');
+          setPositionPreference(DEFAULT_SETTINGS.windowPosition);
           setExtensions(MOCK_EXTENSIONS.map(ext => ({ ...ext })));
           storageRemove(EXTENSIONS_STORAGE_KEY);
           showHUD({
@@ -690,6 +722,7 @@ export function SettingsView() {
     confirmAlert,
     showHUD,
     setTheme,
+    setPositionPreference,
   ]);
 
   const toggleActions = useCallback(() => {
@@ -795,6 +828,7 @@ export function SettingsView() {
               <GeneralTab
                 settings={settings}
                 onSettingsChange={handleSettingsChange}
+                onWindowPositionChange={setPositionPreference}
               />
             )}
             {activeTab === 'extensions' && (
