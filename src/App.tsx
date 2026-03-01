@@ -14,6 +14,7 @@ import {
   FormTextField,
 } from './components/form';
 import { Grid, GridItem } from './components/grid';
+import { HUDContainer } from './components/hud/hud_container';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
 import { SearchBar } from './components/search_bar/search_bar';
@@ -22,6 +23,7 @@ import { SearchDropdown } from './components/search_bar/search_dropdown';
 import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useAlert } from './hooks/use_alert';
+import { useHUD } from './hooks/use_hud';
 import {
   NavigationContextProvider,
   useNavigationStack,
@@ -113,6 +115,42 @@ function ColorSwatch({ color }: { color: string }) {
       className="grid-item__color-swatch"
       style={{ backgroundColor: color }}
     />
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path
+        d="M3.5 8.5L6.5 11.5L12.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ClipboardHUDIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <rect
+        x="4"
+        y="2"
+        width="8"
+        height="12"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M6 2.5H10"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
 
@@ -358,6 +396,7 @@ export function App() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const { toasts, show: showToast, hide: hideToast } = useToast();
+  const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const nav = useNavigationStack<NavViewData>('Raycast');
   const { push, pop } = nav;
@@ -441,13 +480,12 @@ export function App() {
 
   const handleCopyColor = useCallback(
     (color: ColorItemData) => {
-      showToast({
-        style: 'info',
-        title: 'Copied color',
-        message: color.color,
+      showHUD({
+        icon: <ClipboardHUDIcon />,
+        title: `Copied ${color.color}`,
       });
     },
-    [showToast],
+    [showHUD],
   );
 
   const handleGridAction = useCallback(
@@ -615,10 +653,9 @@ export function App() {
             ),
             onClick: () => {
               if (selectedItem) {
-                showToast({
-                  style: 'info' as const,
-                  title: 'Copied to clipboard',
-                  message: selectedItem.title,
+                showHUD({
+                  icon: <CheckIcon />,
+                  title: 'Copied to Clipboard',
                 });
               }
             },
@@ -632,10 +669,9 @@ export function App() {
                     label: 'Copy as Markdown',
                     onClick: () => {
                       if (selectedItem) {
-                        showToast({
-                          style: 'info' as const,
+                        showHUD({
+                          icon: <CheckIcon />,
                           title: 'Copied as Markdown',
-                          message: selectedItem.title,
                         });
                       }
                     },
@@ -644,10 +680,9 @@ export function App() {
                     label: 'Copy as JSON',
                     onClick: () => {
                       if (selectedItem) {
-                        showToast({
-                          style: 'info' as const,
+                        showHUD({
+                          icon: <CheckIcon />,
                           title: 'Copied as JSON',
-                          message: selectedItem.title,
                         });
                       }
                     },
@@ -656,10 +691,9 @@ export function App() {
                     label: 'Copy as Plain Text',
                     onClick: () => {
                       if (selectedItem) {
-                        showToast({
-                          style: 'info' as const,
+                        showHUD({
+                          icon: <CheckIcon />,
                           title: 'Copied as Plain Text',
-                          message: selectedItem.title,
                         });
                       }
                     },
@@ -733,6 +767,7 @@ export function App() {
     [
       selectedItem,
       showToast,
+      showHUD,
       handleOpenCreateSnippet,
       confirmAlert,
     ],
@@ -911,6 +946,7 @@ export function App() {
           />
         )}
         <ToastContainer toasts={toasts} onDismiss={hideToast} />
+        <HUDContainer items={hudItems} />
       </CommandPalette>
     </NavigationContextProvider>
   );

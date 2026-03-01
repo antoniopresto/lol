@@ -1,0 +1,58 @@
+@use '../../styles/tokens' as *;
+
+.hud {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-2 $space-4;
+  max-width: 280px;
+  background-color: $color-surface;
+  border: 1px solid $border-100;
+  border-radius: $radius-pill;
+  box-shadow: $shadow-popover;
+  animation: hud-enter $transition-slow ease-out both;
+  pointer-events: auto;
+
+  &--exiting {
+    animation: hud-exit $transition-normal ease-in both;
+  }
+}
+
+.hud__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: $color-text-primary;
+}
+
+.hud__title {
+  font-size: $font-sm;
+  font-weight: $font-weight-medium;
+  color: $color-text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes hud-enter {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes hud-exit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
