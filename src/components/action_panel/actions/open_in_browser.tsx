@@ -40,7 +40,7 @@ export function performOpen(
   showHUD: ShowHUD,
   options?: PerformOpenOptions,
 ): void {
-  openUrl(url).catch(() => {});
+  openUrl(url);
   showHUD({
     icon: options?.hudIcon ?? <OpenInBrowserHUDIcon />,
     title: options?.hudTitle ?? 'Opened in Browser',

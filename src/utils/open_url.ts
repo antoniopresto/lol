@@ -7,7 +7,13 @@ function isWebUrl(url: string): boolean {
   }
 }
 
-export async function openUrl(url: string): Promise<void> {
+export function openUrl(url: string): void {
   if (!isWebUrl(url)) return;
   window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+export function openDeepLink(url: string): void {
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.click();
 }

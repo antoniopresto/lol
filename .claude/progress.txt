@@ -1104,7 +1104,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 === MISSING RAYCAST SCREENS ===
 
-- [ ] [P1] SCRN010 - Build Quicklinks screen. List view of saved quicklinks
+- [x] [P1] SCRN010 - Build Quicklinks screen. List view of saved quicklinks
   (URLs, file paths, deep links). Each item: icon (auto-detected from URL
   favicon or file type), name, URL/path as subtitle. Actions: Open (⏎),
   Edit (⌘E pushes form), Copy Link (⌘C), Delete (⌘⌫). Create quicklink
