@@ -611,11 +611,37 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     "Clipboard History" command in root search, handle actions dropdown for
     clipboard-specific actions.
 
-- [ ] [P1] SCRN002 - Build Snippet Manager screen. List view of saved snippets.
+- [x] [P1] SCRN002 - Build Snippet Manager screen. List view of saved snippets.
   Each item shows: name, keyword (as tag accessory), preview of content.
   Actions: Insert, Edit (pushes Form), Copy, Delete. Create Snippet form
   accessible via ⌘N. Push via navigation from "Search Snippets" in root search.
   Refactor existing snippet form demo into this proper screen.
+  Done: SnippetManagerView with self-contained UI (SearchBar, List, ActionPanel,
+  Alert, HUDContainer). 14 mock snippet entries across 4 categories (Code, Email,
+  Template, General). List grouped by category with search filtering and
+  SearchDropdown category filter. Keyword shown as purple tag accessory, language
+  tags with colors, relative date accessory. Actions: Insert (⏎), Copy (⌘C),
+  Edit (⌘E) pushes internal form with validation, Create (⌘N), Delete (⌘⌫)
+  with confirm dialog. EditSnippetView handles both create/edit modes with
+  FormTextField, FormDropdown, FormTagPicker, FormTextArea. Tag colors preserved
+  on edit/create via SNIPPET_TAGS color mapping. Type-safe category handling via
+  isSnippetCategory type guard. App.tsx: removed old 'form' NavViewData type,
+  removed CreateSnippetView/handleSnippetSubmit, cleaned up unused Form imports.
+  All 93 tests pass, bun run check passes.
+  Sub-tasks:
+  - [x] SCRN002a - Create snippet mock data (src/data/snippet_data.ts) with
+    SnippetEntry type (name, keyword, content, category, tags, createdAt),
+    14 mock entries across categories (General, Code, Email, Template).
+    Added SnippetCategory type, isSnippetCategory type guard, and tag colors.
+  - [x] SCRN002b - Create SnippetManagerView component
+    (src/components/snippet_manager/snippet_manager_view.tsx and .scss).
+    List with sections by category, search filtering, keyword tag accessories,
+    content preview as subtitle. Actions: Insert, Copy, Edit (push form),
+    Delete with confirm. SearchDropdown filter by category. Uses self-contained
+    SearchBar/ActionPanel/Alert/HUD pattern (isFullView).
+  - [x] SCRN002c - Wire into App.tsx: add 'snippets' to NavViewData, push from
+    "Search Snippets" command in root search, handle isFullView for snippets,
+    removed old CreateSnippetView from App.tsx (now internal to snippet manager).
 
 - [ ] [P2] SCRN003 - Build Emoji Picker screen. Grid view (6 columns) of emoji
   characters, organized by category sections (Smileys, People, Animals, Food,

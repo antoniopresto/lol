@@ -6,15 +6,6 @@ import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
 import { EmptyState } from './components/empty_state/empty_state';
-import {
-  Form,
-  FormCheckbox,
-  FormDatePicker,
-  FormDropdown,
-  FormTagPicker,
-  FormTextArea,
-  FormTextField,
-} from './components/form';
 import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
 import { Kbd } from './components/kbd/kbd';
@@ -22,6 +13,7 @@ import { List, ListItem, ListSection } from './components/list';
 import { SearchBar } from './components/search_bar/search_bar';
 import type { SearchDropdownSection } from './components/search_bar/search_dropdown';
 import { SearchDropdown } from './components/search_bar/search_dropdown';
+import { SnippetManagerView } from './components/snippet_manager/snippet_manager_view';
 import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useAlert } from './hooks/use_alert';
@@ -41,8 +33,8 @@ import type {
 
 type NavViewData =
   | { type: 'grid' }
-  | { type: 'form' }
   | { type: 'clipboard' }
+  | { type: 'snippets' }
   | {
       type: 'detail';
       item: ListItemData;
@@ -181,208 +173,6 @@ function SearchIcon() {
   );
 }
 
-interface SnippetFormState {
-  name: string;
-  keyword: string;
-  snippet: string;
-  category: string;
-  tags: string[];
-  isShared: boolean;
-  expiresAt: string;
-}
-
-const INITIAL_SNIPPET_FORM: SnippetFormState = {
-  name: '',
-  keyword: '',
-  snippet: '',
-  category: 'general',
-  tags: [],
-  isShared: false,
-  expiresAt: '',
-};
-
-const SNIPPET_TAGS = [
-  {
-    label: 'JavaScript',
-    value: 'javascript',
-  },
-  {
-    label: 'TypeScript',
-    value: 'typescript',
-  },
-  {
-    label: 'Python',
-    value: 'python',
-  },
-  {
-    label: 'React',
-    value: 'react',
-  },
-  {
-    label: 'CSS',
-    value: 'css',
-  },
-  {
-    label: 'HTML',
-    value: 'html',
-  },
-  {
-    label: 'Shell',
-    value: 'shell',
-  },
-  {
-    label: 'Markdown',
-    value: 'markdown',
-  },
-];
-
-const SNIPPET_CATEGORIES = [
-  {
-    label: 'General',
-    value: 'general',
-  },
-  {
-    label: 'Code',
-    value: 'code',
-  },
-  {
-    label: 'Email',
-    value: 'email',
-  },
-  {
-    label: 'Template',
-    value: 'template',
-  },
-];
-
-interface CreateSnippetViewProps {
-  onSubmit: (form: SnippetFormState) => void;
-}
-
-function CreateSnippetView({ onSubmit }: CreateSnippetViewProps) {
-  const [snippetForm, setSnippetForm] =
-    useState<SnippetFormState>(INITIAL_SNIPPET_FORM);
-  const [formErrors, setFormErrors] = useState<
-    Partial<Record<keyof SnippetFormState, string>>
-  >({});
-
-  const handleSubmit = useCallback(() => {
-    const errors: Partial<Record<keyof SnippetFormState, string>> = {};
-    if (!snippetForm.name.trim()) {
-      errors.name = 'Name is required';
-    }
-    if (!snippetForm.snippet.trim()) {
-      errors.snippet = 'Snippet content is required';
-    }
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    onSubmit(snippetForm);
-  }, [
-    snippetForm,
-    onSubmit,
-  ]);
-
-  useKeyboardShortcut(
-    {
-      key: 'Enter',
-      meta: true,
-    },
-    handleSubmit,
-  );
-
-  return (
-    <Form onSubmit={handleSubmit}>
-      <FormTextField
-        label="Name"
-        value={snippetForm.name}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            name: v,
-          }))
-        }
-        placeholder="e.g. Email Signature"
-        error={formErrors.name}
-        autoFocus
-      />
-      <FormTextField
-        label="Keyword"
-        value={snippetForm.keyword}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            keyword: v,
-          }))
-        }
-        placeholder="e.g. !sig"
-        description="Type this to expand the snippet"
-      />
-      <FormDropdown
-        label="Category"
-        value={snippetForm.category}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            category: v,
-          }))
-        }
-        options={SNIPPET_CATEGORIES}
-        placeholder="Select a category"
-      />
-      <FormTagPicker
-        label="Tags"
-        value={snippetForm.tags}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            tags: v,
-          }))
-        }
-        options={SNIPPET_TAGS}
-        placeholder="Add tags..."
-        description="Categorize your snippet with tags"
-      />
-      <FormTextArea
-        label="Snippet"
-        value={snippetForm.snippet}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            snippet: v,
-          }))
-        }
-        placeholder="Enter your snippet content..."
-        error={formErrors.snippet}
-        rows={5}
-      />
-      <FormCheckbox
-        label="Share with team"
-        checked={snippetForm.isShared}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            isShared: v,
-          }))
-        }
-        description="Make this snippet available to your team members"
-      />
-      <FormDatePicker
-        label="Expires"
-        value={snippetForm.expiresAt}
-        onChange={v =>
-          setSnippetForm(prev => ({
-            ...prev,
-            expiresAt: v,
-          }))
-        }
-        description="Optional expiration date"
-      />
-    </Form>
-  );
-}
-
 interface ColorPickerViewProps {
   colors: ColorItemData[];
   onActiveIndexChange: (index: number) => void;
@@ -450,7 +240,7 @@ export function App() {
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const nav = useNavigationStack<NavViewData>('Raycast');
-  const { push, pop } = nav;
+  const { push } = nav;
 
   const viewType = nav.currentEntry?.data.type ?? 'root';
 
@@ -552,21 +342,6 @@ export function App() {
     ],
   );
 
-  const handleSnippetSubmit = useCallback(
-    (form: SnippetFormState) => {
-      showToast({
-        style: 'success',
-        title: 'Snippet Created',
-        message: form.name,
-      });
-      pop();
-    },
-    [
-      showToast,
-      pop,
-    ],
-  );
-
   const handleDrillIn = useCallback(() => {
     const item = allItems[selectedIndex];
     if (!item) return;
@@ -575,6 +350,10 @@ export function App() {
 
     if (item.id === 'clipboard-history') {
       push('Clipboard History', { type: 'clipboard' });
+      setQuery('');
+      setSelectedIndex(0);
+    } else if (item.id === 'snippets') {
+      push('Snippets', { type: 'snippets' });
       setQuery('');
       setSelectedIndex(0);
     } else if (item.id === 'color-picker') {
@@ -608,13 +387,6 @@ export function App() {
     push,
   ]);
 
-  const handleOpenCreateSnippet = useCallback(() => {
-    setActionsOpen(false);
-    push('Create Snippet', { type: 'form' });
-    setQuery('');
-    setSelectedIndex(0);
-  }, [push]);
-
   const toggleActions = useCallback(() => {
     setActionsOpen(prev => !prev);
   }, []);
@@ -629,16 +401,9 @@ export function App() {
       meta: true,
     },
     toggleActions,
-    { enabled: viewType !== 'form' && viewType !== 'clipboard' },
-  );
-
-  useKeyboardShortcut(
     {
-      key: 'n',
-      meta: true,
+      enabled: viewType !== 'clipboard' && viewType !== 'snippets',
     },
-    handleOpenCreateSnippet,
-    { enabled: viewType === 'root' },
   );
 
   const detail = selectedItem?.detail;
@@ -676,18 +441,6 @@ export function App() {
                 title: 'Detail panel toggled',
               });
             },
-          },
-          {
-            label: 'Create Snippet',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'N',
-                ]}
-              />
-            ),
-            onClick: handleOpenCreateSnippet,
           },
         ],
       },
@@ -821,7 +574,6 @@ export function App() {
       selectedItem,
       showToast,
       showHUD,
-      handleOpenCreateSnippet,
       confirmAlert,
     ],
   );
@@ -852,6 +604,8 @@ export function App() {
     switch (entry.data.type) {
       case 'clipboard':
         return <ClipboardHistoryView />;
+      case 'snippets':
+        return <SnippetManagerView />;
       case 'grid':
         return (
           <ColorPickerView
@@ -860,14 +614,12 @@ export function App() {
             onAction={handleGridAction}
           />
         );
-      case 'form':
-        return <CreateSnippetView onSubmit={handleSnippetSubmit} />;
       case 'detail':
         return <DetailView item={entry.data.item} />;
     }
   }
 
-  const isFullView = viewType === 'clipboard';
+  const isFullView = viewType === 'clipboard' || viewType === 'snippets';
 
   return (
     <NavigationContextProvider value={nav}>
@@ -966,40 +718,24 @@ export function App() {
         {!isFullView && (
           <ActionPanel
             contextLabel={contextLabel}
-            actions={
-              viewType === 'form'
-                ? [
-                    {
-                      label: 'Submit',
-                      shortcut: (
-                        <Kbd
-                          keys={[
-                            '⌘',
-                            '↵',
-                          ]}
-                        />
-                      ),
-                    },
-                  ]
-                : [
-                    {
-                      label: 'Open',
-                      shortcut: <Kbd keys={['↵']} />,
-                    },
-                    {
-                      label: 'Actions',
-                      shortcut: (
-                        <Kbd
-                          keys={[
-                            '⌘',
-                            'K',
-                          ]}
-                        />
-                      ),
-                      onClick: toggleActions,
-                    },
-                  ]
-            }
+            actions={[
+              {
+                label: 'Open',
+                shortcut: <Kbd keys={['↵']} />,
+              },
+              {
+                label: 'Actions',
+                shortcut: (
+                  <Kbd
+                    keys={[
+                      '⌘',
+                      'K',
+                    ]}
+                  />
+                ),
+                onClick: toggleActions,
+              },
+            ]}
             dropdownOpen={actionsOpen}
             dropdownSections={dropdownSections}
             onDropdownClose={closeActions}
