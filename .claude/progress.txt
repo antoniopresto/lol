@@ -566,11 +566,21 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   tooltip?: string field to ListItemAccessoryData type. Demo tooltip on
   Clipboard History "Raycast" accessory. All 93 tests pass.
 
-- [ ] [P2] COMP013 - Build Quick Look preview overlay. Full-screen-ish preview
+- [x] [P2] COMP013 - Build Quick Look preview overlay. Full-screen-ish preview
   overlay triggered by spacebar or Action.ToggleQuickLook. Shows larger preview
   of selected item's detail content. Dark backdrop + centered card. Close on
   Escape or spacebar again. Create src/components/quick_look/ with
   quick_look.tsx and quick_look.scss.
+  Done: QuickLook component with dark backdrop overlay (blur + rgba), centered
+  card (620px wide, 460px max-height), scale+fade enter/exit animations (0.92→1),
+  focus trap (Tab cycling within dialog), initial focus on close button. Triggers:
+  ⌘Y keyboard shortcut via useKeyboardShortcut, spacebar toggle when query is
+  empty (no modifier keys). Close via Escape, spacebar, backdrop click, or close
+  button. Reuses Detail+DetailMetadata for content rendering. "Quick Look" action
+  added to actions dropdown. $z-quick-look: 130 token. Also tokenized Alert
+  z-index ($z-alert: 200). exitingRef guard prevents double-close on rapid key
+  presses. Quick Look stays open during list navigation (content updates with
+  selection). All 93 tests pass, bun run check passes.
 
 - [ ] [P2] COMP014 - Expand icon system to 50+ icons. Add missing Raycast Icon
   enum equivalents: arrows (up/down/left/right, chevrons), UI controls (check,

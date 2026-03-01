@@ -10,6 +10,7 @@ import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
+import { QuickLook } from './components/quick_look/quick_look';
 import { SearchBar } from './components/search_bar/search_bar';
 import type { SearchDropdownSection } from './components/search_bar/search_dropdown';
 import { SearchDropdown } from './components/search_bar/search_dropdown';
@@ -236,6 +237,7 @@ export function App() {
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [quickLookOpen, setQuickLookOpen] = useState(false);
   const { toasts, show: showToast, hide: hideToast } = useToast();
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
@@ -277,6 +279,7 @@ export function App() {
       setFilterValue('all');
       setSelectedIndex(0);
       setActionsOpen(false);
+      setQuickLookOpen(false);
     }
   }, [nav.stackDepth]);
 
@@ -406,6 +409,50 @@ export function App() {
     },
   );
 
+  const toggleQuickLook = useCallback(() => {
+    setQuickLookOpen(prev => !prev);
+  }, []);
+
+  const closeQuickLook = useCallback(() => {
+    setQuickLookOpen(false);
+  }, []);
+
+  useKeyboardShortcut(
+    {
+      key: 'y',
+      meta: true,
+    },
+    toggleQuickLook,
+    { enabled: viewType === 'root' && !!selectedItem?.detail },
+  );
+
+  useEffect(() => {
+    if (viewType !== 'root' || !selectedItem?.detail) return;
+
+    function handleSpaceBar(e: KeyboardEvent) {
+      if (
+      e.key !== ' ' ||
+      e.metaKey ||
+      e.ctrlKey ||
+      e.altKey
+      ) {
+        return;
+      }
+      if (query !== '') return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      setQuickLookOpen(prev => !prev);
+    }
+
+    window.addEventListener('keydown', handleSpaceBar);
+    return () => window.removeEventListener('keydown', handleSpaceBar);
+  }, [
+    viewType,
+    selectedItem?.detail,
+    query,
+  ]);
+
   const detail = selectedItem?.detail;
 
   const dropdownSections = useMemo(
@@ -426,20 +473,20 @@ export function App() {
             },
           },
           {
-            label: 'Show Detail',
+            label: 'Quick Look',
             shortcut: (
               <Kbd
                 keys={[
                   '⌘',
-                  'D',
+                  'Y',
                 ]}
               />
             ),
             onClick: () => {
-              showToast({
-                style: 'info' as const,
-                title: 'Detail panel toggled',
-              });
+              if (selectedItem?.detail) {
+                setActionsOpen(false);
+                setQuickLookOpen(prev => !prev);
+              }
             },
           },
         ],
@@ -740,6 +787,20 @@ export function App() {
             dropdownSections={dropdownSections}
             onDropdownClose={closeActions}
           />
+        )}
+        {!isFullView && quickLookOpen && selectedItem?.detail && (
+          <QuickLook title={selectedItem.title} onClose={closeQuickLook}>
+            <Detail
+              markdown={selectedItem.detail.markdown}
+              metadata={
+                selectedItem.detail.metadata ? (
+                  <DetailMetadata>
+                    {selectedItem.detail.metadata.map(renderMetadataEntry)}
+                  </DetailMetadata>
+                ) : undefined
+              }
+            />
+          </QuickLook>
         )}
         {!isFullView && alertState && (
           <Alert

@@ -9,7 +9,7 @@
   background: $backdrop-overlay;
   backdrop-filter: blur($backdrop-blur);
   -webkit-backdrop-filter: blur($backdrop-blur);
-  z-index: 200;
+  z-index: $z-alert;
   border-radius: $radius-window;
   animation: alert-backdrop-enter $transition-normal ease-out both;
 
