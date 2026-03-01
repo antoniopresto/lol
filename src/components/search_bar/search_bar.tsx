@@ -51,18 +51,18 @@ export function SearchBar({
     <div className="search-bar" role="search">
       <svg
         className="search-bar__icon"
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.5" />
+        <circle cx="9" cy="9" r="5.5" stroke="currentColor" strokeWidth="1.5" />
         <line
-          x1="10.5"
-          y1="10.5"
-          x2="14"
-          y2="14"
+          x1="13.25"
+          y1="13.25"
+          x2="17.5"
+          y2="17.5"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"

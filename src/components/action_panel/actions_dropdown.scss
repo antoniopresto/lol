@@ -2,8 +2,8 @@
 
 .actions-dropdown {
   position: absolute;
-  bottom: calc(36px + $space-2);
-  right: $space-3;
+  bottom: calc($action-panel-height + $space-2);
+  right: $space-2;
   min-width: 220px;
   max-height: 300px;
   overflow-y: auto;

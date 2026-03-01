@@ -5,11 +5,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 36px;
-  padding: 0 $space-3;
+  height: $action-panel-height;
+  padding: 0 $space-2;
   border-top: 1px solid $color-border;
   background-color: $color-surface-footer;
-  border-radius: 0 0 $radius-xl $radius-xl;
+  border-radius: 0 0 $radius-lg $radius-lg;
   flex-shrink: 0;
   animation: action-panel-slide-up $transition-slow ease-out both;
   animation-delay: $transition-fast;
@@ -31,7 +31,7 @@
     cursor: pointer;
     color: $color-text-secondary;
     font-family: $font-family;
-    font-size: $font-xs;
+    font-size: $font-sm;
     line-height: 1;
     transition: color $transition-fast ease;
 

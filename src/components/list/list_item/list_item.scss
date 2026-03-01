@@ -4,8 +4,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 36px;
-  padding: 0 $space-3;
+  height: $list-item-height;
+  padding: 0 $space-2;
   border-radius: $radius-md;
   cursor: pointer;
   transition: background-color $transition-fast ease;
@@ -63,7 +63,7 @@
 }
 
 .list-item__title {
-  font-size: $font-md;
+  font-size: $font-base;
   color: $color-text-primary;
   white-space: nowrap;
   overflow: hidden;
@@ -86,7 +86,7 @@
   align-items: center;
   gap: $space-2;
   flex-shrink: 0;
-  margin-left: $space-3;
+  margin-left: $space-2;
 }
 
 .list-item__accessory {

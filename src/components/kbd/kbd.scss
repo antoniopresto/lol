@@ -10,14 +10,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 1px 4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 $space-1;
   background-color: $color-kbd-background;
   border: 1px solid $color-border;
   border-radius: $radius-sm;
   font-family: $font-family;
-  font-size: $font-xs;
+  font-size: $font-sm;
   line-height: 1;
   color: $color-text-secondary;
   white-space: nowrap;

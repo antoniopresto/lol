@@ -295,7 +295,7 @@
      vitest + @testing-library/react. Minimum 80% coverage for tested
      components.
 
-- [IN_PROGRESS] UXDS001 - The design is very different from Raycast, colors,
+- [x] UXDS001 - The design is very different from Raycast, colors,
   spacing, icons, etc... fix it.
   Sub-tasks:
   - [x] UXDS001a - Replace monochrome stroke application icons with colorful
@@ -312,8 +312,11 @@
     surface #232325, border #2f2f32, text-primary #e5e5ea, footer #1c1c1e.
     Command palette: opacity 0.78, blur 64px, saturate 200%, rgba border.
     Deeper shadows. Extracted kbd-on-accent tokens. Subtler scrollbar.
-  - [ ] UXDS001d - Fix spacing and sizing: list item height, padding, icon
-    sizes, search bar dimensions, action panel to match Raycast proportions.
+  - [x] UXDS001d - Fix spacing and sizing: list item height 36→40px, padding
+    12→8px, title font 13→14px, action panel height 36→40px with 12px font and
+    12px bottom radius, command palette radius 16→12px, list padding 0 8px,
+    section headers 12px font, kbd 20x20 with 12px font, search icon 20x20.
+    Added $font-base, $list-item-height, $action-panel-height tokens.
 
 - [ ] UXDS002 - The design is very poor, Raycast has a lot more resources and
 screens, plan next tasks and fix it.
