@@ -377,8 +377,241 @@ screens, plan next tasks and fix it.
 
 --------------------------------------------------------------------------------
 
-- [ ] UXDS003 - Map all real Raycast screens and components, plan every single
+- [x] UXDS003 - Map all real Raycast screens and components, plan every single
 one, add tasks.
+  Mapped all Raycast screens/components from official API docs, manual, and
+  design artifacts. Compared with existing implementation. Identified ~40 missing
+  components/screens. Added tasks below organized by priority.
 
 - [ ] T0001 - Plan and add minimum 50 tasks to implement real Tauri Raycast
 clone app.
+
+--------------------------------------------------------------------------------
+RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
+--------------------------------------------------------------------------------
+
+=== CORE MISSING COMPONENTS ===
+
+- [ ] [P0] COMP001 - Build Alert/Confirm dialog component. Blocking modal overlay
+  for destructive or important confirmations. Fields: title, message, icon,
+  primaryAction (label + style: Default/Destructive/Cancel), dismissAction.
+  Animate in with backdrop blur + scale. Create src/components/alert/ with
+  alert.tsx and alert.scss. Create useAlert hook in src/hooks/use_alert.ts that
+  returns confirmAlert(options) -> Promise<boolean>. Wire demo: add "Delete"
+  action to list items that triggers confirm dialog before toast.
+
+- [ ] [P0] COMP002 - Build proper navigation stack system (push/pop). Replace
+  current breadcrumb-only drill-in with a real stack-based navigation. Create
+  src/hooks/use_navigation.ts with push(component), pop(), popToRoot(). Each
+  pushed view is a full-screen replacement inside CommandPalette. Escape pops
+  the stack. Breadcrumb updates automatically from stack. Animate transitions
+  (slide-left on push, slide-right on pop). Update App.tsx to use navigation
+  stack instead of viewMode state. Action.Push should be declarative.
+
+- [ ] [P0] COMP003 - Add ActionPanel.Section support. Group actions in the
+  dropdown with visual section separators and optional section titles. Update
+  actions_dropdown.tsx to accept sections (array of {title?, actions[]}). Render
+  separator line + small title between groups. Update App.tsx demo to show
+  sections: "Primary Actions", "Copy Actions", "Danger Zone".
+
+- [ ] [P0] COMP004 - Add ActionPanel.Submenu support. Nested submenu that
+  replaces the dropdown content with child actions when hovered/selected. Show
+  chevron-right indicator on parent item. Escape goes back to parent menu.
+  Animate sideways transition. Update actions_dropdown.tsx.
+
+- [ ] [P0] COMP005 - Build List.Dropdown component (search bar filter). A small
+  dropdown selector inside the SearchBar (right side) for secondary filtering
+  (e.g., filter by type: All, Commands, Applications). Create
+  src/components/search_bar/search_dropdown.tsx and search_dropdown.scss.
+  Dropdown appears below search bar on click, styled like actions_dropdown.
+  Supports sections. Update SearchBar to accept optional dropdown prop.
+
+- [ ] [P1] COMP006 - Build HUD notification component. Compact floating pill
+  shown at bottom-center of screen after an action completes (like "Copied to
+  clipboard"). Auto-dismisses after 1.5s. Simpler than toast: just icon + text.
+  Animated entrance (scale-up + fade). Create src/components/hud/ with hud.tsx
+  and hud.scss. Create useHUD hook in src/hooks/use_hud.ts. Wire demo: "Copy"
+  action shows HUD.
+
+- [ ] [P1] COMP007 - Build Form.PasswordField component. Masked text input with
+  optional reveal toggle button (eye icon). Same styling as FormTextField but
+  type="password". Create src/components/form/form_password_field.tsx. Add to
+  form index.ts exports.
+
+- [ ] [P1] COMP008 - Build Form.TagPicker component. Multi-select input where
+  user picks tags from a dropdown. Selected tags appear as pills inside the
+  input. Type to filter available tags. Remove tag by clicking X or backspace.
+  Create src/components/form/form_tag_picker.tsx and form_tag_picker.scss.
+
+- [ ] [P1] COMP009 - Build Form.FilePicker component (simulated for web). Shows
+  a file input styled like Raycast's file picker. Single or multiple file
+  selection. Shows selected file name(s) as pills. Create
+  src/components/form/form_file_picker.tsx and form_file_picker.scss.
+
+- [ ] [P1] COMP010 - Build Form.Separator component. Visual horizontal divider
+  line within forms. Thin line (1px, $border-100 color) with optional margin.
+  Create in src/components/form/form_separator.tsx. Simple component.
+
+- [ ] [P1] COMP011 - Add date accessory type to ListItem. List item accessories
+  should support {date: Date} which renders as relative time ("2 hours ago",
+  "Yesterday", "Mar 1"). Update ListItemAccessoryData type in types.ts. Add
+  date formatting utility in src/utils/format_date.ts. Update list_item.tsx
+  rendering.
+
+- [ ] [P1] COMP012 - Add tooltip support to accessories and list items. On hover
+  over an accessory or list item, show a small tooltip with additional info.
+  Create src/components/tooltip/ with tooltip.tsx and tooltip.scss. Position
+  below/above element. Fade-in after 500ms delay. Update ListItem to use.
+
+- [ ] [P2] COMP013 - Build Quick Look preview overlay. Full-screen-ish preview
+  overlay triggered by spacebar or Action.ToggleQuickLook. Shows larger preview
+  of selected item's detail content. Dark backdrop + centered card. Close on
+  Escape or spacebar again. Create src/components/quick_look/ with
+  quick_look.tsx and quick_look.scss.
+
+- [ ] [P2] COMP014 - Expand icon system to 50+ icons. Add missing Raycast Icon
+  enum equivalents: arrows (up/down/left/right, chevrons), UI controls (check,
+  circle, dot, ellipsis, plus, minus), actions (copy, paste, download, upload,
+  trash, duplicate, edit, refresh), objects (document, folder, calendar, clock,
+  gear, globe, link, lock, key, star, heart), status (battery, wifi, bolt,
+  cloud). Create organized icon categories in src/components/icons/.
+
+- [ ] [P2] COMP015 - Add Grid.Dropdown component (same as List.Dropdown but
+  for Grid view). Reuse SearchDropdown component from COMP005. Wire into Grid
+  header. Demo: filter colors by category.
+
+=== FULL SCREENS / VIEWS ===
+
+- [ ] [P1] SCRN001 - Build Clipboard History screen. Dedicated List view showing
+  mock clipboard entries (text, links, images, colors). Searchable. Each item
+  shows: content preview (truncated), source app icon, timestamp accessory.
+  Actions: Paste, Copy, Pin/Unpin, Delete. Pinned section at top. Push via
+  navigation from "Clipboard History" command in root search.
+
+- [ ] [P1] SCRN002 - Build Snippet Manager screen. List view of saved snippets.
+  Each item shows: name, keyword (as tag accessory), preview of content.
+  Actions: Insert, Edit (pushes Form), Copy, Delete. Create Snippet form
+  accessible via ⌘N. Push via navigation from "Search Snippets" in root search.
+  Refactor existing snippet form demo into this proper screen.
+
+- [ ] [P2] SCRN003 - Build Emoji Picker screen. Grid view (6 columns) of emoji
+  characters, organized by category sections (Smileys, People, Animals, Food,
+  Activities, Travel, Objects, Symbols, Flags). Search filters across all.
+  Click/Enter copies emoji. Show recently used section at top. Push via
+  navigation from "Search Emoji" command.
+
+- [ ] [P2] SCRN004 - Build Calculator inline result. When user types a math
+  expression in root search (e.g. "2+2", "sqrt(144)", "15% of 200"), show
+  result as a special ListItem at the top with calculator icon and "= result"
+  title. Enter copies result. Use a safe expression evaluator (no eval()).
+  Create src/utils/calculator.ts.
+
+- [ ] [P2] SCRN005 - Build File Search screen. List view showing mock file
+  system entries. Each item: file icon (different per type), filename, path as
+  subtitle, size + date accessories. Actions: Open, Show in Finder, Copy Path,
+  Quick Look. Demonstrate file type icons (folder, document, image, code).
+  Push via navigation from "File Search" command.
+
+- [ ] [P2] SCRN006 - Build Settings/Preferences screen. Pushed view with
+  tabbed/sectioned layout. Tabs: General (appearance toggle, hotkey display),
+  Extensions (list of installed extensions with enable/disable), Advanced
+  (export/import mock). Use Form components for settings fields. Push via ⌘,
+  shortcut.
+
+- [ ] [P3] SCRN007 - Build Extension Store screen. List view of mock extensions
+  with: extension icon, name, developer, download count accessory. Detail panel
+  shows description, screenshots placeholder, commands list, install button.
+  Search and category filter via List.Dropdown. Push from "Store" command.
+
+- [ ] [P3] SCRN008 - Build AI Chat interface. Separate view (not in main command
+  palette or styled differently). Chat bubbles: user messages (right-aligned),
+  AI responses (left-aligned, with markdown rendering). Input bar at bottom
+  with send button. Model selector dropdown. Mock streaming response effect
+  (typewriter). Push from "AI Chat" command.
+
+- [ ] [P3] SCRN009 - Build Notes editor screen. Markdown editor with toolbar
+  (bold, italic, strikethrough, code, heading, list, checklist). Split or
+  toggle between edit and preview modes. Notes list sidebar (or push from list).
+  Create src/components/notes/ with notes_editor.tsx, notes_list.tsx, and
+  .scss files. Push from "Notes" command.
+
+=== VISUAL POLISH & THEMES ===
+
+- [ ] [P2] THEME001 - Add light theme support. Create _tokens_light.scss with
+  light-mode color values. Add theme toggle mechanism (CSS class on root or
+  CSS custom properties). All components must respect current theme. Background
+  becomes light, text becomes dark, borders adjust. Test all components in
+  both themes.
+
+- [ ] [P2] THEME002 - Add compact mode. When no query is entered, show only
+  the search bar (hide list and action panel). List appears with fade-in when
+  user starts typing. Revert to compact when query is cleared. Toggle via
+  prop on CommandPalette. Animate height transition.
+
+- [ ] [P3] THEME003 - Add proper semantic color system. Create Color enum/object
+  matching Raycast's: Blue, Green, Magenta, Orange, Purple, Red, Yellow,
+  PrimaryText, SecondaryText. Each color auto-adapts to current theme. Use
+  CSS custom properties. Replace hardcoded hex in tag_colors.ts with semantic
+  colors. Create src/constants/colors.ts.
+
+=== KEYBOARD & INTERACTION ===
+
+- [ ] [P1] KBD001 - Implement global keyboard shortcut system. Create
+  src/hooks/use_keyboard_shortcuts.ts that manages all global shortcuts in one
+  place. Support modifier combos (⌘, ⌥, ⌃, ⇧). Prevent conflicts. Register
+  shortcuts declaratively from components. Replace ad-hoc keydown handlers in
+  App.tsx with centralized system.
+
+- [ ] [P2] KBD002 - Add favorite items support. ⌘⇧F toggles favorite on
+  selected item. Favorited items appear in a "Favorites" section at top of
+  root search. Persist favorites in state (localStorage for web demo). Show
+  star icon on favorited items. ⌘⌥↑/↓ reorders favorites.
+
+- [ ] [P2] KBD003 - Add ⌃N/⌃P alternative navigation. In addition to arrow
+  keys, support Ctrl+N (down) and Ctrl+P (up) for Emacs-style navigation in
+  lists. Update list keyboard handler.
+
+=== INFRASTRUCTURE ===
+
+- [ ] [P2] INFRA001 - Create proper extension/command registry system. Instead
+  of hardcoded mock data, create a registry where "extensions" register
+  commands with: name, icon, keywords, component (for push), aliases. Root
+  search queries this registry. Create src/registry/command_registry.ts and
+  src/registry/types.ts. Refactor mock_data.ts to register through this
+  system.
+
+- [ ] [P2] INFRA002 - Add localStorage persistence layer. Save and restore:
+  recent commands, favorites, clipboard history, snippets, settings. Create
+  src/utils/storage.ts with typed get/set helpers. Used by screens that need
+  state persistence.
+
+- [ ] [P3] INFRA003 - Refactor App.tsx into smaller modules. Current App.tsx is
+  660+ lines. Extract: RootSearchView, NavigationProvider, KeyboardProvider,
+  command handlers. Each view should be its own component file. App.tsx should
+  only compose providers and the root view.
+
+=== TESTS ===
+
+- [ ] [P1000] TEST001 - Add visual regression tests with Playwright for all
+  new components (Alert, HUD, navigation transitions, List.Dropdown,
+  Form.TagPicker, Form.PasswordField). Each test captures screenshot and
+  compares. Create tests/ directory with playwright config.
+
+- [ ] [P1000] TEST002 - Add interaction tests for navigation stack: push view,
+  pop with Escape, popToRoot with ⌘Escape, breadcrumb updates. Test with
+  Playwright.
+
+- [ ] [P1000] TEST003 - Add interaction tests for ActionPanel.Section and
+  ActionPanel.Submenu: open dropdown, navigate sections, enter submenu,
+  escape back to parent. Test with Playwright.
+
+- [ ] [P1000] TEST004 - Add unit tests for new hooks: useAlert, useHUD,
+  useNavigation, useKeyboardShortcuts. Test with vitest.
+
+- [ ] [P1000] TEST005 - Add visual tests for Clipboard History, Snippet
+  Manager, Emoji Picker, Calculator, File Search screens. Capture screenshots
+  at various states (empty, loaded, searching, selecting).
+
+- [ ] [P1000] TEST006 - Add visual tests for light theme. All existing
+  component screenshots re-captured in light mode. Compare with dark mode
+  baselines to ensure proper contrast.
