@@ -32,7 +32,10 @@ export const MOCK_SECTIONS: SectionData[] = [
             },
           },
           { date: new Date(Date.now() - 1000 * 60 * 30) },
-          { text: 'Raycast' },
+          {
+            text: 'Raycast',
+            tooltip: 'Provided by Raycast',
+          },
         ],
         detail: {
           markdown: `# Clipboard History

@@ -3,6 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { TAG_COLOR_HEX } from '../../../constants/tag_colors';
 import type { ListItemAccessoryData } from '../../../types';
 import { formatRelativeDate } from '../../../utils/format_date';
+import { Tooltip } from '../../tooltip/tooltip';
 import { useListContext } from '../list_context';
 import './list_item.scss';
 
@@ -13,6 +14,19 @@ export interface ListItemProps {
   subtitle?: string;
   accessories?: ListItemAccessoryData[];
   onClick?: () => void;
+}
+
+function AccessoryWrapper({
+  tooltip,
+  children,
+}: {
+  tooltip?: string;
+  children: ReactNode;
+}) {
+  if (tooltip) {
+    return <Tooltip content={tooltip}>{children}</Tooltip>;
+  }
+  return <>{children}</>;
 }
 
 export function ListItem({
@@ -52,25 +66,30 @@ export function ListItem({
       {accessories && accessories.length > 0 && (
         <div className="list-item__accessories">
           {accessories.map((accessory, i) => {
+            const tooltipText =
+              accessory.tooltip ??
+              (accessory.date ? accessory.date.toLocaleString() : undefined);
+
             if (accessory.tag) {
               const hex = accessory.tag.color
                 ? TAG_COLOR_HEX[accessory.tag.color]
                 : undefined;
               return (
-                <span
-                  key={i}
-                  className="list-item__accessory-tag"
-                  style={
-                    hex
-                      ? {
-                          color: hex,
-                          backgroundColor: `${hex}26`,
-                        }
-                      : undefined
-                  }
-                >
-                  {accessory.tag.text}
-                </span>
+                <AccessoryWrapper key={i} tooltip={tooltipText}>
+                  <span
+                    className="list-item__accessory-tag"
+                    style={
+                      hex
+                        ? {
+                            color: hex,
+                            backgroundColor: `${hex}26`,
+                          }
+                        : undefined
+                    }
+                  >
+                    {accessory.tag.text}
+                  </span>
+                </AccessoryWrapper>
               );
             }
             const displayText = accessory.date
@@ -78,20 +97,16 @@ export function ListItem({
               : accessory.text;
 
             return (
-              <span
-                key={i}
-                className="list-item__accessory"
-                title={
-                  accessory.date ? accessory.date.toLocaleString() : undefined
-                }
-              >
-                {accessory.icon}
-                {displayText && (
-                  <span className="list-item__accessory-text">
-                    {displayText}
-                  </span>
-                )}
-              </span>
+              <AccessoryWrapper key={i} tooltip={tooltipText}>
+                <span className="list-item__accessory">
+                  {accessory.icon}
+                  {displayText && (
+                    <span className="list-item__accessory-text">
+                      {displayText}
+                    </span>
+                  )}
+                </span>
+              </AccessoryWrapper>
             );
           })}
         </div>

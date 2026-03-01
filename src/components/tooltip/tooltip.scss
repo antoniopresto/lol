@@ -1,0 +1,60 @@
+@use '../../styles/tokens' as *;
+
+$tooltip-max-width: 240px;
+
+.tooltip {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.tooltip__bubble {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + $space-1);
+  transform: translateX(-50%);
+  padding: $space-1 $space-2;
+  background-color: $color-surface;
+  border: 1px solid $border-200;
+  border-radius: $radius-kbd;
+  box-shadow: $shadow-popover;
+  font-size: $font-xs;
+  color: $color-text-primary;
+  white-space: nowrap;
+  max-width: $tooltip-max-width;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  z-index: $z-tooltip;
+  animation: tooltip-appear $transition-normal ease-out both;
+
+  &--above {
+    top: auto;
+    bottom: calc(100% + $space-1);
+    animation-name: tooltip-appear-above;
+  }
+}
+
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes tooltip-appear-above {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}

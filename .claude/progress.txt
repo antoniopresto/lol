@@ -551,10 +551,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   (Clipboard History: 30min, Snippets: 3hr, Window Management: 2 days).
   All 93 tests pass, bun run check passes.
 
-- [ ] [P1] COMP012 - Add tooltip support to accessories and list items. On hover
+- [x] [P1] COMP012 - Add tooltip support to accessories and list items. On hover
   over an accessory or list item, show a small tooltip with additional info.
   Create src/components/tooltip/ with tooltip.tsx and tooltip.scss. Position
   below/above element. Fade-in after 500ms delay. Update ListItem to use.
+  Done: Tooltip component with 500ms hover delay, auto-flip positioning
+  (below by default, above when near viewport bottom), fade-in animation with
+  correct direction per position, BEM SCSS (tooltip/tooltip__bubble/--above),
+  all values tokenized ($z-tooltip: 90, $tooltip-max-width: 240px local var).
+  ARIA: role="tooltip", useId() for aria-describedby pairing. Timer cleanup
+  on unmount. ListItem updated: AccessoryWrapper conditionally wraps accessories
+  with Tooltip when tooltip text exists. Date accessories auto-get full date
+  tooltip. Explicit tooltip field overrides via nullish coalescing. Added
+  tooltip?: string field to ListItemAccessoryData type. Demo tooltip on
+  Clipboard History "Raycast" accessory. All 93 tests pass.
 
 - [ ] [P2] COMP013 - Build Quick Look preview overlay. Full-screen-ish preview
   overlay triggered by spacebar or Action.ToggleQuickLook. Shows larger preview
