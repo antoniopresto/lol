@@ -513,10 +513,18 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   type. Demo: Tags field in Create Snippet form with 8 language options.
   All 93 tests pass, bun run check passes.
 
-- [ ] [P1] COMP009 - Build Form.FilePicker component (simulated for web). Shows
+- [x] [P1] COMP009 - Build Form.FilePicker component (simulated for web). Shows
   a file input styled like Raycast's file picker. Single or multiple file
   selection. Shows selected file name(s) as pills. Create
   src/components/form/form_file_picker.tsx and form_file_picker.scss.
+  Done: FormFilePicker component with hidden native file input, browse button,
+  selected file pills (name + size + remove button). Supports single/multiple
+  file selection, accept filter, file deduplication by name+size+type in multi
+  mode. SCSS: BEM naming, all values tokenized (local vars for pill height,
+  max-width, remove size). ARIA: role="list"/role="listitem" on file pills,
+  aria-label on remove buttons, aria-invalid/aria-describedby for errors.
+  FilePickerFile type and FormFilePicker exported from form/index.ts.
+  All 93 tests pass, bun run check passes.
 
 - [ ] [P1] COMP010 - Build Form.Separator component. Visual horizontal divider
   line within forms. Thin line (1px, $border-100 color) with optional margin.
