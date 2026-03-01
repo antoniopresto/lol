@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { NavViewData } from '../../app_types';
 import { useAlert } from '../../hooks/use_alert';
+import { useApplications } from '../../hooks/use_applications';
 import { useFavorites } from '../../hooks/use_favorites';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useRecentCommands } from '../../hooks/use_recent_commands';
 import { useToast } from '../../hooks/use_toast';
+import { getPlatform, isTauri } from '../../platform';
 import { getCommand, getSections, searchCommands } from '../../registry';
 import type { ListItemData, SectionData } from '../../types';
 import { evaluate } from '../../utils/calculator';
-import { fuzzyMatch } from '../../utils/fuzzy_search';
+import { fuzzyMatch, fuzzyScore } from '../../utils/fuzzy_search';
 import { ActionPanel } from '../action_panel/action_panel';
 import {
   ClipboardHUDIcon,
@@ -31,9 +33,40 @@ import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
 import { ToastContainer } from '../toast/toast_container';
+import './root_search_view.scss';
 
 function flattenItems(sections: SectionData[]): ListItemData[] {
   return sections.flatMap(s => s.items);
+}
+
+function AppIcon({ src }: { src: string }) {
+  const [errored, setErrored] = useState(false);
+  if (errored) return <AppPlaceholderIcon />;
+  return (
+    <img
+      src={src}
+      alt=""
+      width={20}
+      height={20}
+      className="root-search__app-icon"
+      onError={() => setErrored(true)}
+    />
+  );
+}
+
+function AppPlaceholderIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <rect width="20" height="20" rx="4" fill="currentColor" opacity="0.2" />
+      <path
+        d="M6 7L10 4L14 7V13L10 16L6 13V7Z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+        opacity="0.5"
+      />
+    </svg>
+  );
 }
 
 const searchFilterSections: SearchDropdownSection[] = [
@@ -80,6 +113,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
   const { favoriteIds, isFavorite, toggleFavorite, moveFavorite } =
     useFavorites();
   const { recentIds, addRecent } = useRecentCommands();
+  const { applications, refresh: refreshApps } = useApplications();
 
   useEffect(() => {
     if (nav.stackDepth === 0) {
@@ -91,10 +125,70 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     }
   }, [nav.stackDepth]);
 
+  useEffect(() => {
+    if (!isTauri) return;
+    const platform = getPlatform();
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+
+    platform.window
+      .onFocusChanged(focused => {
+        if (focused) refreshApps();
+      })
+      .then(fn => {
+        if (cancelled) fn();
+        else unsub = fn;
+      });
+
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
+  }, [refreshApps]);
+
+  const appSection: SectionData | null = useMemo(() => {
+    if (applications.length === 0) return null;
+
+    const items: ListItemData[] = applications.map(app => ({
+      id: app.id,
+      title: app.name,
+      subtitle: 'Application',
+      icon: app.icon ? <AppIcon src={app.icon} /> : <AppPlaceholderIcon />,
+    }));
+
+    return {
+      title: 'Applications',
+      items,
+    };
+  }, [applications]);
+
   const registrySections = useMemo(() => getSections(), []);
 
+  const allSections = useMemo(() => {
+    const sections = [...registrySections];
+    if (!appSection) return sections;
+
+    const existingIdx = sections.findIndex(s => s.title === 'Applications');
+    if (existingIdx >= 0) {
+      const existing = sections[existingIdx]!;
+      sections[existingIdx] = {
+        title: existing.title,
+        items: [
+          ...appSection.items,
+          ...existing.items,
+        ],
+      };
+    } else {
+      sections.push(appSection);
+    }
+    return sections;
+  }, [
+    registrySections,
+    appSection,
+  ]);
+
   const filtered = useMemo(() => {
-    let sections = registrySections;
+    let sections = allSections;
     if (filterValue === 'commands') {
       sections = sections.filter(
         s => s.title === 'Suggestions' || s.title === 'Commands',
@@ -103,33 +197,69 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
       sections = sections.filter(s => s.title === 'Applications');
     }
 
-    const result = query ? searchCommands(query) : sections;
+    let filteredResult: SectionData[];
+    if (query) {
+      const commandResults = searchCommands(query);
+      const appItems = appSection?.items ?? [];
+      const matchedApps = appItems
+        .map(item => ({
+          item,
+          score: fuzzyScore(query, item.title)?.score ?? -Infinity,
+        }))
+        .filter(({ score }) => score > -Infinity)
+        .sort((a, b) => b.score - a.score)
+        .map(({ item }) => item);
 
-    const filteredResult = query
-      ? result
-          .map(s => {
-            if (filterValue === 'commands') {
-              return s.title === 'Suggestions' || s.title === 'Commands'
-                ? s
-                : {
-                    ...s,
-                    items: [],
-                  };
-            }
-            if (filterValue === 'applications') {
-              return s.title === 'Applications'
-                ? s
-                : {
-                    ...s,
-                    items: [],
-                  };
-            }
-            return s;
-          })
-          .filter(s => s.items.length > 0)
-      : result;
+      const mergedSections = [...commandResults];
+      if (matchedApps.length > 0) {
+        const appSectionIdx = mergedSections.findIndex(
+          s => s.title === 'Applications',
+        );
+        if (appSectionIdx >= 0) {
+          const existing = mergedSections[appSectionIdx]!;
+          const existingIds = new Set(existing.items.map(i => i.id));
+          const newApps = matchedApps.filter(a => !existingIds.has(a.id));
+          mergedSections[appSectionIdx] = {
+            title: existing.title,
+            items: [
+              ...newApps,
+              ...existing.items,
+            ],
+          };
+        } else {
+          mergedSections.push({
+            title: 'Applications',
+            items: matchedApps,
+          });
+        }
+      }
 
-    const allFlatItems = registrySections.flatMap(s => s.items);
+      filteredResult = mergedSections
+        .map(s => {
+          if (filterValue === 'commands') {
+            return s.title === 'Suggestions' || s.title === 'Commands'
+              ? s
+              : {
+                  ...s,
+                  items: [],
+                };
+          }
+          if (filterValue === 'applications') {
+            return s.title === 'Applications'
+              ? s
+              : {
+                  ...s,
+                  items: [],
+                };
+          }
+          return s;
+        })
+        .filter(s => s.items.length > 0);
+    } else {
+      filteredResult = sections;
+    }
+
+    const allFlatItems = allSections.flatMap(s => s.items);
     const favoriteItems = favoriteIds
       .map(id => allFlatItems.find(item => item.id === id))
       .filter((item): item is ListItemData => !!item);
@@ -207,7 +337,8 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     filterValue,
     favoriteIds,
     recentIds,
-    registrySections,
+    allSections,
+    appSection,
   ]);
 
   const calculatorResult = useMemo(() => {
@@ -235,6 +366,14 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     calculatorResult,
     query,
   ]);
+
+  const appPathMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const app of applications) {
+      map.set(app.id, app.path);
+    }
+    return map;
+  }, [applications]);
 
   const selectedItem = allItems[selectedIndex];
 
@@ -265,6 +404,24 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
         hudIcon: <ClipboardHUDIcon />,
         hudTitle: `Copied ${calculatorResult}`,
       });
+      return;
+    }
+
+    const appPath = appPathMap.get(item.id);
+    if (appPath) {
+      getPlatform()
+        .apps.launchApplication(appPath)
+        .then(() => {
+          if (isTauri) {
+            getPlatform().window.hide();
+          }
+        })
+        .catch(() => {
+          showToast({
+            style: 'error',
+            title: `Failed to launch ${item.title}`,
+          });
+        });
       return;
     }
 
@@ -302,6 +459,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     calculatorResult,
     push,
     addRecent,
+    appPathMap,
   ]);
 
   const toggleActions = useCallback(() => {

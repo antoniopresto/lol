@@ -2,9 +2,11 @@ import type { PlatformAPI } from './types';
 import { webPlatform } from './web';
 
 export type {
+  AppEntry,
   ClipboardChangeEvent,
   FileSearchResult,
   PlatformAPI,
+  PlatformApps,
   PlatformClipboard,
   PlatformFiles,
   PlatformShell,

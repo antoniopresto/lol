@@ -23,6 +23,8 @@ walkdir = "2"
 dirs-next = "2"
 open = "5"
 trash = "5"
+plist = "1"
+base64 = "0.22"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 window-vibrancy = "0.7"

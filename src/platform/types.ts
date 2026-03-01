@@ -49,9 +49,22 @@ export interface PlatformFiles {
   moveToTrash(path: string): Promise<void>;
 }
 
+export interface AppEntry {
+  id: string;
+  name: string;
+  path: string;
+  icon: string | null;
+}
+
+export interface PlatformApps {
+  discoverApplications(forceRefresh?: boolean): Promise<AppEntry[]>;
+  launchApplication(path: string): Promise<void>;
+}
+
 export interface PlatformAPI {
   readonly clipboard: PlatformClipboard;
   readonly shell: PlatformShell;
   readonly window: PlatformWindow;
   readonly files: PlatformFiles;
+  readonly apps: PlatformApps;
 }

@@ -1,5 +1,6 @@
 use std::sync::Mutex;
 use std::time::Duration;
+use base64::Engine;
 use serde::Serialize;
 use tauri::{Emitter, Manager};
 use walkdir::WalkDir;
@@ -20,6 +21,11 @@ impl Default for WindowConfig {
             position_pref: "top-third".to_string(),
         }
     }
+}
+
+#[derive(Default)]
+struct AppCache {
+    apps: Option<Vec<AppEntry>>,
 }
 
 fn position_near_top(window: &tauri::WebviewWindow) {
@@ -389,6 +395,232 @@ fn move_to_trash(path: String) -> Result<(), String> {
     trash::delete(p).map_err(|e| format!("failed to trash {path}: {e}"))
 }
 
+#[derive(Serialize, Clone)]
+struct AppEntry {
+    id: String,
+    name: String,
+    path: String,
+    icon: Option<String>,
+}
+
+fn scan_app_dir(dir: &std::path::Path, depth: usize) -> Vec<std::path::PathBuf> {
+    let mut apps = Vec::new();
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return apps;
+    };
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.extension().map_or(false, |e| e == "app") {
+            apps.push(path);
+        } else if depth > 0 && path.is_dir() {
+            let name = path.file_name().unwrap_or_default().to_string_lossy();
+            if !name.starts_with('.') {
+                apps.extend(scan_app_dir(&path, depth - 1));
+            }
+        }
+    }
+    apps
+}
+
+fn read_info_plist(app_path: &std::path::Path) -> Option<plist::Dictionary> {
+    let info_plist = app_path.join("Contents/Info.plist");
+    plist::from_file(info_plist).ok()
+}
+
+fn display_name_from_plist(dict: &plist::Dictionary) -> Option<String> {
+    dict.get("CFBundleDisplayName")
+        .or_else(|| dict.get("CFBundleName"))
+        .and_then(|v| v.as_string())
+        .map(|s| s.to_string())
+}
+
+fn extract_png_from_icns(icns_data: &[u8]) -> Option<Vec<u8>> {
+    if icns_data.len() < 8 || &icns_data[0..4] != b"icns" {
+        return None;
+    }
+
+    let total_len = u32::from_be_bytes(icns_data[4..8].try_into().ok()?) as usize;
+    let total_len = total_len.min(icns_data.len());
+
+    let preferred: &[&[u8; 4]] = &[
+        b"icp5", b"icp6", b"icp4", b"ic07",
+    ];
+
+    let mut offset = 8;
+    let mut entries: Vec<(&[u8], &[u8])> = Vec::new();
+
+    while offset + 8 <= total_len {
+        let type_code = &icns_data[offset..offset + 4];
+        let entry_len = u32::from_be_bytes(icns_data[offset + 4..offset + 8].try_into().ok()?) as usize;
+        if entry_len < 8 || offset + entry_len > total_len {
+            break;
+        }
+        let data = &icns_data[offset + 8..offset + entry_len];
+        entries.push((type_code, data));
+        offset += entry_len;
+    }
+
+    for pref in preferred {
+        for (type_code, data) in &entries {
+            if *type_code == pref.as_slice() && data.starts_with(&[0x89, 0x50, 0x4E, 0x47]) {
+                return Some(data.to_vec());
+            }
+        }
+    }
+
+    let max_fallback_size = 200_000;
+    for (_, data) in &entries {
+        if data.starts_with(&[0x89, 0x50, 0x4E, 0x47]) && data.len() <= max_fallback_size {
+            return Some(data.to_vec());
+        }
+    }
+
+    None
+}
+
+fn extract_app_icon(app_path: &std::path::Path, dict: &plist::Dictionary) -> Option<String> {
+    let icon_name = dict
+        .get("CFBundleIconFile")
+        .and_then(|v| v.as_string())
+        .unwrap_or("AppIcon");
+
+    let icon_filename = if icon_name.ends_with(".icns") {
+        icon_name.to_string()
+    } else {
+        format!("{icon_name}.icns")
+    };
+
+    let icns_path = app_path.join("Contents/Resources").join(&icon_filename);
+    let icns_data = std::fs::read(&icns_path).ok()?;
+    let png_data = extract_png_from_icns(&icns_data)?;
+
+    Some(format!(
+        "data:image/png;base64,{}",
+        base64::engine::general_purpose::STANDARD.encode(&png_data)
+    ))
+}
+
+fn build_app_list() -> Vec<AppEntry> {
+    let mut apps = Vec::new();
+    let mut seen_paths = std::collections::HashSet::new();
+
+    let mut dirs = vec![std::path::PathBuf::from("/Applications")];
+    if let Some(home) = dirs_next::home_dir() {
+        dirs.push(home.join("Applications"));
+    }
+
+    for dir in &dirs {
+        for app_path in scan_app_dir(dir, 1) {
+            let path_str = app_path.to_string_lossy().to_string();
+            if !seen_paths.insert(path_str.clone()) {
+                continue;
+            }
+
+            let file_stem = app_path
+                .file_stem()
+                .map(|s| s.to_string_lossy().to_string())
+                .unwrap_or_default();
+
+            let plist_dict = read_info_plist(&app_path);
+            let name = plist_dict
+                .as_ref()
+                .and_then(display_name_from_plist)
+                .unwrap_or_else(|| file_stem.clone());
+            let icon = plist_dict
+                .as_ref()
+                .and_then(|dict| extract_app_icon(&app_path, dict));
+
+            let id = format!("app-{:x}", {
+                use std::hash::{Hash, Hasher};
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                path_str.hash(&mut h);
+                h.finish()
+            });
+
+            apps.push(AppEntry {
+                id,
+                name,
+                path: path_str,
+                icon,
+            });
+        }
+    }
+
+    apps.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    apps
+}
+
+#[tauri::command(async)]
+fn discover_applications(
+    state: tauri::State<'_, Mutex<AppCache>>,
+    force_refresh: bool,
+) -> Vec<AppEntry> {
+    if !force_refresh {
+        if let Ok(cache) = state.lock() {
+            if let Some(ref apps) = cache.apps {
+                return apps.clone();
+            }
+        }
+    }
+
+    let apps = build_app_list();
+
+    if let Ok(mut cache) = state.lock() {
+        cache.apps = Some(apps.clone());
+    }
+
+    apps
+}
+
+fn is_valid_app_path(path: &std::path::Path) -> bool {
+    let canonical = match path.canonicalize() {
+        Ok(p) => p,
+        Err(_) => return false,
+    };
+
+    if canonical.extension().map_or(true, |e| e != "app") {
+        return false;
+    }
+
+    let mut allowed_dirs = vec![std::path::PathBuf::from("/Applications")];
+    if let Some(home) = dirs_next::home_dir() {
+        allowed_dirs.push(home.join("Applications"));
+    }
+
+    for dir in &allowed_dirs {
+        if let Ok(canonical_dir) = dir.canonicalize() {
+            if canonical.starts_with(&canonical_dir) {
+                return true;
+            }
+        }
+    }
+    false
+}
+
+#[tauri::command]
+fn launch_application(path: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    if !is_valid_app_path(p) {
+        return Err(format!("application not allowed: {path}"));
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg("-a")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| format!("failed to launch {path}: {e}"))?;
+        return Ok(());
+    }
+
+    #[allow(unreachable_code)]
+    {
+        open::that(&path).map_err(|e| format!("failed to launch {path}: {e}"))
+    }
+}
+
 #[tauri::command]
 fn set_window_position_pref(
     state: tauri::State<'_, Mutex<WindowConfig>>,
@@ -413,12 +645,15 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_shell::init())
         .manage(Mutex::new(WindowConfig::default()))
+        .manage(Mutex::new(AppCache::default()))
         .invoke_handler(tauri::generate_handler![
             set_window_position_pref,
             search_files,
             open_file,
             reveal_in_finder,
-            move_to_trash
+            move_to_trash,
+            discover_applications,
+            launch_application
         ])
         .setup(|app| {
             #[cfg(desktop)]

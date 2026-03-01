@@ -1151,13 +1151,35 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     platform operations. Add 250ms debounce, loading state, ErrorHUDIcon for
     failure states.
 
-- [ ] [P1] TAURI007 - Add native app launching. Use @tauri-apps/api/shell
+- [x] [P1] TAURI007 - Add native app launching. Use @tauri-apps/api/shell
   to launch applications. On macOS: scan /Applications and ~/Applications
   for .app bundles, extract app name and icon. On Windows: scan Start Menu
   shortcuts. Create Rust command for app discovery that returns name, path,
   icon (base64 PNG). Cache app list and refresh on focus. Wire into root
   search: show matching apps in "Applications" section. Enter launches app
   and hides window.
+  Done: Rust-side discover_applications (async, cached via AppCache mutex) and
+  launch_application commands in lib.rs. App discovery: scan_app_dir with 1-level
+  recursion, read_info_plist for single parse per app (consolidated from duplicate
+  calls), display_name_from_plist for CFBundleDisplayName/CFBundleName, extract_app_icon
+  from .icns files (PNG extraction with preferred small types: icp5/icp6/icp4/ic07,
+  200KB max fallback to avoid huge 1024x1024 icons). base64 data URI encoding.
+  is_valid_app_path security validation: canonicalize + restrict to /Applications and
+  ~/Applications only. Hash-based IDs. Sorted alphabetically. Dependencies: plist 1,
+  base64 0.22. PlatformApps interface (types.ts), Tauri invoke implementation (tauri.ts),
+  web noop fallback (web.ts). useApplications hook with loading state, console.error
+  on failure (no silent swallowing), cache-based refresh on window focus (not force).
+  Root search: AppIcon component with onError fallback to AppPlaceholderIcon, SCSS class
+  for border-radius (no inline styles), fuzzy search on app names, launch+hide on Enter,
+  error toast on launch failure. All 93 tests pass, cargo check passes, bun run check passes.
+  Sub-tasks:
+    - [x] TAURI007a: Rust backend - discover_applications + launch_application commands +
+      security (is_valid_app_path with canonicalize + allowed dirs restriction),
+      consolidated plist parsing, icon size limits, AppCache with mutex.
+    - [x] TAURI007b: Frontend platform API (types.ts, tauri.ts, web.ts) + AppEntry type,
+      PlatformApps interface with discoverApplications/launchApplication.
+    - [x] TAURI007c: Root search integration - useApplications hook with loading state,
+      AppIcon with onError fallback, fuzzy search, cache refresh on focus, launch+hide.
 
 - [ ] [P2] TAURI008 - Add SQLite persistence layer via Tauri. Use
   @tauri-apps/plugin-sql with SQLite. Create database schema: clipboard_

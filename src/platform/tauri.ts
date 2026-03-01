@@ -1,8 +1,10 @@
 import { storageGet } from '../utils/storage';
 import type {
+  AppEntry,
   ClipboardChangeEvent,
   FileSearchResult,
   PlatformAPI,
+  PlatformApps,
   PlatformClipboard,
   PlatformFiles,
   PlatformShell,
@@ -115,9 +117,23 @@ const files: PlatformFiles = {
   },
 };
 
+const apps: PlatformApps = {
+  async discoverApplications(forceRefresh = false): Promise<AppEntry[]> {
+    const { invoke } = await import('@tauri-apps/api/core');
+    return invoke<AppEntry[]>('discover_applications', {
+      forceRefresh,
+    });
+  },
+  async launchApplication(path: string) {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('launch_application', { path });
+  },
+};
+
 export const tauriPlatform: PlatformAPI = {
   clipboard,
   shell,
   window: platformWindow,
   files,
+  apps,
 };

@@ -1,5 +1,6 @@
 import type {
   PlatformAPI,
+  PlatformApps,
   PlatformClipboard,
   PlatformFiles,
   PlatformShell,
@@ -62,9 +63,17 @@ const files: PlatformFiles = {
   async moveToTrash() {},
 };
 
+const apps: PlatformApps = {
+  async discoverApplications() {
+    return [];
+  },
+  async launchApplication() {},
+};
+
 export const webPlatform: PlatformAPI = {
   clipboard,
   shell,
   window: platformWindow,
   files,
+  apps,
 };
