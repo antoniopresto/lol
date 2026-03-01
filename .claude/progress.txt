@@ -383,8 +383,15 @@ one, add tasks.
   design artifacts. Compared with existing implementation. Identified ~40 missing
   components/screens. Added tasks below organized by priority.
 
-- [ ] T0001 - Plan and add minimum 50 tasks to implement real Tauri Raycast
+- [x] T0001 - Plan and add minimum 50 tasks to implement real Tauri Raycast
 clone app.
+  Done: Researched full Raycast feature set (official API docs, user reviews,
+  feature pages, Tauri v2 capabilities). Planned 55 new tasks across 7
+  categories: Tauri Desktop Integration (10), Missing Raycast Screens (6),
+  Missing UI Components (9), Visual Polish (7), Search & Interaction (6),
+  Infrastructure (9), Testing (8). Total pending tasks: 66 (11 existing + 55
+  new). Tasks prioritized P0-P3 based on Raycast core feature importance and
+  dependencies.
 
 --------------------------------------------------------------------------------
 RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
@@ -949,3 +956,434 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 - [ ] [P1000] TEST006 - Add visual tests for light theme. All existing
   component screenshots re-captured in light mode. Compare with dark mode
   baselines to ensure proper contrast.
+
+================================================================================
+TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
+================================================================================
+
+=== TAURI DESKTOP INTEGRATION ===
+
+- [ ] [P0] TAURI001 - Initialize Tauri v2 project structure. Run `bun add -D
+  @tauri-apps/cli@next` and `bunx tauri init`. Configure src-tauri/ with
+  Cargo.toml, tauri.conf.json (identifier, window settings, bundle config).
+  Set up frameless window (decorations: false) with transparent background.
+  Window size: 750x500px, centered, always-on-top option. Configure
+  allowlist for needed Tauri APIs. Verify `bun run tauri dev` launches the
+  app with the existing React frontend. Update package.json scripts:
+  "tauri:dev", "tauri:build".
+
+- [ ] [P0] TAURI002 - Implement global hotkey to toggle window visibility.
+  Use @tauri-apps/plugin-global-shortcut to register Option+Space (macOS)
+  / Alt+Space (Windows) as global hotkey. Toggle window show/hide on
+  keypress. When showing: center window on active monitor, focus search
+  input. When hiding: clear search query, pop navigation to root. Create
+  src-tauri/src/lib.rs commands for show/hide. Handle edge case: if window
+  is visible but unfocused, bring to front instead of hiding.
+
+- [ ] [P0] TAURI003 - Add system tray with menu. Use @tauri-apps/api/tray
+  to create system tray icon (Raycast logo). Tray menu items: Show Raycast
+  (trigger global hotkey), Clipboard History, Snippets, Settings, separator,
+  Check for Updates, About, Quit. Clicking tray icon toggles window. Create
+  tray icon SVG (16x16 and 32x32 for retina). Wire tray menu actions to
+  IPC commands that push appropriate views.
+
+- [ ] [P0] TAURI004 - Configure window behavior to match Raycast. Hide on
+  blur (window loses focus → hide, like Spotlight). Disable window
+  resize/maximize. Position window: top-third of screen vertically, centered
+  horizontally. Persist window position preference in settings. Add
+  vibrancy/blur effect on macOS (NSVisualEffectView via Tauri window
+  effects). Handle multi-monitor: show on monitor where mouse cursor is.
+  Create src/hooks/use_window.ts for window management from React side.
+
+- [ ] [P1] TAURI005 - Add native clipboard access via Tauri plugin. Use
+  @tauri-apps/plugin-clipboard-manager for real clipboard read/write.
+  Replace mock clipboard data with actual system clipboard monitoring.
+  Create src-tauri/ Rust command to poll clipboard changes (500ms interval).
+  Emit clipboard-changed event to frontend via Tauri event system. Store
+  clipboard history in localStorage initially (migrate to SQLite when
+  TAURI008 is complete). Detect content type (text, image, link, color hex).
+  Limit history to 1000 entries. Wire into ClipboardHistoryView to replace
+  mock data.
+
+- [ ] [P1] TAURI006 - Add native file system access. Use @tauri-apps/api/fs
+  and @tauri-apps/plugin-fs for real file operations. Replace mock file
+  search with real directory scanning. Create Rust command for fast
+  recursive file search (ignore node_modules, .git, hidden dirs by default).
+  Index common directories (~/, ~/Documents, ~/Downloads, ~/Desktop).
+  Return file metadata (size, modified date, type). Wire into FileSearchView
+  to replace mock data. Add "Open" action that uses @tauri-apps/api/shell
+  to open files with default app.
+
+- [ ] [P1] TAURI007 - Add native app launching. Use @tauri-apps/api/shell
+  to launch applications. On macOS: scan /Applications and ~/Applications
+  for .app bundles, extract app name and icon. On Windows: scan Start Menu
+  shortcuts. Create Rust command for app discovery that returns name, path,
+  icon (base64 PNG). Cache app list and refresh on focus. Wire into root
+  search: show matching apps in "Applications" section. Enter launches app
+  and hides window.
+
+- [ ] [P2] TAURI008 - Add SQLite persistence layer via Tauri. Use
+  @tauri-apps/plugin-sql with SQLite. Create database schema: clipboard_
+  entries, snippets, quicklinks, notes, recent_commands, settings tables.
+  Migrate from localStorage to SQLite for all persistence (use localStorage
+  as web fallback when Tauri is not available). Create src/utils/database.ts
+  with typed query helpers. Rust-side migrations for schema versioning.
+  Full-text search index on text content for fast querying.
+
+- [ ] [P2] TAURI009 - Configure auto-launch on login. Use
+  @tauri-apps/plugin-autostart to register app for login auto-start.
+  Add toggle in Settings > General: "Launch at Login" checkbox. Default:
+  enabled. Store preference in settings. Handle platform differences
+  (macOS LaunchAgent, Windows registry, Linux autostart desktop file).
+
+- [ ] [P2] TAURI010 - Add auto-update system. Use @tauri-apps/plugin-updater
+  for in-app updates. Configure update endpoint URL in tauri.conf.json.
+  Check for updates on launch (silent) and via Settings > Advanced. Show
+  toast notification when update available. "Install Update & Restart"
+  action. Progress bar during download. Changelog display before install.
+  Sign updates with Tauri's built-in code signing.
+
+=== MISSING RAYCAST SCREENS ===
+
+- [ ] [P1] SCRN010 - Build Quicklinks screen. List view of saved quicklinks
+  (URLs, file paths, deep links). Each item: icon (auto-detected from URL
+  favicon or file type), name, URL/path as subtitle. Actions: Open (⏎),
+  Edit (⌘E pushes form), Copy Link (⌘C), Delete (⌘⌫). Create quicklink
+  form: name, link (URL/path/deep link), icon selection, application to
+  open with. Support query placeholders in URLs (e.g. "https://google.com/
+  search?q={query}" — when opened, prompts for query input). Push from
+  "Search Quicklinks" command. Create src/data/quicklinks_data.ts with 10
+  mock quicklinks and src/components/quicklinks/quicklinks_view.tsx.
+
+- [ ] [P1] SCRN011 - Build Window Management screen. Grid or list of window
+  layout presets: Left Half, Right Half, Top Half, Bottom Half, Center,
+  Maximize, First Third, Middle Third, Last Third, First Two Thirds, Last
+  Two Thirds, Top Left Quarter, Top Right Quarter, Bottom Left Quarter,
+  Bottom Right Quarter. Each preset shows a visual diagram (CSS box showing
+  the layout position highlighted). Keyboard shortcuts for each position
+  (configurable). In Tauri mode, use @tauri-apps/api/window to actually
+  resize/reposition windows. In web mode, show visual demo only. Create
+  src/components/window_management/window_management_view.tsx and
+  src/data/window_layouts_data.ts.
+
+- [ ] [P2] SCRN012 - Build Floating Notes screen. Markdown-enabled note
+  editor that floats above other apps. In-memory list of notes with titles.
+  Notes list view with search. Click note to open editor. Editor: simple
+  textarea with markdown preview toggle. Auto-save on change (debounced
+  500ms). Create new note via ⌘N. Delete note with confirm. Persist notes
+  via localStorage/SQLite. Push from "Floating Notes" command. Create
+  src/components/floating_notes/floating_notes_view.tsx and
+  floating_notes_editor.tsx.
+
+- [ ] [P2] SCRN013 - Build Translator screen. Two-panel layout: source text
+  (left/top) and translated text (right/bottom). Language selector dropdowns
+  for source and target. Swap languages button. Auto-detect source language.
+  Copy translation button. In web demo mode, use a simple mock translation
+  (reverse text or placeholder). In production, integrate with translation
+  API. Support 20+ languages. Create src/components/translator/
+  translator_view.tsx and translator.scss. Push from "Translate" command.
+
+- [ ] [P2] SCRN014 - Build Reminders screen. List of reminders with
+  title, due date/time, and repeat options. Create reminder form: title,
+  date (FormDatePicker), time, repeat (none/daily/weekly/monthly), notes.
+  Sections: Overdue, Today, Upcoming, Completed. Toggle complete with
+  checkbox. Delete with confirm. In Tauri mode, use OS notification API
+  for due reminders. Persist via localStorage/SQLite. Push from "Reminders"
+  command. Create src/components/reminders/reminders_view.tsx and
+  src/data/reminders_data.ts.
+
+- [ ] [P3] SCRN015 - Build Script Commands screen. List view of user-defined
+  script commands. Each item: name, description, language icon (bash, python,
+  node, ruby), last run date. Actions: Run (⏎) shows output in detail panel,
+  Edit (opens in editor), Copy Script, Delete. Mock script execution with
+  simulated output (typewriter effect). In Tauri mode, use
+  @tauri-apps/api/shell to actually execute scripts. Create
+  src/components/script_commands/script_commands_view.tsx with mock scripts.
+
+=== MISSING UI COMPONENTS ===
+
+- [ ] [P1] COMP016 - Build Action.CopyToClipboard declarative action. Create
+  reusable action component that copies content to clipboard and shows HUD
+  "Copied to Clipboard". Accepts: content (string), title (default "Copy"),
+  shortcut. Uses navigator.clipboard.writeText in web, Tauri clipboard
+  plugin in desktop. Create src/components/action_panel/actions/ directory
+  with copy_to_clipboard.tsx. Replace ad-hoc clipboard.writeText calls
+  across all views (ClipboardHistory, SnippetManager, EmojiPicker,
+  Calculator, FileSearch, App.tsx) with this reusable action.
+
+- [ ] [P1] COMP017 - Build Action.OpenInBrowser declarative action. Opens
+  URL in default browser. Accepts: url, title (default "Open in Browser"),
+  shortcut. In web: window.open(url). In Tauri: @tauri-apps/api/shell open.
+  Shows HUD "Opened in Browser". Create open_in_browser.tsx in actions/.
+
+- [ ] [P1] COMP018 - Build List.Item.Detail inline detail panel. When a
+  ListItem has a detail prop, the list splits into list (left, ~40%) and
+  detail panel (right, ~60%) showing the item's detail content. Reuses
+  Detail component. Toggle detail panel visibility with an action or
+  automatic on selection. Animate panel slide-in. Update List component
+  to accept showDetail prop. Create list_item_detail.scss for split layout.
+
+- [ ] [P2] COMP019 - Build Action.PickDate component. Date picker that
+  appears inline in action panel or as a pushed form field. Supports
+  date-only and date+time modes. Min/max date constraints. Calendar grid
+  UI with month/year navigation. Selected date highlighted with accent.
+  Keyboard navigation: arrows for days, PageUp/Down for months. Create
+  src/components/date_picker/ with date_picker.tsx and date_picker.scss.
+
+- [ ] [P2] COMP020 - Add List pagination support (infinite scroll). Add
+  onLoadMore callback and hasMore boolean props to List. When user scrolls
+  near bottom (IntersectionObserver on sentinel element), trigger
+  onLoadMore. Show loading skeleton items (3 placeholder rows with pulse
+  animation) while loading. Update List component. Demo: Clipboard History
+  loads 20 items at a time.
+
+- [ ] [P2] COMP021 - Build proper markdown renderer for Detail component.
+  Replace current simple text rendering with proper CommonMark markdown
+  using existing marked + dompurify dependencies (already in package.json).
+  Support: headings, bold, italic, code (inline + blocks with syntax
+  highlighting via CSS classes), links, lists (ordered + unordered),
+  blockquotes, tables, horizontal rules, images (as placeholders in web).
+  Create src/utils/markdown.ts as a thin wrapper around marked+dompurify.
+  Add markdown-specific SCSS styles in detail.scss. Update Detail component
+  to render parsed markdown.
+
+- [ ] [P2] COMP022 - Build Form.LinkAccessory component. Small accessory
+  displayed in the right side of the SearchBar/navigation bar when a Form
+  is active. Shows a link with icon + label. Clickable, opens URL or
+  triggers action. Create src/components/form/form_link_accessory.tsx.
+  Update SearchBar to accept optional rightAccessory prop. Demo: "View Docs"
+  link in Create Snippet form.
+
+- [ ] [P3] COMP023 - Build color swatch accessory for ListItem. When a
+  ListItem accessory has a color hex value, render a small color circle
+  (12x12px, rounded) next to the text. Used in clipboard history for copied
+  colors and in color picker. Update ListItem rendering to detect color
+  accessory type and render swatch. Add color?: string field to
+  ListItemAccessoryData.
+
+- [ ] [P3] COMP024 - Build empty search fallback actions. When root search
+  has no matching results, show fallback items: "Search Google for '{query}'",
+  "Search DuckDuckGo for '{query}'", "Search Wikipedia for '{query}'". Each
+  item has appropriate search engine icon. Enter opens search URL in browser.
+  Configurable fallback list in settings. Create src/data/fallback_data.ts.
+  Update App.tsx to show fallbacks when filteredSections is empty.
+
+=== VISUAL POLISH ===
+
+- [ ] [P2] VIS001 - Add virtual scrolling for large lists. Current List
+  renders all items in DOM which becomes slow with 100+ items. Implement
+  virtual scroll: only render visible items + buffer (5 items above/below
+  viewport). Calculate item positions from fixed height ($list-item-height).
+  Maintain scroll position on item count changes. Keep keyboard navigation
+  working (scrollIntoView on active item). Create src/hooks/use_virtual_
+  scroll.ts. Apply to List component. Test with 1000+ items in Clipboard
+  History.
+
+- [ ] [P2] VIS002 - Add custom window title bar. Since Tauri uses frameless
+  window, build a custom title bar. macOS style: traffic light buttons
+  (close/minimize/maximize) on left side, centered title text. Make it
+  draggable (data-tauri-drag-region). In web mode, hide title bar (browser
+  has its own). Create src/components/title_bar/ with title_bar.tsx and
+  title_bar.scss. Position above CommandPalette. 28px height matching macOS.
+
+- [ ] [P2] VIS003 - Add smooth scroll momentum and snap-to-item. Lists
+  should have native-feeling scroll momentum (CSS scroll-behavior: smooth).
+  When scroll stops, snap to nearest item boundary (CSS scroll-snap-type:
+  y proximity on list container, scroll-snap-align: start on items). Ensure
+  keyboard navigation scrollIntoView uses smooth behavior. Test on macOS
+  trackpad and mouse wheel.
+
+- [ ] [P2] VIS004 - Add focus ring animation matching Raycast. When
+  navigating list items with keyboard, show a subtle animated focus ring
+  that transitions between items (not just instant highlight switch).
+  Use CSS transition on a pseudo-element that moves between item positions.
+  The ring should have a very subtle glow (box-shadow with accent color at
+  10% opacity). 80ms transition duration. Only show on keyboard navigation,
+  not mouse hover.
+
+- [ ] [P3] VIS005 - Add window open/close animations. When CommandPalette
+  appears: macOS-style spring animation (scale from 0.95 to 1.0, opacity
+  0 to 1, with slight overshoot). When closing: scale to 0.97, opacity to 0,
+  faster (150ms). Use CSS @keyframes with cubic-bezier easing that mimics
+  spring physics. In Tauri mode, coordinate with window show/hide timing.
+
+- [ ] [P3] VIS006 - Add Grid view hover preview tooltip. When hovering a
+  GridItem for 800ms, show an enlarged preview tooltip above the item
+  (larger icon/image, full title, metadata). Positioned above the item,
+  centered. Fade in/out. Dismiss on mouse leave. Create
+  src/components/grid/grid_preview.tsx and grid_preview.scss.
+
+- [ ] [P3] VIS007 - Add subtle parallax effect to command palette background.
+  Very subtle background gradient shift based on mouse position (±2px max
+  movement). Creates depth illusion matching Raycast's glass effect. CSS
+  custom properties updated via mousemove listener (throttled to rAF). Only
+  affects background layer, not content. Disable when prefers-reduced-motion.
+
+=== SEARCH & INTERACTION ===
+
+- [ ] [P1] SRCH001 - Implement fuzzy search matching. Replace current
+  substring search with fuzzy matching (Fuse.js-style scoring). Match
+  characters don't need to be contiguous: "clhist" matches "Clipboard
+  History". Score based on: consecutive matches (bonus), match at word
+  boundary (bonus), match position (earlier = better), gap penalty. Highlight
+  matched characters in results (bold or underline). Create
+  src/utils/fuzzy_search.ts with score() and match() functions. Apply to
+  root search and all view search bars.
+
+- [ ] [P1] SRCH002 - Add recent commands tracking. Track last 10 opened
+  commands with timestamps. Show "Recent Commands" section in root search
+  when query is empty (above other sections). Persist via localStorage/
+  SQLite. When user opens a command (drill-in), add to recents. Deduplicate.
+  Cap at 10. Create src/hooks/use_recent_commands.ts. Wire into App.tsx
+  root search sections.
+
+- [ ] [P2] SRCH003 - Add search bar placeholder cycling. When search bar
+  is empty, cycle through helpful placeholder texts every 4 seconds:
+  "Type a command...", "Search applications...", "Calculate something...",
+  "Find files...". Smooth fade transition between placeholders. Stop cycling
+  when user starts typing. Resume on clear. Use CSS animation for opacity
+  transitions. Update SearchBar component.
+
+- [ ] [P2] SRCH004 - Add ⌘L to copy current item URL/value. Universal
+  shortcut that copies the most relevant value of the selected item (URL
+  for links, path for files, content for snippets, hex for colors). Show
+  HUD with what was copied. Register via useKeyboardShortcut. Works across
+  all views.
+
+- [ ] [P2] SRCH005 - Add search debouncing and loading state. Debounce
+  search input by 150ms to avoid excessive re-renders during fast typing.
+  Show loading bar during debounce period. Create src/hooks/use_debounce.ts
+  with generic useDebounce(value, delay) hook. Apply to all search bars.
+  Cancel pending debounce on unmount.
+
+- [ ] [P3] SRCH006 - Add Tab completion in search. When Tab is pressed in
+  search and there's a single matching result, auto-complete the search
+  query to match that result's title. If multiple matches share a common
+  prefix, complete to that prefix. Visual: briefly highlight the completed
+  portion. Works in root search only (not within views). Prevent Tab from
+  focusing other elements during search.
+
+=== INFRASTRUCTURE ===
+
+- [ ] [P1] INFRA004 - Build extension architecture. Formalize each screen
+  as an "extension" with a manifest. Create ExtensionManifest type in
+  src/registry/types.ts: id, name, icon, description, author, commands[].
+  Each command has: name, title, subtitle, keywords, mode (view/no-view/
+  menu-bar), component. Refactor existing registry to use extension manifests.
+  Create src/extensions/ directory with one folder per extension (clipboard/,
+  snippets/, emoji/, etc). Each extension exports its manifest. Auto-discover
+  extensions via barrel import.
+
+- [ ] [P1] INFRA005 - Create Tauri IPC bridge layer. Abstract all
+  platform-specific operations behind a unified interface. Create
+  src/platform/index.ts with PlatformAPI interface: clipboard (read/write/
+  monitor), files (search/open/trash), apps (list/launch), shell (execute),
+  window (show/hide/position), notifications (send). Two implementations:
+  src/platform/web.ts (browser fallbacks using navigator, localStorage, etc)
+  and src/platform/tauri.ts (real native via @tauri-apps/api). Auto-detect
+  environment and export correct implementation. All views import from
+  platform/index.ts only.
+
+- [ ] [P2] INFRA006 - Add error boundary components. Create
+  src/components/error_boundary/ with error_boundary.tsx (class component
+  wrapping React.ErrorBoundary). Show friendly error UI: icon, "Something
+  went wrong" title, error message (collapsed by default, expandable),
+  "Try Again" button that resets state. Style matching Raycast error states.
+  Wrap each pushed view in error boundary. Log errors to console with
+  component stack. Create error_boundary.scss.
+
+- [ ] [P2] INFRA007 - Add state management with Zustand. Replace prop-
+  drilling and scattered useState across App.tsx. Create stores:
+  useAppStore (query, selectedIndex, actionsOpen, isFullView),
+  useNavigationStore (stack, push, pop, breadcrumbs — replaces hook),
+  useSettingsStore (general settings, extension states). Zustand selected
+  for minimal API (no providers), TypeScript inference, devtools support,
+  middleware (persist). Install zustand, create src/stores/ directory.
+  Migrate App.tsx state to stores incrementally.
+
+- [ ] [P2] INFRA008 - Add proper build configuration for production. Vite
+  production build: minification (terser), tree-shaking, chunk splitting
+  (vendor chunk for React, component chunks per route/view). Configure
+  asset hashing for cache busting. Add bundle size analysis (rollup-plugin-
+  visualizer). Set up path aliases (@/ for src/). Add environment variable
+  support (.env, .env.production). Target: initial bundle < 200KB gzipped.
+  Update vite.config.ts.
+
+- [ ] [P1] INFRA009 - Add CI/CD pipeline. Create .github/workflows/ci.yml:
+  lint (bun run check), test (bun run test), build (bun run build), optional
+  Playwright visual tests. Run on push to main and PRs. Cache bun
+  dependencies. Fail on lint errors or test failures. Add status badges
+  to README. For Tauri: add tauri-build job that creates platform-specific
+  binaries (macOS .dmg, Windows .msi, Linux .AppImage).
+
+- [ ] [P3] INFRA010 - Add telemetry/analytics abstraction. Create
+  src/utils/analytics.ts with track(event, properties?) function. Events:
+  command_opened, search_query, action_triggered, extension_enabled/disabled,
+  theme_changed. In web demo: log to console. In production: send to
+  analytics endpoint. Respect user opt-out preference in settings. Add
+  "Share Usage Data" toggle in Settings > Advanced. No PII in events.
+
+- [ ] [P3] INFRA011 - Add i18n internationalization support. Create
+  src/i18n/ with translation files (en.json, pt.json, es.json, ja.json).
+  Translation keys for all UI strings (button labels, section titles,
+  placeholder texts, error messages). Create useTranslation hook that
+  returns t(key) function. Language selector in Settings > General. Default
+  to system locale. Persist preference. Start with English strings
+  extracted from all components.
+
+- [ ] [P3] INFRA012 - Add performance monitoring utilities. Create
+  src/utils/perf.ts with: measureRender(componentName) HOC that logs
+  render time in dev mode, useRenderCount() hook for detecting excessive
+  re-renders, throttle() and debounce() utilities. Add React.StrictMode
+  in dev. Profile List rendering with 500+ items. Identify and fix
+  unnecessary re-renders with React.memo where needed. Target: 60fps
+  scroll performance.
+
+=== TESTING (NEW) ===
+
+- [ ] [P1000] TEST007 - Add unit tests for calculator.ts. Test all math
+  operations: basic arithmetic, operator precedence, parentheses, functions
+  (sqrt, sin, cos, etc), constants (pi, e), percentages, "X% of Y" syntax,
+  edge cases (division by zero, NaN, Infinity), invalid expressions, very
+  large/small numbers. Minimum 30 test cases. Use vitest.
+
+- [ ] [P1000] TEST008 - Add unit tests for fuzzy_search.ts (after SRCH001).
+  Test scoring: exact match > prefix > word boundary > substring > fuzzy.
+  Test highlighting of matched characters. Test edge cases: empty query,
+  empty candidates, special characters, unicode. Minimum 20 test cases.
+
+- [ ] [P1000] TEST009 - Add unit tests for storage.ts. Test get/set/remove
+  with various types (string, number, boolean, object, array). Test
+  validators (isStringArray, isRecord, isBooleanRecord). Test error
+  handling (invalid JSON, quota exceeded mock). Test migration paths.
+  Minimum 15 test cases.
+
+- [ ] [P1000] TEST010 - Add unit tests for format_date.ts. Test all
+  relative date ranges: just now, minutes ago, hours ago, yesterday, N days
+  ago, absolute date, different year. Test edge cases: midnight boundaries,
+  timezone handling, future dates, invalid dates. Minimum 15 test cases.
+
+- [ ] [P1000] TEST011 - Add integration tests for command registry. Test
+  register/get/search/getSections. Test search matches title, subtitle,
+  keywords, aliases. Test section ordering. Test duplicate registration
+  warning. Minimum 10 test cases.
+
+- [ ] [P1000] TEST012 - Add E2E tests with Playwright for core flows.
+  Flow 1: Open → type query → select result → drill into view → Escape back.
+  Flow 2: Open → ⌘K → navigate actions → execute action → verify HUD.
+  Flow 3: Settings → change theme → verify visual change.
+  Flow 4: Clipboard History → pin item → verify pinned section.
+  Each flow as separate test. Screenshot on failure.
+
+- [ ] [P1000] TEST013 - Add accessibility audit tests. Use axe-core with
+  Playwright to audit each view for WCAG 2.1 AA violations. Test: color
+  contrast ratios, ARIA roles/labels, keyboard navigation order, focus
+  management, screen reader announcements. Run on: root search, clipboard
+  history, snippet manager, emoji picker, settings, forms. Zero violations
+  target.
+
+- [ ] [P1000] TEST014 - Add performance benchmark tests. Measure and assert:
+  initial render time < 100ms, search filter time < 50ms for 1000 items,
+  navigation push/pop < 100ms, scroll FPS > 55fps with 500 items. Use
+  vitest + performance.now() for unit benchmarks. Use Playwright for
+  runtime performance metrics. Create performance regression baseline.

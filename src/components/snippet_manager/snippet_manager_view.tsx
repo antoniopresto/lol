@@ -114,10 +114,7 @@ function isStoredTag(value: unknown): value is {
 } {
   if (!isRecord(value)) return false;
   if (typeof value.text !== 'string') return false;
-  if (
-  'color' in value &&
-  typeof value.color !== 'string'
-  ) {
+  if ('color' in value && typeof value.color !== 'string') {
     return false;
   }
   return true;
