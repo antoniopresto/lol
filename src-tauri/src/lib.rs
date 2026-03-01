@@ -770,6 +770,27 @@ fn db_migrations() -> Vec<Migration> {
             ",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "create_reminders_table",
+            sql: "
+                CREATE TABLE IF NOT EXISTS reminders (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    due_date TEXT NOT NULL,
+                    due_time TEXT NOT NULL DEFAULT '09:00',
+                    repeat TEXT NOT NULL DEFAULT 'none',
+                    notes TEXT NOT NULL DEFAULT '',
+                    completed INTEGER NOT NULL DEFAULT 0,
+                    completed_at TEXT,
+                    created_at TEXT NOT NULL
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_reminders_due_date ON reminders(due_date, due_time);
+                CREATE INDEX IF NOT EXISTS idx_reminders_completed ON reminders(completed);
+            ",
+            kind: MigrationKind::Up,
+        },
     ]
 }
 

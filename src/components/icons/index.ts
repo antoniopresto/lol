@@ -9,6 +9,7 @@ export {
   FigmaIcon,
   NotesIcon,
   PaletteIcon,
+  RemindersIcon,
   SafariIcon,
   SlackIcon,
   SnippetsIcon,

@@ -535,3 +535,33 @@ export function TranslateIcon(props: IconProps = {}) {
     </svg>
   );
 }
+
+export function RemindersIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgBase(props)}>
+      <defs>
+        <linearGradient id="reminders-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#FF6B6B" />
+          <stop offset="100%" stopColor="#E53E3E" />
+        </linearGradient>
+      </defs>
+      <rect
+        x="1"
+        y="1"
+        width="18"
+        height="18"
+        rx="4"
+        fill="url(#reminders-bg)"
+      />
+      <circle
+        cx="10"
+        cy="10"
+        r="4.5"
+        {...WHITE_STROKE}
+        strokeWidth={1.2}
+        fill="none"
+      />
+      <path d="M10 7.5V10l2 1.5" {...WHITE_STROKE} strokeWidth={1.2} />
+    </svg>
+  );
+}

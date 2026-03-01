@@ -1,0 +1,43 @@
+@use '../../styles/tokens';
+
+.reminder-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: tokens.$space-3;
+  gap: tokens.$space-3;
+  overflow-y: auto;
+}
+
+.reminder-check {
+  $check-size: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $check-size;
+  height: $check-size;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--text-400);
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color tokens.$transition-fast ease,
+    border-color tokens.$transition-fast ease;
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+
+  &--completed {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+}

@@ -1390,7 +1390,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   swap-button-size, line-height-body, disabled-opacity). All 93 tests pass,
   bun run check passes.
 
-- [ ] [P2] SCRN014 - Build Reminders screen. List of reminders with
+- [x] [P2] SCRN014 - Build Reminders screen. List of reminders with
   title, due date/time, and repeat options. Create reminder form: title,
   date (FormDatePicker), time, repeat (none/daily/weekly/monthly), notes.
   Sections: Overdue, Today, Upcoming, Completed. Toggle complete with
@@ -1398,6 +1398,26 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   for due reminders. Persist via localStorage/SQLite. Push from "Reminders"
   command. Create src/components/reminders/reminders_view.tsx and
   src/data/reminders_data.ts.
+  Sub-tasks:
+  - [x] SCRN014a - Create reminders mock data (src/data/reminders_data.ts) with
+    ReminderEntry type, RepeatOption type, 10 mock entries across sections
+    (overdue, today, upcoming, completed). Add reminderDb to database.ts.
+  - [x] SCRN014b - Create RemindersView component
+    (src/components/reminders/reminders_view.tsx and .scss). List with
+    Overdue/Today/Upcoming/Completed sections, search filtering, toggle
+    complete, create/edit form (title, date, time, repeat, notes), delete
+    with confirm. Uses self-contained SearchBar/ActionPanel/Alert/HUD pattern.
+  - [x] SCRN014c - Create RemindersIcon, register extension in
+    src/extensions/reminders/, wire into extensions/index.ts.
+  Post-review fixes applied:
+  - Fixed selectedEntry/section order mismatch (flatItems pattern)
+  - Deduplicated toggle-complete logic (inline checkbox + Enter key)
+  - Added Cmd+Enter keyboard shortcut in EditReminderView form
+  - Fixed formatTime NaN on malformed input
+  - Fixed renderNow useMemo dependency ([] instead of [filtered])
+  - Removed dead CSS classes (.reminder-completed-title, .reminder-repeat-badge)
+  - Fixed INITIAL_FORM.dueDate stale across midnight (function instead of const)
+  - Added reminders table + indexes to Tauri SQLite migrations (version 3)
 
 - [ ] [P3] SCRN015 - Build Script Commands screen. List view of user-defined
   script commands. Each item: name, description, language icon (bash, python,

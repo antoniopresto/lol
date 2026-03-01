@@ -45,6 +45,18 @@ export interface NoteRow {
   updated_at: string;
 }
 
+export interface ReminderRow {
+  id: string;
+  title: string;
+  due_date: string;
+  due_time: string;
+  repeat: string;
+  notes: string;
+  completed: number;
+  completed_at: string | null;
+  created_at: string;
+}
+
 export interface RecentCommandRow {
   id: number;
   command_id: string;
@@ -118,6 +130,17 @@ const QUICKLINK_COLUMNS = new Set<string>([
 const NOTE_COLUMNS = new Set<string>([
   'title',
   'content',
+  'created_at',
+]);
+
+const REMINDER_COLUMNS = new Set<string>([
+  'title',
+  'due_date',
+  'due_time',
+  'repeat',
+  'notes',
+  'completed',
+  'completed_at',
   'created_at',
 ]);
 
@@ -205,6 +228,19 @@ function isQuicklinkRowArray(v: unknown): v is QuicklinkRow[] {
 }
 
 function isNoteRowArray(v: unknown): v is NoteRow[] {
+  if (!Array.isArray(v)) return false;
+  return v.every(
+    r =>
+      typeof r === 'object' &&
+      r !== null &&
+      'id' in r &&
+      typeof r.id === 'string' &&
+      'title' in r &&
+      typeof r.title === 'string',
+  );
+}
+
+function isReminderRowArray(v: unknown): v is ReminderRow[] {
   if (!Array.isArray(v)) return false;
   return v.every(
     r =>
@@ -622,6 +658,104 @@ export const noteDb = {
         r =>
           r.title.toLowerCase().includes(q) ||
           r.content.toLowerCase().includes(q),
+      )
+      .slice(0, limit);
+  },
+};
+
+export const reminderDb = {
+  async getAll(): Promise<ReminderRow[]> {
+    if (isTauri) {
+      const db = await getDb();
+      return db.select<ReminderRow[]>(
+        'SELECT id, title, due_date, due_time, repeat, notes, completed, completed_at, created_at FROM reminders ORDER BY due_date ASC, due_time ASC',
+      );
+    }
+    return storageGet('reminders', isReminderRowArray) ?? [];
+  },
+  async insert(reminder: ReminderRow): Promise<void> {
+    if (isTauri) {
+      const db = await getDb();
+      await db.execute(
+        'INSERT INTO reminders (id, title, due_date, due_time, repeat, notes, completed, completed_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+        [
+          reminder.id,
+          reminder.title,
+          reminder.due_date,
+          reminder.due_time,
+          reminder.repeat,
+          reminder.notes,
+          reminder.completed,
+          reminder.completed_at,
+          reminder.created_at,
+        ],
+      );
+      return;
+    }
+    const all = await this.getAll();
+    all.unshift(reminder);
+    storageSet('reminders', all);
+  },
+  async update(
+    id: string,
+    updates: Partial<Omit<ReminderRow, 'id'>>,
+  ): Promise<void> {
+    if (isTauri) {
+      const db = await getDb();
+      const query = buildUpdateQuery(
+        'reminders',
+        updates,
+        REMINDER_COLUMNS,
+        id,
+      );
+      if (!query) return;
+      await db.execute(query.sql, query.values);
+      return;
+    }
+    const all = await this.getAll();
+    const updated = all.map(r =>
+      r.id === id
+        ? {
+            ...r,
+            ...updates,
+          }
+        : r);
+    storageSet('reminders', updated);
+  },
+  async delete(id: string): Promise<void> {
+    if (isTauri) {
+      const db = await getDb();
+      await db.execute('DELETE FROM reminders WHERE id = $1', [id]);
+      return;
+    }
+    const all = await this.getAll();
+    storageSet(
+      'reminders',
+      all.filter(r => r.id !== id),
+    );
+  },
+  async search(query: string, limit = 50): Promise<ReminderRow[]> {
+    if (isTauri) {
+      const db = await getDb();
+      const escaped = escapeLikeQuery(query);
+      return db.select<ReminderRow[]>(
+        `SELECT id, title, due_date, due_time, repeat, notes, completed, completed_at, created_at FROM reminders
+         WHERE title LIKE $1 ESCAPE '\\' OR notes LIKE $1 ESCAPE '\\'
+         ORDER BY due_date ASC, due_time ASC
+         LIMIT $2`,
+        [
+          `%${escaped}%`,
+          limit,
+        ],
+      );
+    }
+    const all = await this.getAll();
+    const q = query.toLowerCase();
+    return all
+      .filter(
+        r =>
+          r.title.toLowerCase().includes(q) ||
+          r.notes.toLowerCase().includes(q),
       )
       .slice(0, limit);
   },
