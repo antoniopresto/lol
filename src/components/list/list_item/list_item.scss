@@ -6,7 +6,7 @@
   justify-content: space-between;
   height: $list-item-height;
   padding: 0 $space-2;
-  border-radius: $radius-md;
+  border-radius: $radius-list-item;
   cursor: pointer;
   transition: background-color $transition-fast ease;
 
@@ -27,7 +27,7 @@
 .list-item__left {
   display: flex;
   align-items: center;
-  gap: $space-2;
+  gap: $space-3;
   min-width: 0;
   flex: 1;
 }
