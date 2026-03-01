@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionPanel } from './components/action_panel/action_panel';
 import { Alert } from './components/alert/alert';
+import { ClipboardHistoryView } from './components/clipboard_history/clipboard_history_view';
 import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
@@ -41,6 +42,7 @@ import type {
 type NavViewData =
   | { type: 'grid' }
   | { type: 'form' }
+  | { type: 'clipboard' }
   | {
       type: 'detail';
       item: ListItemData;
@@ -571,7 +573,11 @@ export function App() {
 
     setActionsOpen(false);
 
-    if (item.id === 'color-picker') {
+    if (item.id === 'clipboard-history') {
+      push('Clipboard History', { type: 'clipboard' });
+      setQuery('');
+      setSelectedIndex(0);
+    } else if (item.id === 'color-picker') {
       push('Color Picker', { type: 'grid' });
       setQuery('');
       setSelectedIndex(0);
@@ -623,7 +629,7 @@ export function App() {
       meta: true,
     },
     toggleActions,
-    { enabled: viewType !== 'form' },
+    { enabled: viewType !== 'form' && viewType !== 'clipboard' },
   );
 
   useKeyboardShortcut(
@@ -844,6 +850,8 @@ export function App() {
     if (!entry) return null;
 
     switch (entry.data.type) {
+      case 'clipboard':
+        return <ClipboardHistoryView />;
       case 'grid':
         return (
           <ColorPickerView
@@ -859,25 +867,38 @@ export function App() {
     }
   }
 
+  const isFullView = viewType === 'clipboard';
+
   return (
     <NavigationContextProvider value={nav}>
       <CommandPalette isLoading>
-        <SearchBar
-          value={query}
-          onChange={handleQueryChange}
-          activeDescendantId={activeDescendantId}
-          breadcrumbs={nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined}
-          dropdown={
-            viewType === 'root' ? (
-              <SearchDropdown
-                sections={searchFilterSections}
-                value={filterValue}
-                onChange={handleFilterChange}
-              />
-            ) : undefined
-          }
-        />
-        {nav.currentEntry ? (
+        {!isFullView && (
+          <SearchBar
+            value={query}
+            onChange={handleQueryChange}
+            activeDescendantId={activeDescendantId}
+            breadcrumbs={
+              nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined
+            }
+            dropdown={
+              viewType === 'root' ? (
+                <SearchDropdown
+                  sections={searchFilterSections}
+                  value={filterValue}
+                  onChange={handleFilterChange}
+                />
+              ) : undefined
+            }
+          />
+        )}
+        {isFullView && nav.currentEntry ? (
+          <div
+            key={nav.navKey}
+            className={`command-palette__nav-view${navDirectionClass}`}
+          >
+            {renderCurrentView()}
+          </div>
+        ) : nav.currentEntry ? (
           <div
             key={nav.navKey}
             className={`command-palette__nav-view${navDirectionClass}`}
@@ -942,47 +963,49 @@ export function App() {
             )}
           </div>
         )}
-        <ActionPanel
-          contextLabel={contextLabel}
-          actions={
-            viewType === 'form'
-              ? [
-                  {
-                    label: 'Submit',
-                    shortcut: (
-                      <Kbd
-                        keys={[
-                          '⌘',
-                          '↵',
-                        ]}
-                      />
-                    ),
-                  },
-                ]
-              : [
-                  {
-                    label: 'Open',
-                    shortcut: <Kbd keys={['↵']} />,
-                  },
-                  {
-                    label: 'Actions',
-                    shortcut: (
-                      <Kbd
-                        keys={[
-                          '⌘',
-                          'K',
-                        ]}
-                      />
-                    ),
-                    onClick: toggleActions,
-                  },
-                ]
-          }
-          dropdownOpen={actionsOpen}
-          dropdownSections={dropdownSections}
-          onDropdownClose={closeActions}
-        />
-        {alertState && (
+        {!isFullView && (
+          <ActionPanel
+            contextLabel={contextLabel}
+            actions={
+              viewType === 'form'
+                ? [
+                    {
+                      label: 'Submit',
+                      shortcut: (
+                        <Kbd
+                          keys={[
+                            '⌘',
+                            '↵',
+                          ]}
+                        />
+                      ),
+                    },
+                  ]
+                : [
+                    {
+                      label: 'Open',
+                      shortcut: <Kbd keys={['↵']} />,
+                    },
+                    {
+                      label: 'Actions',
+                      shortcut: (
+                        <Kbd
+                          keys={[
+                            '⌘',
+                            'K',
+                          ]}
+                        />
+                      ),
+                      onClick: toggleActions,
+                    },
+                  ]
+            }
+            dropdownOpen={actionsOpen}
+            dropdownSections={dropdownSections}
+            onDropdownClose={closeActions}
+          />
+        )}
+        {!isFullView && alertState && (
           <Alert
             title={alertState.title}
             message={alertState.message}
@@ -993,7 +1016,7 @@ export function App() {
           />
         )}
         <ToastContainer toasts={toasts} onDismiss={hideToast} />
-        <HUDContainer items={hudItems} />
+        {!isFullView && <HUDContainer items={hudItems} />}
       </CommandPalette>
     </NavigationContextProvider>
   );

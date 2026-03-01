@@ -585,11 +585,31 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 
 === FULL SCREENS / VIEWS ===
 
-- [ ] [P1] SCRN001 - Build Clipboard History screen. Dedicated List view showing
+- [x] [P1] SCRN001 - Build Clipboard History screen. Dedicated List view showing
   mock clipboard entries (text, links, images, colors). Searchable. Each item
   shows: content preview (truncated), source app icon, timestamp accessory.
   Actions: Paste, Copy, Pin/Unpin, Delete. Pinned section at top. Push via
   navigation from "Clipboard History" command in root search.
+  Done: ClipboardHistoryView with full self-contained UI (SearchBar, List,
+  ActionPanel, Alert, HUDContainer). ClipboardEntry supports text/link/color/image
+  content types. 14 mock entries with source app icons and timestamps. Pinned/Recent
+  sections. SearchDropdown filter by type (All/Text/Links/Images/Colors). Keyboard
+  shortcuts: ⌘K actions, ⌘C copy, ⌘⇧P pin/unpin, ⌘⌫ delete with confirm.
+  selectedIndex clamped after delete/pin mutations. App.tsx conditionally hides its
+  own Alert/HUDContainer when clipboard fullView is active to avoid duplicates.
+  ImageIcon for image entries. All 93 tests pass.
+  Sub-tasks:
+  - [x] SCRN001a - Create clipboard mock data (src/data/clipboard_data.ts) with
+    ClipboardEntry type (text/link/color/image), 14 mock entries, source app icons,
+    timestamps, pinned state.
+  - [x] SCRN001b - Create ClipboardHistoryView component
+    (src/components/clipboard_history/clipboard_history_view.tsx and .scss).
+    List with Pinned/Recent sections, search filtering, pin/unpin toggle, delete
+    with confirm, copy action with HUD. Uses existing List, ListItem, ListSection,
+    ActionPanel, SearchBar components.
+  - [x] SCRN001c - Wire into App.tsx: add 'clipboard' to NavViewData, push from
+    "Clipboard History" command in root search, handle actions dropdown for
+    clipboard-specific actions.
 
 - [ ] [P1] SCRN002 - Build Snippet Manager screen. List view of saved snippets.
   Each item shows: name, keyword (as tag accessory), preview of content.
