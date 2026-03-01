@@ -734,11 +734,22 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   formatFileSize utility for human-readable file sizes. Folder icons use solid
   fills (no gradient ID collision). All 93 tests pass, bun run check passes.
 
-- [ ] [P2] SCRN006 - Build Settings/Preferences screen. Pushed view with
+- [x] [P2] SCRN006 - Build Settings/Preferences screen. Pushed view with
   tabbed/sectioned layout. Tabs: General (appearance toggle, hotkey display),
   Extensions (list of installed extensions with enable/disable), Advanced
   (export/import mock). Use Form components for settings fields. Push via ⌘,
   shortcut.
+  Done: SettingsView with 3 tabs via SearchDropdown (General/Extensions/Advanced).
+  General: FormDropdown for appearance/window width/font size, FormCheckbox for
+  show recent apps/show dock, hotkey display with Kbd. Extensions: filterable list
+  with Built-in/Community sections, ToggleSwitch enable/disable (with stopPropagation
+  fix for double-toggle bug), ExtensionRow extracted component, 10 mock extensions
+  in settings_data.tsx with colored SVG icons. Advanced: Export/Import/Clear Cache
+  action rows, Reset All with destructive confirm dialog. Actions dropdown (⌘K)
+  with tab navigation and context-sensitive actions. ⌘, global shortcut to push
+  settings. All SCSS values tokenized ($toggle-width, $toggle-height, $toggle-knob-size,
+  $toggle-padding, $color-toggle-knob, $settings-ext-icon-size added to _tokens.scss).
+  MOCK_EXTENSIONS shallow-copied on init and reset. All 93 tests pass.
 
 - [ ] [P3] SCRN007 - Build Extension Store screen. List view of mock extensions
   with: extension icon, name, developer, download count accessory. Detail panel

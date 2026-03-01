@@ -17,6 +17,7 @@ import { QuickLook } from './components/quick_look/quick_look';
 import { SearchBar } from './components/search_bar/search_bar';
 import type { SearchDropdownSection } from './components/search_bar/search_dropdown';
 import { SearchDropdown } from './components/search_bar/search_dropdown';
+import { SettingsView } from './components/settings/settings_view';
 import { SnippetManagerView } from './components/snippet_manager/snippet_manager_view';
 import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
@@ -42,6 +43,7 @@ type NavViewData =
   | { type: 'snippets' }
   | { type: 'emoji' }
   | { type: 'file-search' }
+  | { type: 'settings' }
   | {
       type: 'detail';
       item: ListItemData;
@@ -452,6 +454,10 @@ export function App() {
       push('Search Emoji', { type: 'emoji' });
       setQuery('');
       setSelectedIndex(0);
+    } else if (item.id === 'settings') {
+      push('Settings', { type: 'settings' });
+      setQuery('');
+      setSelectedIndex(0);
     } else if (item.id === 'color-picker') {
       push('Color Picker', { type: 'grid' });
       setQuery('');
@@ -505,8 +511,29 @@ export function App() {
         viewType !== 'clipboard' &&
         viewType !== 'snippets' &&
         viewType !== 'emoji' &&
-        viewType !== 'file-search',
+        viewType !== 'file-search' &&
+        viewType !== 'settings',
     },
+  );
+
+  const openSettings = useCallback(() => {
+    if (viewType !== 'settings') {
+      push('Settings', { type: 'settings' });
+      setQuery('');
+      setSelectedIndex(0);
+      setActionsOpen(false);
+    }
+  }, [
+    viewType,
+    push,
+  ]);
+
+  useKeyboardShortcut(
+    {
+      key: ',',
+      meta: true,
+    },
+    openSettings,
   );
 
   const toggleQuickLook = useCallback(() => {
@@ -760,6 +787,8 @@ export function App() {
         return <EmojiPickerView />;
       case 'file-search':
         return <FileSearchView />;
+      case 'settings':
+        return <SettingsView />;
       case 'grid':
         return (
           <ColorPickerView
@@ -778,7 +807,8 @@ export function App() {
     viewType === 'clipboard' ||
     viewType === 'snippets' ||
     viewType === 'emoji' ||
-    viewType === 'file-search';
+    viewType === 'file-search' ||
+    viewType === 'settings';
 
   return (
     <NavigationContextProvider value={nav}>
