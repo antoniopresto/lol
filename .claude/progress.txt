@@ -351,7 +351,7 @@ screens, plan next tasks and fix it.
     full text color + Enter kbd badge + vertical separator (2x12px at text/10%) +
     "Actions" label at 60% + Cmd+K badges. Background from $color-surface-footer
     to rgba(255, 255, 255, 0.05).
-  - [ ] UXDS002g - [P1] Fix kbd badge styling. Background from $color-kbd-background
+  - [x] UXDS002g - [P1] Fix kbd badge styling. Background from $color-kbd-background
     to rgba($color-text-primary, 0.1). Remove 1px border. Border-radius from 4px
     to 6px ($radius-md or new $radius-kbd: 6px). Size stays 20px height but Raycast
     uses 22x20px for single chars, 24x20px for symbols.
