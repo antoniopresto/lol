@@ -1,0 +1,85 @@
+import type { ListItemData, SectionData } from '../types';
+import type { CommandRegistration } from './types';
+
+const commands = new Map<string, CommandRegistration>();
+
+const sectionOrder: string[] = [];
+
+export function registerCommand(cmd: CommandRegistration): void {
+  commands.set(cmd.id, cmd);
+  if (!sectionOrder.includes(cmd.section)) {
+    sectionOrder.push(cmd.section);
+  }
+}
+
+export function getCommand(id: string): CommandRegistration | undefined {
+  return commands.get(id);
+}
+
+function toListItem(cmd: CommandRegistration): ListItemData {
+  return {
+    id: cmd.id,
+    title: cmd.name,
+    subtitle: cmd.subtitle,
+    icon: cmd.icon,
+    accessories: cmd.accessories,
+    detail: cmd.detail,
+  };
+}
+
+export function getSections(): SectionData[] {
+  const grouped = new Map<string, ListItemData[]>();
+
+  for (const section of sectionOrder) {
+    grouped.set(section, []);
+  }
+
+  for (const cmd of commands.values()) {
+    let items = grouped.get(cmd.section);
+    if (!items) {
+      items = [];
+      grouped.set(cmd.section, items);
+    }
+    items.push(toListItem(cmd));
+  }
+
+  const sections: SectionData[] = [];
+  for (const [title, items] of grouped) {
+    if (items.length > 0) {
+      sections.push({
+        title,
+        items,
+      });
+    }
+  }
+  return sections;
+}
+
+export function searchCommands(query: string): SectionData[] {
+  if (!query) return getSections();
+  const lower = query.toLowerCase();
+
+  const sections = getSections();
+  return sections
+    .map(section => ({
+      ...section,
+      items: section.items.filter(item => {
+        if (
+          item.title.toLowerCase().includes(lower) ||
+          item.subtitle?.toLowerCase().includes(lower)
+        ) {
+          return true;
+        }
+        const cmd = commands.get(item.id);
+        if (!cmd) return false;
+        if (cmd.keywords?.some(kw => kw.toLowerCase().includes(lower))) {
+          return true;
+        }
+        if (cmd.aliases?.some(a => a.toLowerCase().includes(lower))) {
+          return true;
+        }
+        return false;
+      }),
+    }))
+    .filter(section => section.items.length > 0);
+}

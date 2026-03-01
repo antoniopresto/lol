@@ -865,12 +865,31 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 
 === INFRASTRUCTURE ===
 
-- [ ] [P2] INFRA001 - Create proper extension/command registry system. Instead
+- [x] [P2] INFRA001 - Create proper extension/command registry system. Instead
   of hardcoded mock data, create a registry where "extensions" register
   commands with: name, icon, keywords, component (for push), aliases. Root
   search queries this registry. Create src/registry/command_registry.ts and
   src/registry/types.ts. Refactor mock_data.ts to register through this
   system.
+  Done: CommandRegistration interface in types.ts. command_registry.ts with
+  Map-based register/get/getSections/search (preserves section order, searches
+  title/subtitle/keywords/aliases). All 15 commands registered in commands.ts.
+  Barrel export in index.ts with side-effect import. App.tsx refactored:
+  NavViewData simplified to 'command'|'detail', handleDrillIn uses getCommand()
+  lookup, isFullView derived from registry. Dead filterSections function removed.
+  MOCK_COLORS extracted to src/data/color_data.ts, mock_data.ts deleted.
+  ColorPickerView updated to import from color_data.ts. All 93 tests pass.
+  Sub-tasks:
+  - [x] INFRA001a - Create registry types (src/registry/types.ts) with
+    CommandRegistration interface and registry module (src/registry/command_registry.ts)
+    with register/get/getSections/search functions.
+  - [x] INFRA001b - Extract ColorPickerView to standalone self-contained
+    component (like ClipboardHistoryView), register ALL existing commands
+    through the registry (src/registry/commands.ts).
+  - [x] INFRA001c - Refactor App.tsx to consume registry: replace hardcoded
+    handleDrillIn switch with registry lookup, simplify NavViewData type,
+    replace MOCK_SECTIONS import with registry.getSections(), derive isFullView
+    from registry.
 
 - [ ] [P2] INFRA002 - Add localStorage persistence layer. Save and restore:
   recent commands, favorites, clipboard history, snippets, settings. Create

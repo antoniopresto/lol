@@ -1,0 +1,88 @@
+import type { ColorItemData } from '../types';
+
+export const MOCK_COLORS: ColorItemData[] = [
+  {
+    id: 'color-red',
+    title: 'Red',
+    subtitle: '#FF3B30',
+    color: '#FF3B30',
+    category: 'warm',
+  },
+  {
+    id: 'color-orange',
+    title: 'Orange',
+    subtitle: '#FF9500',
+    color: '#FF9500',
+    category: 'warm',
+  },
+  {
+    id: 'color-yellow',
+    title: 'Yellow',
+    subtitle: '#FFCC00',
+    color: '#FFCC00',
+    category: 'warm',
+  },
+  {
+    id: 'color-green',
+    title: 'Green',
+    subtitle: '#34C759',
+    color: '#34C759',
+    category: 'cool',
+  },
+  {
+    id: 'color-teal',
+    title: 'Teal',
+    subtitle: '#5AC8FA',
+    color: '#5AC8FA',
+    category: 'cool',
+  },
+  {
+    id: 'color-blue',
+    title: 'Blue',
+    subtitle: '#007AFF',
+    color: '#007AFF',
+    category: 'cool',
+  },
+  {
+    id: 'color-indigo',
+    title: 'Indigo',
+    subtitle: '#5856D6',
+    color: '#5856D6',
+    category: 'cool',
+  },
+  {
+    id: 'color-purple',
+    title: 'Purple',
+    subtitle: '#AF52DE',
+    color: '#AF52DE',
+    category: 'cool',
+  },
+  {
+    id: 'color-pink',
+    title: 'Pink',
+    subtitle: '#FF2D55',
+    color: '#FF2D55',
+    category: 'warm',
+  },
+  {
+    id: 'color-brown',
+    title: 'Brown',
+    subtitle: '#A2845E',
+    color: '#A2845E',
+    category: 'neutral',
+  },
+  {
+    id: 'color-gray',
+    title: 'Gray',
+    subtitle: '#8E8E93',
+    color: '#8E8E93',
+    category: 'neutral',
+  },
+  {
+    id: 'color-white',
+    title: 'White',
+    subtitle: '#FFFFFF',
+    color: '#FFFFFF',
+    category: 'neutral',
+  },
+];

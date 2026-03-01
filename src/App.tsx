@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionPanel } from './components/action_panel/action_panel';
 import { Alert } from './components/alert/alert';
-import { ClipboardHistoryView } from './components/clipboard_history/clipboard_history_view';
 import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
-import { EmojiPickerView } from './components/emoji_picker/emoji_picker_view';
 import { EmptyState } from './components/empty_state/empty_state';
-import { FileSearchView } from './components/file_search/file_search_view';
-import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
 import { CalculatorIcon, StarFilledIcon } from './components/icons';
 import { Kbd } from './components/kbd/kbd';
@@ -17,10 +13,7 @@ import { QuickLook } from './components/quick_look/quick_look';
 import { SearchBar } from './components/search_bar/search_bar';
 import type { SearchDropdownSection } from './components/search_bar/search_dropdown';
 import { SearchDropdown } from './components/search_bar/search_dropdown';
-import { SettingsView } from './components/settings/settings_view';
-import { SnippetManagerView } from './components/snippet_manager/snippet_manager_view';
 import { ToastContainer } from './components/toast/toast_container';
-import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useAlert } from './hooks/use_alert';
 import { useFavorites } from './hooks/use_favorites';
 import { useHUD } from './hooks/use_hud';
@@ -31,50 +24,19 @@ import {
 } from './hooks/use_navigation';
 import { useTheme } from './hooks/use_theme';
 import { useToast } from './hooks/use_toast';
-import type {
-  ColorItemData,
-  ListItemData,
-  ListItemMetadataEntry,
-  SectionData,
-} from './types';
+import { getCommand, getSections, searchCommands } from './registry';
+import type { ListItemData, ListItemMetadataEntry, SectionData } from './types';
 import { evaluate } from './utils/calculator';
 
 type NavViewData =
-  | { type: 'grid' }
-  | { type: 'clipboard' }
-  | { type: 'snippets' }
-  | { type: 'emoji' }
-  | { type: 'file-search' }
-  | { type: 'settings' }
+  | {
+      type: 'command';
+      commandId: string;
+    }
   | {
       type: 'detail';
       item: ListItemData;
     };
-
-function filterSections(sections: SectionData[], query: string): SectionData[] {
-  if (!query) return sections;
-  const lower = query.toLowerCase();
-  return sections
-    .map(section => ({
-      ...section,
-      items: section.items.filter(
-        item =>
-          item.title.toLowerCase().includes(lower) ||
-          item.subtitle?.toLowerCase().includes(lower),
-      ),
-    }))
-    .filter(section => section.items.length > 0);
-}
-
-function filterColors(colors: ColorItemData[], query: string): ColorItemData[] {
-  if (!query) return colors;
-  const lower = query.toLowerCase();
-  return colors.filter(
-    c =>
-      c.title.toLowerCase().includes(lower) ||
-      c.subtitle?.toLowerCase().includes(lower),
-  );
-}
 
 function flattenItems(sections: SectionData[]): ListItemData[] {
   return sections.flatMap(s => s.items);
@@ -114,15 +76,6 @@ function renderMetadataEntry(entry: ListItemMetadataEntry, index: number) {
     case 'separator':
       return <DetailMetadata.Separator key={index} />;
   }
-}
-
-function ColorSwatch({ color }: { color: string }) {
-  return (
-    <div
-      className="grid-item__color-swatch"
-      style={{ backgroundColor: color }}
-    />
-  );
 }
 
 function CheckIcon() {
@@ -184,47 +137,6 @@ function SearchIcon() {
   );
 }
 
-interface ColorPickerViewProps {
-  colors: ColorItemData[];
-  onActiveIndexChange: (index: number) => void;
-  onAction: (index: number) => void;
-}
-
-function ColorPickerView({
-  colors,
-  onActiveIndexChange,
-  onAction,
-}: ColorPickerViewProps) {
-  if (colors.length === 0) {
-    return (
-      <EmptyState
-        icon={<SearchIcon />}
-        title="No Colors"
-        description="Try a different search term"
-      />
-    );
-  }
-
-  return (
-    <Grid
-      itemCount={colors.length}
-      columns={4}
-      onActiveIndexChange={onActiveIndexChange}
-      onAction={onAction}
-    >
-      {colors.map((color, index) => (
-        <GridItem
-          key={color.id}
-          index={index}
-          icon={<ColorSwatch color={color.color} />}
-          title={color.title}
-          subtitle={color.subtitle}
-        />
-      ))}
-    </Grid>
-  );
-}
-
 function DetailView({ item }: { item: ListItemData }) {
   const itemDetail = item.detail;
   if (!itemDetail) return null;
@@ -246,7 +158,6 @@ export function App() {
   useTheme();
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
-  const [colorFilterValue, setColorFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [quickLookOpen, setQuickLookOpen] = useState(false);
@@ -258,7 +169,11 @@ export function App() {
   const { favoriteIds, isFavorite, toggleFavorite, moveFavorite } =
     useFavorites();
 
-  const viewType = nav.currentEntry?.data.type ?? 'root';
+  const currentNavData = nav.currentEntry?.data;
+  const isRoot = !currentNavData;
+  const isFullView =
+    currentNavData?.type === 'command' &&
+    (getCommand(currentNavData.commandId)?.fullView ?? false);
 
   const searchFilterSections: SearchDropdownSection[] = useMemo(
     () => [
@@ -287,50 +202,20 @@ export function App() {
     [],
   );
 
-  const colorFilterSections: SearchDropdownSection[] = useMemo(
-    () => [
-      {
-        options: [
-          {
-            label: 'All Colors',
-            value: 'all',
-          },
-        ],
-      },
-      {
-        title: 'Category',
-        options: [
-          {
-            label: 'Warm',
-            value: 'warm',
-          },
-          {
-            label: 'Cool',
-            value: 'cool',
-          },
-          {
-            label: 'Neutral',
-            value: 'neutral',
-          },
-        ],
-      },
-    ],
-    [],
-  );
-
   useEffect(() => {
     if (nav.stackDepth === 0) {
       setQuery('');
       setFilterValue('all');
-      setColorFilterValue('all');
       setSelectedIndex(0);
       setActionsOpen(false);
       setQuickLookOpen(false);
     }
   }, [nav.stackDepth]);
 
+  const registrySections = useMemo(() => getSections(), []);
+
   const filtered = useMemo(() => {
-    let sections = MOCK_SECTIONS;
+    let sections = registrySections;
     if (filterValue === 'commands') {
       sections = sections.filter(
         s => s.title === 'Suggestions' || s.title === 'Commands',
@@ -338,7 +223,32 @@ export function App() {
     } else if (filterValue === 'applications') {
       sections = sections.filter(s => s.title === 'Applications');
     }
-    const result = filterSections(sections, query);
+
+    const result = query ? searchCommands(query) : sections;
+
+    const filteredResult = query
+      ? result
+          .map(s => {
+            if (filterValue === 'commands') {
+              return s.title === 'Suggestions' || s.title === 'Commands'
+                ? s
+                : {
+                    ...s,
+                    items: [],
+                  };
+            }
+            if (filterValue === 'applications') {
+              return s.title === 'Applications'
+                ? s
+                : {
+                    ...s,
+                    items: [],
+                  };
+            }
+            return s;
+          })
+          .filter(s => s.items.length > 0)
+      : result;
 
     const allFlatItems = sections.flatMap(s => s.items);
     const favoriteItems = favoriteIds
@@ -354,7 +264,7 @@ export function App() {
       );
       if (filteredFavs.length > 0) {
         const favIds = new Set(filteredFavs.map(f => f.id));
-        const dedupedSections = result
+        const dedupedSections = filteredResult
           .map(s => ({
             ...s,
             items: s.items.filter(item => !favIds.has(item.id)),
@@ -368,12 +278,12 @@ export function App() {
           ...dedupedSections,
         ];
       }
-      return result;
+      return filteredResult;
     }
 
     if (favoriteItems.length > 0) {
       const favIds = new Set(favoriteIds);
-      const dedupedSections = result
+      const dedupedSections = filteredResult
         .map(s => ({
           ...s,
           items: s.items.filter(item => !favIds.has(item.id)),
@@ -388,18 +298,20 @@ export function App() {
       ];
     }
 
-    return result;
+    return filteredResult;
   }, [
     query,
     filterValue,
     favoriteIds,
+    registrySections,
   ]);
+
   const calculatorResult = useMemo(() => {
-    if (viewType !== 'root' || !query.trim()) return null;
+    if (!isRoot || !query.trim()) return null;
     return evaluate(query);
   }, [
     query,
-    viewType,
+    isRoot,
   ]);
 
   const allItems = useMemo(() => {
@@ -422,19 +334,8 @@ export function App() {
     calculatorResult,
     query,
   ]);
-  const filteredColors = useMemo(() => {
-    let colors = MOCK_COLORS;
-    if (colorFilterValue !== 'all') {
-      colors = colors.filter(c => c.category === colorFilterValue);
-    }
-    return filterColors(colors, query);
-  }, [
-    query,
-    colorFilterValue,
-  ]);
 
-  const selectedItem =
-    viewType === 'root' ? allItems[selectedIndex] : undefined;
+  const selectedItem = isRoot ? allItems[selectedIndex] : undefined;
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -447,38 +348,10 @@ export function App() {
     setSelectedIndex(0);
   }, []);
 
-  const handleColorFilterChange = useCallback((value: string) => {
-    setColorFilterValue(value);
-    setSelectedIndex(0);
-  }, []);
-
   const handleActiveIndexChange = useCallback((index: number) => {
     setSelectedIndex(index);
     setActionsOpen(false);
   }, []);
-
-  const handleCopyColor = useCallback(
-    (color: ColorItemData) => {
-      showHUD({
-        icon: <ClipboardHUDIcon />,
-        title: `Copied ${color.color}`,
-      });
-    },
-    [showHUD],
-  );
-
-  const handleGridAction = useCallback(
-    (index: number) => {
-      const color = filteredColors[index];
-      if (color) {
-        handleCopyColor(color);
-      }
-    },
-    [
-      filteredColors,
-      handleCopyColor,
-    ],
-  );
 
   const handleDrillIn = useCallback(() => {
     const item = allItems[selectedIndex];
@@ -494,35 +367,15 @@ export function App() {
       return;
     }
 
-    if (item.id === 'clipboard-history') {
-      push('Clipboard History', { type: 'clipboard' });
-      setQuery('');
-      setSelectedIndex(0);
-    } else if (item.id === 'file-search') {
-      push('File Search', { type: 'file-search' });
-      setQuery('');
-      setSelectedIndex(0);
-    } else if (item.id === 'snippets') {
-      push('Snippets', { type: 'snippets' });
-      setQuery('');
-      setSelectedIndex(0);
-    } else if (item.id === 'emoji') {
-      push('Search Emoji', { type: 'emoji' });
-      setQuery('');
-      setSelectedIndex(0);
-    } else if (item.id === 'settings') {
-      push('Settings', { type: 'settings' });
-      setQuery('');
-      setSelectedIndex(0);
-    } else if (item.id === 'color-picker') {
-      push('Color Picker', { type: 'grid' });
-      setQuery('');
-      setSelectedIndex(0);
-      setColorFilterValue('all');
-      showToast({
-        style: 'success',
-        title: 'Opened Color Picker',
+    const cmd = getCommand(item.id);
+
+    if (cmd?.component) {
+      push(cmd.name, {
+        type: 'command',
+        commandId: cmd.id,
       });
+      setQuery('');
+      setSelectedIndex(0);
     } else if (item.detail) {
       push(item.title, {
         type: 'detail',
@@ -562,14 +415,7 @@ export function App() {
       meta: true,
     },
     toggleActions,
-    {
-      enabled:
-        viewType !== 'clipboard' &&
-        viewType !== 'snippets' &&
-        viewType !== 'emoji' &&
-        viewType !== 'file-search' &&
-        viewType !== 'settings',
-    },
+    { enabled: !isFullView },
   );
 
   const handleToggleFavorite = useCallback(() => {
@@ -598,7 +444,7 @@ export function App() {
       shift: true,
     },
     handleToggleFavorite,
-    { enabled: viewType === 'root' && !!selectedItem },
+    { enabled: isRoot && !!selectedItem },
   );
 
   const handleMoveFavoriteUp = useCallback(() => {
@@ -629,8 +475,7 @@ export function App() {
     },
     handleMoveFavoriteUp,
     {
-      enabled:
-        viewType === 'root' && !!selectedItem && isFavorite(selectedItem.id),
+      enabled: isRoot && !!selectedItem && isFavorite(selectedItem.id),
     },
   );
 
@@ -642,20 +487,28 @@ export function App() {
     },
     handleMoveFavoriteDown,
     {
-      enabled:
-        viewType === 'root' && !!selectedItem && isFavorite(selectedItem.id),
+      enabled: isRoot && !!selectedItem && isFavorite(selectedItem.id),
     },
   );
 
   const openSettings = useCallback(() => {
-    if (viewType !== 'settings') {
-      push('Settings', { type: 'settings' });
-      setQuery('');
-      setSelectedIndex(0);
-      setActionsOpen(false);
+    const settingsCmd = getCommand('settings');
+    if (settingsCmd) {
+      const isAlreadySettings =
+        currentNavData?.type === 'command' &&
+        currentNavData.commandId === 'settings';
+      if (!isAlreadySettings) {
+        push('Settings', {
+          type: 'command',
+          commandId: 'settings',
+        });
+        setQuery('');
+        setSelectedIndex(0);
+        setActionsOpen(false);
+      }
     }
   }, [
-    viewType,
+    currentNavData,
     push,
   ]);
 
@@ -681,11 +534,11 @@ export function App() {
       meta: true,
     },
     toggleQuickLook,
-    { enabled: viewType === 'root' && !!selectedItem?.detail },
+    { enabled: isRoot && !!selectedItem?.detail },
   );
 
   useEffect(() => {
-    if (viewType !== 'root' || !selectedItem?.detail) return;
+    if (!isRoot || !selectedItem?.detail) return;
 
     function handleSpaceBar(e: KeyboardEvent) {
       if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) {
@@ -701,7 +554,7 @@ export function App() {
     window.addEventListener('keydown', handleSpaceBar);
     return () => window.removeEventListener('keydown', handleSpaceBar);
   }, [
-    viewType,
+    isRoot,
     selectedItem?.detail,
     query,
   ]);
@@ -914,11 +767,7 @@ export function App() {
   );
 
   const activeDescendantId =
-    viewType === 'root' && allItems.length > 0
-      ? `list-item-${selectedIndex}`
-      : viewType === 'grid' && filteredColors.length > 0
-        ? `grid-item-${selectedIndex}`
-        : undefined;
+    isRoot && allItems.length > 0 ? `list-item-${selectedIndex}` : undefined;
 
   const navDirectionClass =
     nav.direction === 'push'
@@ -936,39 +785,23 @@ export function App() {
     const entry = nav.currentEntry;
     if (!entry) return null;
 
-    switch (entry.data.type) {
-      case 'clipboard':
-        return <ClipboardHistoryView />;
-      case 'snippets':
-        return <SnippetManagerView />;
-      case 'emoji':
-        return <EmojiPickerView />;
-      case 'file-search':
-        return <FileSearchView />;
-      case 'settings':
-        return <SettingsView />;
-      case 'grid':
-        return (
-          <ColorPickerView
-            key={colorFilterValue}
-            colors={filteredColors}
-            onActiveIndexChange={handleActiveIndexChange}
-            onAction={handleGridAction}
-          />
-        );
-      case 'detail':
-        return <DetailView item={entry.data.item} />;
+    if (entry.data.type === 'command') {
+      const cmd = getCommand(entry.data.commandId);
+      if (cmd?.component) {
+        const Component = cmd.component;
+        return <Component />;
+      }
+      return null;
     }
+
+    if (entry.data.type === 'detail') {
+      return <DetailView item={entry.data.item} />;
+    }
+
+    return null;
   }
 
-  const isFullView =
-    viewType === 'clipboard' ||
-    viewType === 'snippets' ||
-    viewType === 'emoji' ||
-    viewType === 'file-search' ||
-    viewType === 'settings';
-
-  const isCompact = viewType === 'root' && !query.trim();
+  const isCompact = isRoot && !query.trim();
 
   return (
     <NavigationContextProvider value={nav}>
@@ -982,17 +815,11 @@ export function App() {
               nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined
             }
             dropdown={
-              viewType === 'root' ? (
+              isRoot ? (
                 <SearchDropdown
                   sections={searchFilterSections}
                   value={filterValue}
                   onChange={handleFilterChange}
-                />
-              ) : viewType === 'grid' ? (
-                <SearchDropdown
-                  sections={colorFilterSections}
-                  value={colorFilterValue}
-                  onChange={handleColorFilterChange}
                 />
               ) : undefined
             }
