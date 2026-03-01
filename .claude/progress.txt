@@ -498,10 +498,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   tokenized. autoComplete="current-password" for proper browser/password manager
   behavior. Exported from form/index.ts.
 
-- [ ] [P1] COMP008 - Build Form.TagPicker component. Multi-select input where
+- [x] [P1] COMP008 - Build Form.TagPicker component. Multi-select input where
   user picks tags from a dropdown. Selected tags appear as pills inside the
   input. Type to filter available tags. Remove tag by clicking X or backspace.
   Create src/components/form/form_tag_picker.tsx and form_tag_picker.scss.
+  Done: FormTagPicker component with combobox ARIA pattern, filtered dropdown,
+  tag pills with X remove button, Backspace removes last tag, ArrowDown/Up
+  keyboard navigation, Enter to select, Escape/Tab to close. useMemo for
+  availableOptions and optionLabelMap for O(1) label lookups. Value-based
+  option IDs for stable aria-activedescendant. All SCSS values tokenized
+  (local vars for tag height, remove size, input min-width, menu max-height).
+  FormField wrapper, useId(), aria-invalid/aria-describedby for errors,
+  aria-label on listbox. Exported from form/index.ts with FormTagPickerOption
+  type. Demo: Tags field in Create Snippet form with 8 language options.
+  All 93 tests pass, bun run check passes.
 
 - [ ] [P1] COMP009 - Build Form.FilePicker component (simulated for web). Shows
   a file input styled like Raycast's file picker. Single or multiple file

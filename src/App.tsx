@@ -10,6 +10,7 @@ import {
   FormCheckbox,
   FormDatePicker,
   FormDropdown,
+  FormTagPicker,
   FormTextArea,
   FormTextField,
 } from './components/form';
@@ -182,6 +183,7 @@ interface SnippetFormState {
   keyword: string;
   snippet: string;
   category: string;
+  tags: string[];
   isShared: boolean;
   expiresAt: string;
 }
@@ -191,9 +193,45 @@ const INITIAL_SNIPPET_FORM: SnippetFormState = {
   keyword: '',
   snippet: '',
   category: 'general',
+  tags: [],
   isShared: false,
   expiresAt: '',
 };
+
+const SNIPPET_TAGS = [
+  {
+    label: 'JavaScript',
+    value: 'javascript',
+  },
+  {
+    label: 'TypeScript',
+    value: 'typescript',
+  },
+  {
+    label: 'Python',
+    value: 'python',
+  },
+  {
+    label: 'React',
+    value: 'react',
+  },
+  {
+    label: 'CSS',
+    value: 'css',
+  },
+  {
+    label: 'HTML',
+    value: 'html',
+  },
+  {
+    label: 'Shell',
+    value: 'shell',
+  },
+  {
+    label: 'Markdown',
+    value: 'markdown',
+  },
+];
 
 const SNIPPET_CATEGORIES = [
   {
@@ -292,6 +330,19 @@ function CreateSnippetView({ onSubmit }: CreateSnippetViewProps) {
         }
         options={SNIPPET_CATEGORIES}
         placeholder="Select a category"
+      />
+      <FormTagPicker
+        label="Tags"
+        value={snippetForm.tags}
+        onChange={v =>
+          setSnippetForm(prev => ({
+            ...prev,
+            tags: v,
+          }))
+        }
+        options={SNIPPET_TAGS}
+        placeholder="Add tags..."
+        description="Categorize your snippet with tags"
       />
       <FormTextArea
         label="Snippet"
