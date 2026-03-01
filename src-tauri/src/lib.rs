@@ -1,4 +1,5 @@
 use std::sync::Mutex;
+use std::time::Duration;
 use tauri::{Emitter, Manager};
 #[cfg(desktop)]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
@@ -81,6 +82,70 @@ fn toggle_window(window: &tauri::WebviewWindow) {
     }
 }
 
+fn detect_content_type(content: &str) -> &'static str {
+    let trimmed = content.trim();
+
+    if trimmed.starts_with("http://") || trimmed.starts_with("https://") {
+        return "link";
+    }
+
+    if (trimmed.len() == 4 || trimmed.len() == 7 || trimmed.len() == 9)
+        && trimmed.starts_with('#')
+        && trimmed[1..].chars().all(|c| c.is_ascii_hexdigit())
+    {
+        return "color";
+    }
+
+    if trimmed.starts_with("rgb(")
+        || trimmed.starts_with("rgba(")
+        || trimmed.starts_with("hsl(")
+        || trimmed.starts_with("hsla(")
+    {
+        return "color";
+    }
+
+    "text"
+}
+
+fn start_clipboard_monitor(app_handle: tauri::AppHandle) {
+    use tauri_plugin_clipboard_manager::ClipboardExt;
+
+    std::thread::spawn(move || {
+        let mut last_text = String::new();
+
+        loop {
+            std::thread::sleep(Duration::from_millis(500));
+
+            let text = match app_handle.clipboard().read_text() {
+                Ok(t) => t,
+                Err(_) => continue,
+            };
+
+            if text.is_empty() || text == last_text {
+                continue;
+            }
+            last_text = text.clone();
+
+            let content_type = detect_content_type(&text);
+
+            let elapsed = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default();
+            let timestamp_ms = elapsed.as_secs() * 1000 + elapsed.subsec_millis() as u64;
+
+            let payload = serde_json::json!({
+                "content": text,
+                "contentType": content_type,
+                "timestamp": timestamp_ms,
+            });
+
+            if let Err(e) = app_handle.emit("clipboard-changed", payload) {
+                eprintln!("failed to emit clipboard-changed: {e}");
+            }
+        }
+    });
+}
+
 #[tauri::command]
 fn set_window_position_pref(
     state: tauri::State<'_, Mutex<WindowConfig>>,
@@ -102,6 +167,7 @@ fn set_window_position_pref(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(Mutex::new(WindowConfig::default()))
         .invoke_handler(tauri::generate_handler![set_window_position_pref])
         .setup(|app| {
@@ -132,6 +198,8 @@ pub fn run() {
                 }
 
                 position_near_top(&window);
+
+                start_clipboard_monitor(app.handle().clone());
 
                 let window_for_shortcut = window.clone();
                 app.handle().plugin(

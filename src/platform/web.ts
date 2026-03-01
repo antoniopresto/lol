@@ -5,6 +5,8 @@ import type {
   PlatformWindow,
 } from './types';
 
+const noop = () => {};
+
 function isWebUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
@@ -21,6 +23,9 @@ const clipboard: PlatformClipboard = {
   async readText() {
     return navigator.clipboard.readText();
   },
+  async onClipboardChange() {
+    return noop;
+  },
 };
 
 const shell: PlatformShell = {
@@ -34,8 +39,6 @@ const shell: PlatformShell = {
     anchor.click();
   },
 };
-
-const noop = () => {};
 
 const platformWindow: PlatformWindow = {
   async hide() {},

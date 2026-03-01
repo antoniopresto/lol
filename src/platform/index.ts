@@ -2,6 +2,7 @@ import type { PlatformAPI } from './types';
 import { webPlatform } from './web';
 
 export type {
+  ClipboardChangeEvent,
   PlatformAPI,
   PlatformClipboard,
   PlatformShell,

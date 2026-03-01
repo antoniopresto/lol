@@ -1054,7 +1054,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     settings_view.tsx, stored pref synced to Rust backend on startup.
     Files: use_window.ts, settings_view.tsx.
 
-- [ ] [P1] TAURI005 - Add native clipboard access via Tauri plugin. Use
+- [x] [P1] TAURI005 - Add native clipboard access via Tauri plugin. Use
   @tauri-apps/plugin-clipboard-manager for real clipboard read/write.
   Replace mock clipboard data with actual system clipboard monitoring.
   Create src-tauri/ Rust command to poll clipboard changes (500ms interval).
@@ -1063,6 +1063,35 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   TAURI008 is complete). Detect content type (text, image, link, color hex).
   Limit history to 1000 entries. Wire into ClipboardHistoryView to replace
   mock data.
+  Done: Installed tauri-plugin-clipboard-manager (Rust) and
+  @tauri-apps/plugin-clipboard-manager (JS). Rust-side start_clipboard_monitor
+  with background thread, 500ms polling, direct string equality change
+  detection (no hash collisions), detect_content_type for text/link/color,
+  timestamp via safe u64 arithmetic. ClipboardChangeEvent type in platform/
+  types.ts. tauri.ts listens for "clipboard-changed" events, web.ts noop.
+  useClipboardHistory hook with localStorage persistence, race-safe
+  deduplication inside setEntries updater, trimToMaxEntries with guard
+  against negative unpinned limit, pin/delete/clearAll. ClipboardHistoryView
+  consumes hook (web: mock seed, Tauri: real clipboard events). Capabilities
+  include clipboard-manager permissions. All 93 tests pass, bun run check
+  and cargo check pass.
+  Sub-tasks:
+  - [x] TAURI005a - Install clipboard plugin (Rust + JS), register in lib.rs,
+    add permissions to capabilities. Install tauri-plugin-clipboard-manager
+    in Cargo.toml and @tauri-apps/plugin-clipboard-manager via bun.
+  - [x] TAURI005b - Create Rust-side clipboard polling. Background thread with
+    500ms interval, string equality change detection, emit "clipboard-changed"
+    event with content string and detected content type to frontend.
+  - [x] TAURI005c - Extend PlatformClipboard interface with onClipboardChange
+    listener method. Implement in tauri.ts (listen for "clipboard-changed"
+    events) and web.ts (noop fallback). Update clipboard.ts utility.
+  - [x] TAURI005d - Create useClipboardHistory hook (src/hooks/use_clipboard_history.ts).
+    Manage clipboard entries from native events + localStorage persistence.
+    Content type detection (link/color/text), 1000 entry limit, pin/delete
+    state, race-safe deduplication inside setEntries updater.
+  - [x] TAURI005e - Refactor ClipboardHistoryView to use useClipboardHistory hook.
+    In Tauri mode: real clipboard data from monitoring. In web mode: mock data
+    as seed. Remove direct MOCK_CLIPBOARD_ENTRIES dependency from view.
 
 - [ ] [P1] TAURI006 - Add native file system access. Use @tauri-apps/api/fs
   and @tauri-apps/plugin-fs for real file operations. Replace mock file

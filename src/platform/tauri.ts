@@ -1,5 +1,6 @@
 import { storageGet } from '../utils/storage';
 import type {
+  ClipboardChangeEvent,
   PlatformAPI,
   PlatformClipboard,
   PlatformShell,
@@ -19,10 +20,18 @@ function isSettingsWithPosition(v: unknown): v is { windowPosition: string } {
 
 const clipboard: PlatformClipboard = {
   async writeText(text: string) {
-    await navigator.clipboard.writeText(text);
+    const { writeText } = await import('@tauri-apps/plugin-clipboard-manager');
+    await writeText(text);
   },
   async readText() {
-    return navigator.clipboard.readText();
+    const { readText } = await import('@tauri-apps/plugin-clipboard-manager');
+    return readText();
+  },
+  async onClipboardChange(handler: (event: ClipboardChangeEvent) => void) {
+    const { listen } = await import('@tauri-apps/api/event');
+    return listen<ClipboardChangeEvent>('clipboard-changed', event => {
+      handler(event.payload);
+    });
   },
 };
 
