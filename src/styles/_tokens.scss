@@ -20,6 +20,8 @@ $color-tag-background: rgba(255, 255, 255, 0.1);
 
 $font-family-mono: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, monospace;
 
+$font-weight-regular: 400;
+$font-weight-medium: 500;
 $font-weight-semibold: 600;
 
 $space-half: 2px;
@@ -45,8 +47,15 @@ $shadow-popover:
   0 1px 6px rgba(0, 0, 0, 0.25);
 
 $font-family:
-  -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto,
-  Helvetica, Arial, sans-serif;
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'SF Pro Text',
+  'Segoe UI',
+  Roboto,
+  Helvetica,
+  Arial,
+  sans-serif;
 
 $font-xs: 11px;
 $font-sm: 12px;

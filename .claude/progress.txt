@@ -318,8 +318,58 @@
     section headers 12px font, kbd 20x20 with 12px font, search icon 20x20.
     Added $font-base, $list-item-height, $action-panel-height tokens.
 
-- [ ] UXDS002 - The design is very poor, Raycast has a lot more resources and
+- [x] UXDS002 - The design is very poor, Raycast has a lot more resources and
 screens, plan next tasks and fix it.
+  Sub-tasks:
+  - [x] UXDS002a - [P0] Add Inter font and update font stack. Raycast uses Inter
+    as primary font with custom letter/line spacing. Add Inter via Google Fonts
+    or local @font-face. Update $font-family in _tokens.scss to prioritize Inter.
+    Done: Inter prioritized in $font-family, letter-spacing -0.011em on body,
+    added $font-weight-regular (400) and $font-weight-medium (500) tokens.
+    Inter was already loaded in index.html (weights 400, 500, 600).
+  - [ ] UXDS002b - [P0] Fix selection/active item style. Raycast uses selection
+    color at 10% alpha for active items (subtle highlight), NOT full accent blue.
+    Update list_item.scss: active bg from $color-accent to rgba($color-accent, 0.1).
+    Active title/subtitle/accessory text stays primary color (no white override).
+    Add new token $color-selection-background: rgba($color-accent, 0.1).
+  - [ ] UXDS002c - [P0] Fix window dimensions and glass effect. Window radius 12→18px
+    (add $radius-window: 18px token). Search bar height 46→56px. Search bar font
+    15→16px. Backdrop blur 64→72px. Background: gradient from backgroundPrimary(40%)
+    to backgroundSecondary(40%) instead of single rgba. Border: text at 20% opacity
+    inset instead of rgba(255,255,255,0.08). Action panel bottom radius matches
+    window radius.
+  - [ ] UXDS002d - [P1] Fix list item spacing and radius. Border-radius 8→10px
+    (add $radius-list-item: 10px token). Icon-text gap 8→12px. Left padding 8px
+    stays. These match Raycast's ray-so source exactly.
+  - [ ] UXDS002e - [P1] Fix section headers. Font-weight to 500 (medium, add
+    $font-weight-medium: 500 token). Letter-spacing from 0.5px to 0.1px. Text
+    color from $color-text-secondary to rgba($color-text-primary, 0.6) for
+    proper alpha-based approach. Remove text-transform uppercase (Raycast section
+    headers are mixed case).
+  - [ ] UXDS002f - [P1] Fix action bar layout. Left side: add Raycast logo icon
+    (small 16x16 SVG) + context label (current extension/view name) in $font-sm
+    at 60% text opacity. Right side: primary action label in $font-xs font-semibold
+    full text color + Enter kbd badge + vertical separator (2x12px at text/10%) +
+    "Actions" label at 60% + Cmd+K badges. Background from $color-surface-footer
+    to rgba(255, 255, 255, 0.05).
+  - [ ] UXDS002g - [P1] Fix kbd badge styling. Background from $color-kbd-background
+    to rgba($color-text-primary, 0.1). Remove 1px border. Border-radius from 4px
+    to 6px ($radius-md or new $radius-kbd: 6px). Size stays 20px height but Raycast
+    uses 22x20px for single chars, 24x20px for symbols.
+  - [ ] UXDS002h - [P2] Fix loading bar to match Raycast. Height 2→1px. Gradient
+    width constrained to 200px (not full width). Animation duration 1.5→2s. Gradient:
+    transparent→loader color→transparent (simpler 3-stop gradient).
+  - [ ] UXDS002i - [P2] Adopt alpha-based color token system. Raycast derives all
+    UI colors from base text color at various opacities (10%, 40%, 60%). Replace
+    flat colors ($color-text-secondary, $color-text-tertiary, $color-border) with
+    alpha variants of $color-text-primary. Add tokens: $text-100 (10%), $text-400
+    (40%), $text-600 (60%), $border-100 (text 10%), $border-200 (text 20%).
+  - [ ] UXDS002j - [P2] Add colored accessory tags on list items. Raycast shows
+    colored tag pills in list item accessories (22px tall, rounded-md 6px, color
+    text on 15% alpha bg). Update ListItemAccessoryData type to support tag
+    accessories with color. Create accessory tag styles in list_item.scss.
+
+--------------------------------------------------------------------------------
 
 - [ ] UXDS003 - Map all real Raycast screens and components, plan every single
 one, add tasks.
