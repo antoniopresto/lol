@@ -1192,10 +1192,22 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     on text content columns. FTS5 sync triggers for clipboard, snippets,
     quicklinks. JSON validation on tags columns. Auto-update trigger for
     notes.updated_at. All timestamps use ISO 8601 UTC format.
-  - [ ] TAURI008c - Create src/utils/database.ts with typed query helpers.
+  - [x] TAURI008c - Create src/utils/database.ts with typed query helpers.
     Platform-aware: uses SQLite via Tauri when available, falls back to
     localStorage (existing storage.ts) on web. Typed insert/select/update/
     delete helpers for each table.
+    Done: Created src/utils/database.ts with 6 typed table helpers:
+    clipboardDb, snippetDb, quicklinkDb, noteDb, recentCommandDb, settingsDb.
+    Row types (ClipboardEntryRow, SnippetRow, QuicklinkRow, NoteRow,
+    RecentCommandRow, SettingRow) match SQLite schema exactly. Lazy DB
+    singleton with error recovery (clears promise on rejection). Column
+    allowlists (CLIPBOARD_COLUMNS, SNIPPET_COLUMNS, etc.) prevent SQL
+    injection in dynamic UPDATE queries via buildUpdateQuery(). FTS5 query
+    escaping via escapeFts5Query() wraps tokens in double-quotes. Settings
+    upsert uses excluded.value (canonical SQLite pattern). Web fallback uses
+    existing storage.ts localStorage keys for backward compatibility. All
+    search methods support FTS5 MATCH (Tauri) and substring filter (web).
+    All 93 tests pass, bun run check passes.
   - [ ] TAURI008d - Migrate clipboard_entries persistence to database.ts.
     Update use_clipboard_history.ts to use database helpers instead of
     direct localStorage.
