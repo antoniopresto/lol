@@ -3,6 +3,7 @@ import { NavViewData, TRAY_COMMAND_MAP } from './app_types';
 import { ActionPanel } from './components/action_panel/action_panel';
 import { CommandPalette } from './components/command_palette/command_palette';
 import { DetailItemView } from './components/detail/detail_item_view';
+import { ErrorBoundary } from './components/error_boundary/error_boundary';
 import { Kbd } from './components/kbd/kbd';
 import { RootSearchView } from './components/root_search';
 import { SearchBar } from './components/search_bar/search_bar';
@@ -99,12 +100,11 @@ export function App() {
     <NavigationContextProvider value={nav}>
       <CommandPalette isLoading compact={compact}>
         {isFullView && nav.currentEntry ? (
-          <div
-            key={nav.navKey}
-            className={`command-palette__nav-view${navDirectionClass}`}
-          >
-            {renderNavView(nav.currentEntry.data)}
-          </div>
+          <ErrorBoundary key={nav.navKey} onReset={nav.pop}>
+            <div className={`command-palette__nav-view${navDirectionClass}`}>
+              {renderNavView(nav.currentEntry.data)}
+            </div>
+          </ErrorBoundary>
         ) : nav.currentEntry ? (
           <>
             <SearchBar
@@ -114,16 +114,15 @@ export function App() {
                 nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined
               }
             />
-            <div
-              key={nav.navKey}
-              className={`command-palette__nav-view${navDirectionClass}`}
-            >
-              <div className="command-palette__body">
-                <div className="command-palette__list-container">
-                  {renderNavView(nav.currentEntry.data)}
+            <ErrorBoundary key={nav.navKey} onReset={nav.pop}>
+              <div className={`command-palette__nav-view${navDirectionClass}`}>
+                <div className="command-palette__body">
+                  <div className="command-palette__list-container">
+                    {renderNavView(nav.currentEntry.data)}
+                  </div>
                 </div>
               </div>
-            </div>
+            </ErrorBoundary>
             <ActionPanel
               contextLabel={contextLabel}
               actions={[

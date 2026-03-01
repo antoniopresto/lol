@@ -1742,13 +1742,28 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   - [x] INFRA005b - Refactor existing utils to use platform API: clipboard.ts,
     open_url.ts, use_window.ts, main.tsx. Consumers unchanged.
 
-- [ ] [P2] INFRA006 - Add error boundary components. Create
+- [x] [P2] INFRA006 - Add error boundary components. Create
   src/components/error_boundary/ with error_boundary.tsx (class component
   wrapping React.ErrorBoundary). Show friendly error UI: icon, "Something
   went wrong" title, error message (collapsed by default, expandable),
   "Try Again" button that resets state. Style matching Raycast error states.
   Wrap each pushed view in error boundary. Log errors to console with
   component stack. Create error_boundary.scss.
+  Done: ErrorBoundary class component with getDerivedStateFromError +
+  componentDidCatch (logs error + component stack). Friendly UI: WarningIcon
+  (32px, destructive color), "Something went wrong" title, error message,
+  collapsible stack trace (aria-expanded toggle), "Try Again" button with
+  autoFocus. Escape key via window-level keydown listener (added on error,
+  removed on clear/unmount). handleRetry clears state via setState callback
+  before calling onReset to prevent setState-on-unmounted. BEM SCSS with
+  tokenized values ($space-6*2 icon container, $radius-md, $font-lg title,
+  $font-sm message, var(--color-destructive) icon color). Scale+fade enter
+  animation. Stack trace uses $font-family-mono with overflow-wrap:break-word.
+  WarningIcon added to status_icons.tsx (triangle with exclamation mark,
+  stroke-based, currentColor). App.tsx: ErrorBoundary wraps both fullView and
+  non-fullView pushed views with key={nav.navKey} for auto-reset on navigation
+  change, onReset={nav.pop} for explicit retry. Root search view not wrapped
+  (unrecoverable). All 93 tests pass, bun run check passes.
 
 - [ ] [P2] INFRA007 - Add state management with @belt/tools state-machine.
 Replace prop-drilling and scattered useState across App - belt/tools is an

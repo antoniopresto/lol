@@ -66,4 +66,10 @@ export {
   StarIcon,
 } from './object_icons';
 
-export { BatteryIcon, BoltIcon, CloudIcon, WifiIcon } from './status_icons';
+export {
+  BatteryIcon,
+  BoltIcon,
+  CloudIcon,
+  WarningIcon,
+  WifiIcon,
+} from './status_icons';

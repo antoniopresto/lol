@@ -46,3 +46,16 @@ export function CloudIcon(props: IconProps = {}) {
     </svg>
   );
 }
+
+export function WarningIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgBase(props)}>
+      <path
+        d="M7.13 2.5a1 1 0 011.74 0l5.5 9.5A1 1 0 0113.5 13.5h-11a1 1 0 01-.87-1.5l5.5-9.5z"
+        {...STROKE_DEFAULTS}
+      />
+      <path d="M8 6v3.5" {...STROKE_DEFAULTS} />
+      <circle cx="8" cy="11.25" r="0.75" fill="currentColor" />
+    </svg>
+  );
+}
