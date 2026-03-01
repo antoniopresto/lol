@@ -1599,12 +1599,24 @@ internal package public available in npm. See docs and examples at /Users/anoton
   support (.env, .env.production). Target: initial bundle < 200KB gzipped.
   Update vite.config.ts.
 
-- [ ] [P1] INFRA009 - Add CI/CD pipeline. Create .github/workflows/ci.yml:
+- [x] [P1] INFRA009 - Add CI/CD pipeline. Create .github/workflows/ci.yml:
   lint (bun run check), test (bun run test), build (bun run build), optional
   Playwright visual tests. Run on push to main and PRs. Cache bun
   dependencies. Fail on lint errors or test failures. Add status badges
   to README. For Tauri: add tauri-build job that creates platform-specific
   binaries (macOS .dmg, Windows .msi, Linux .AppImage).
+  Done: Created .github/workflows/ci.yml with 4 jobs: lint (type check + eslint
+  + prettier --check), test (vitest), build (vite build), tauri-build (macOS
+  aarch64 + x86_64). Bun dependency caching via actions/cache with bun.lock hash
+  key. Rust caching via Swatinem/rust-cache. Concurrency: cancel-in-progress for
+  PRs only (main runs complete). Timeout: 10min for frontend jobs, 30min for Tauri
+  builds. CI lint uses `bunx eslint src` (no --fix) to catch all issues. Format
+  check uses `bunx prettier --check .` (read-only). Tauri builds macOS-only
+  (project uses window-vibrancy, plist, macOS private API). tauri-action pinned to
+  @v0.5 (not floating @v0). Artifact upload for .dmg and .app bundles. Added
+  .prettierignore (dist, src-tauri/target, src-tauri/gen) to speed up prettier.
+  Linux/Windows builds deferred until cross-platform support is implemented.
+  All 93 tests pass, bun run check passes.
 
 - [ ] [P3] INFRA010 - Add telemetry/analytics abstraction. Create
   src/utils/analytics.ts with track(event, properties?) function. Events:
