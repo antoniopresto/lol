@@ -7,6 +7,7 @@ import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
 import { EmojiPickerView } from './components/emoji_picker/emoji_picker_view';
 import { EmptyState } from './components/empty_state/empty_state';
+import { FileSearchView } from './components/file_search/file_search_view';
 import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
 import { CalculatorIcon } from './components/icons';
@@ -40,6 +41,7 @@ type NavViewData =
   | { type: 'clipboard' }
   | { type: 'snippets' }
   | { type: 'emoji' }
+  | { type: 'file-search' }
   | {
       type: 'detail';
       item: ListItemData;
@@ -438,6 +440,10 @@ export function App() {
       push('Clipboard History', { type: 'clipboard' });
       setQuery('');
       setSelectedIndex(0);
+    } else if (item.id === 'file-search') {
+      push('File Search', { type: 'file-search' });
+      setQuery('');
+      setSelectedIndex(0);
     } else if (item.id === 'snippets') {
       push('Snippets', { type: 'snippets' });
       setQuery('');
@@ -498,7 +504,8 @@ export function App() {
       enabled:
         viewType !== 'clipboard' &&
         viewType !== 'snippets' &&
-        viewType !== 'emoji',
+        viewType !== 'emoji' &&
+        viewType !== 'file-search',
     },
   );
 
@@ -751,6 +758,8 @@ export function App() {
         return <SnippetManagerView />;
       case 'emoji':
         return <EmojiPickerView />;
+      case 'file-search':
+        return <FileSearchView />;
       case 'grid':
         return (
           <ColorPickerView
@@ -766,7 +775,10 @@ export function App() {
   }
 
   const isFullView =
-    viewType === 'clipboard' || viewType === 'snippets' || viewType === 'emoji';
+    viewType === 'clipboard' ||
+    viewType === 'snippets' ||
+    viewType === 'emoji' ||
+    viewType === 'file-search';
 
   return (
     <NavigationContextProvider value={nav}>

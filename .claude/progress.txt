@@ -718,11 +718,21 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   copies result via HUD. ActionPanel label changes to "Copy Result" when
   calculator item is selected. All 93 tests pass, bun run check passes.
 
-- [ ] [P2] SCRN005 - Build File Search screen. List view showing mock file
+- [x] [P2] SCRN005 - Build File Search screen. List view showing mock file
   system entries. Each item: file icon (different per type), filename, path as
   subtitle, size + date accessories. Actions: Open, Show in Finder, Copy Path,
-  Quick Look. Demonstrate file type icons (folder, document, image, code).
-  Push via navigation from "File Search" command.
+  Move to Trash (with confirm). Demonstrate file type icons (folder, document,
+  image, code, pdf, archive, spreadsheet, presentation). Push via navigation
+  from "File Search" command.
+  Done: FileSearchView with self-contained UI (SearchBar, List, ActionPanel,
+  Alert, HUDContainer). 16 mock file entries across 8 file types in
+  file_search_data.tsx. Colored file type icons: folder (blue), code (purple),
+  image (green), pdf (red), archive (gray), spreadsheet (green), presentation
+  (orange), document (blue). Folders/Files sections. SearchDropdown filter by
+  type (All + 8 types). Keyboard shortcuts: ⌘K actions, ⌘C copy path,
+  ⌘⇧F show in finder, ⌘⌫ move to trash with confirm dialog.
+  formatFileSize utility for human-readable file sizes. Folder icons use solid
+  fills (no gradient ID collision). All 93 tests pass, bun run check passes.
 
 - [ ] [P2] SCRN006 - Build Settings/Preferences screen. Pushed view with
   tabbed/sectioned layout. Tabs: General (appearance toggle, hotkey display),

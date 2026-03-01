@@ -14,6 +14,7 @@ import {
   WindowIcon,
 } from '../components/icons';
 import type { ColorItemData, SectionData } from '../types';
+import { FileSearchCommandIcon } from './file_search_data';
 
 export const MOCK_SECTIONS: SectionData[] = [
   {
@@ -94,6 +95,36 @@ Quickly find and insert your saved text snippets. Create shortcuts for frequentl
 1. Create a snippet with a keyword
 2. Type the keyword anywhere
 3. The snippet auto-expands`,
+          metadata: [
+            {
+              type: 'label',
+              title: 'Application',
+              text: 'Raycast',
+            },
+            {
+              type: 'label',
+              title: 'Type',
+              text: 'Command',
+            },
+          ],
+        },
+      },
+      {
+        id: 'file-search',
+        title: 'File Search',
+        subtitle: 'Search Files',
+        icon: FileSearchCommandIcon(),
+        accessories: [{ text: 'Raycast' }],
+        detail: {
+          markdown: `# File Search
+
+Search and browse files on your system. Quickly find documents, code, images, and more.
+
+## Features
+- Search by file name or path
+- Filter by file type
+- Open files directly
+- Copy file paths`,
           metadata: [
             {
               type: 'label',
