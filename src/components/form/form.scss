@@ -29,42 +29,42 @@
 
 .form-field__label {
   font-size: $font-sm;
-  color: $text-600;
+  color: var(--text-600);
   font-weight: $font-weight-semibold;
 }
 
 .form-field__description {
   font-size: $font-xs;
-  color: $text-400;
+  color: var(--text-400);
 }
 
 .form-field__error {
   font-size: $font-xs;
-  color: $color-destructive;
+  color: var(--color-destructive);
 }
 
 .form-input {
   width: 100%;
   padding: $space-2 $space-3;
-  background: $color-background;
-  border: 1px solid $border-100;
+  background: var(--color-background);
+  border: 1px solid var(--border-100);
   border-radius: $radius-md;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   font-family: $font-family;
   font-size: $font-md;
   outline: none;
   transition: border-color $transition-fast ease;
 
   &::placeholder {
-    color: $text-400;
+    color: var(--text-400);
   }
 
   &:focus {
-    border-color: $color-accent;
+    border-color: var(--color-accent);
   }
 
   .form-field--error & {
-    border-color: $color-destructive;
+    border-color: var(--color-destructive);
   }
 }
 
@@ -90,16 +90,16 @@
   border: none;
   border-radius: $radius-sm;
   background: transparent;
-  color: $text-400;
+  color: var(--text-400);
   cursor: pointer;
   transition: color $transition-fast ease;
 
   &:hover {
-    color: $color-text-primary;
+    color: var(--color-text-primary);
   }
 
   &:focus-visible {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 }
@@ -110,7 +110,7 @@
   margin: 0;
   padding: 0;
   border: none;
-  border-top: 1px solid $border-100;
+  border-top: 1px solid var(--border-100);
 }
 
 .form-input--textarea {
@@ -128,17 +128,17 @@
   padding-right: $space-7;
 
   option {
-    background: $color-surface;
-    color: $color-text-primary;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
   }
 }
 
 .form-input--date {
   cursor: pointer;
-  color-scheme: dark;
+  color-scheme: inherit;
 
   &::-webkit-calendar-picker-indicator {
-    filter: invert(0.6);
+    filter: invert(var(--date-picker-invert));
     cursor: pointer;
   }
 }
@@ -165,7 +165,7 @@ $checkbox-size: 16px;
   pointer-events: none;
 
   &:focus-visible + .form-checkbox__box {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 }
@@ -176,10 +176,10 @@ $checkbox-size: 16px;
   justify-content: center;
   width: $checkbox-size;
   height: $checkbox-size;
-  border: 1px solid $border-100;
+  border: 1px solid var(--border-100);
   border-radius: $radius-sm;
-  background: $color-background;
-  color: $color-text-on-accent;
+  background: var(--color-background);
+  color: var(--color-text-on-accent);
   pointer-events: none;
   flex-shrink: 0;
   transition:
@@ -187,29 +187,29 @@ $checkbox-size: 16px;
     border-color $transition-fast ease;
 
   .form-checkbox--error & {
-    border-color: $color-destructive;
+    border-color: var(--color-destructive);
   }
 
   &--checked {
-    background: $color-accent;
-    border-color: $color-accent;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
   }
 }
 
 .form-checkbox__label {
   font-size: $font-md;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   cursor: pointer;
 }
 
 .form-checkbox__error {
   font-size: $font-xs;
-  color: $color-destructive;
+  color: var(--color-destructive);
   padding-left: calc($checkbox-size + $space-2);
 }
 
 .form-checkbox__description {
   font-size: $font-xs;
-  color: $text-400;
+  color: var(--text-400);
   padding-left: calc($checkbox-size + $space-2);
 }

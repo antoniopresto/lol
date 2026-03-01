@@ -13,7 +13,7 @@
   &__title {
     font-size: $font-xs;
     font-weight: $font-weight-medium;
-    color: $text-600;
+    color: var(--text-600);
     letter-spacing: $letter-spacing-section;
     margin-bottom: $space-2;
   }
@@ -29,7 +29,7 @@
   transition: background-color $transition-fast ease;
 
   &:hover {
-    background: $color-surface-hover;
+    background: var(--color-surface-hover);
   }
 
   &__icon {
@@ -53,7 +53,7 @@
 
   &__name {
     font-size: $font-base;
-    color: $color-text-primary;
+    color: var(--color-text-primary);
     font-weight: $font-weight-medium;
     white-space: nowrap;
     overflow: hidden;
@@ -62,7 +62,7 @@
 
   &__meta {
     font-size: $font-xs;
-    color: $text-400;
+    color: var(--text-400);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -88,7 +88,7 @@
   pointer-events: none;
 
   &:focus-visible + .settings-toggle__track {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: $space-half;
   }
 }
@@ -97,12 +97,12 @@
   width: $toggle-width;
   height: $toggle-height;
   border-radius: $radius-pill;
-  background: $text-100;
+  background: var(--text-100);
   transition: background-color $transition-normal ease;
   pointer-events: none;
 
   .settings-toggle__input:checked + & {
-    background: $color-accent;
+    background: var(--color-accent);
   }
 }
 
@@ -113,7 +113,7 @@
   width: $toggle-knob-size;
   height: $toggle-knob-size;
   border-radius: $radius-pill;
-  background: $color-toggle-knob;
+  background: var(--color-toggle-knob);
   transition: transform $transition-normal ease;
   pointer-events: none;
 
@@ -132,7 +132,7 @@
 
   &__label {
     font-size: $font-sm;
-    color: $text-600;
+    color: var(--text-600);
     font-weight: $font-weight-semibold;
     flex: 1;
   }
@@ -148,14 +148,14 @@
   transition: background-color $transition-fast ease;
 
   &:hover {
-    background: $color-surface-hover;
+    background: var(--color-surface-hover);
   }
 
   &__icon {
     flex-shrink: 0;
     width: $space-5;
     height: $space-5;
-    color: $text-600;
+    color: var(--text-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -163,20 +163,20 @@
 
   &__label {
     font-size: $font-base;
-    color: $color-text-primary;
+    color: var(--color-text-primary);
     flex: 1;
   }
 
   &__hint {
     font-size: $font-xs;
-    color: $text-400;
+    color: var(--text-400);
   }
 
   &--destructive &__label {
-    color: $color-destructive;
+    color: var(--color-destructive);
   }
 
   &--destructive &__icon {
-    color: $color-destructive;
+    color: var(--color-destructive);
   }
 }

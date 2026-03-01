@@ -28,6 +28,7 @@ import {
   NavigationContextProvider,
   useNavigationStack,
 } from './hooks/use_navigation';
+import { useTheme } from './hooks/use_theme';
 import { useToast } from './hooks/use_toast';
 import type {
   ColorItemData,
@@ -241,6 +242,7 @@ function DetailView({ item }: { item: ListItemData }) {
 }
 
 export function App() {
+  useTheme();
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [colorFilterValue, setColorFilterValue] = useState('all');

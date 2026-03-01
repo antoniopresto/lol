@@ -19,7 +19,7 @@ $emoji-grid-columns: 6;
 .emoji-picker__section-header {
   font-size: $font-sm;
   font-weight: $font-weight-medium;
-  color: $text-600;
+  color: var(--text-600);
   letter-spacing: $letter-spacing-section;
   padding: $space-1 $space-2;
   line-height: 1;
@@ -51,12 +51,12 @@ $emoji-grid-columns: 6;
   background: none;
 
   &:hover {
-    background-color: $color-surface-hover;
+    background-color: var(--color-surface-hover);
     transform: scale(1.1);
   }
 
   &--active {
-    border-color: $color-accent;
-    background-color: $color-surface-hover;
+    border-color: var(--color-accent);
+    background-color: var(--color-surface-hover);
   }
 }

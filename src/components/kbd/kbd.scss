@@ -13,12 +13,12 @@
   min-width: 22px;
   height: 20px;
   padding: 0 $space-1;
-  background-color: $border-100;
+  background-color: var(--border-100);
   border: none;
   border-radius: $radius-kbd;
   font-family: $font-family;
   font-size: $font-sm;
   line-height: 1;
-  color: $text-600;
+  color: var(--text-600);
   white-space: nowrap;
 }

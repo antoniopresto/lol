@@ -19,18 +19,18 @@ $tag-picker-menu-max-height: 180px;
   gap: $space-1;
   min-height: $tag-picker-input-min-height;
   padding: $space-1 $space-2;
-  background: $color-background;
-  border: 1px solid $border-100;
+  background: var(--color-background);
+  border: 1px solid var(--border-100);
   border-radius: $radius-md;
   cursor: text;
   transition: border-color $transition-fast ease;
 
   &:focus-within {
-    border-color: $color-accent;
+    border-color: var(--color-accent);
   }
 
   .form-field--error & {
-    border-color: $color-destructive;
+    border-color: var(--color-destructive);
   }
 }
 
@@ -40,8 +40,8 @@ $tag-picker-menu-max-height: 180px;
   gap: $space-half;
   height: $tag-picker-tag-height;
   padding: 0 $space-1 0 $space-2;
-  background: rgba($color-accent, 0.15);
-  color: $color-accent;
+  background: var(--color-accent-15);
+  color: var(--color-accent);
   border-radius: $radius-kbd;
   font-size: $font-xs;
   font-weight: $font-weight-medium;
@@ -66,7 +66,7 @@ $tag-picker-menu-max-height: 180px;
   border: none;
   border-radius: $radius-sm;
   background: transparent;
-  color: $color-accent;
+  color: var(--color-accent);
   cursor: pointer;
   opacity: 0.6;
   transition: opacity $transition-fast ease;
@@ -76,7 +76,7 @@ $tag-picker-menu-max-height: 180px;
   }
 
   &:focus-visible {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
   }
 }
@@ -88,13 +88,13 @@ $tag-picker-menu-max-height: 180px;
   padding: 0;
   border: none;
   background: transparent;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   font-family: $font-family;
   font-size: $font-md;
   outline: none;
 
   &::placeholder {
-    color: $text-400;
+    color: var(--text-400);
   }
 }
 
@@ -108,10 +108,10 @@ $tag-picker-menu-max-height: 180px;
   margin: 0;
   padding: $space-1;
   list-style: none;
-  background: $color-surface;
-  border: 1px solid $border-100;
+  background: var(--color-surface);
+  border: 1px solid var(--border-100);
   border-radius: $radius-md;
-  box-shadow: $shadow-popover;
+  box-shadow: var(--shadow-popover);
   z-index: $z-dropdown;
 }
 
@@ -122,11 +122,11 @@ $tag-picker-menu-max-height: 180px;
   padding: 0 $space-2;
   border-radius: $radius-kbd;
   font-size: $font-md;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: background-color $transition-fast ease;
 
   &--active {
-    background: $color-selection-background;
+    background: var(--color-selection-background);
   }
 }

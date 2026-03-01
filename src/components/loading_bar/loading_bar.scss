@@ -29,7 +29,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    $color-accent 50%,
+    var(--color-accent) 50%,
     transparent 100%
   );
 }

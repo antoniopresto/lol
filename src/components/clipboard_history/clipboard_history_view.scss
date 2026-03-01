@@ -1,10 +1,10 @@
-@use '../../styles/tokens';
+@use '../../styles/tokens' as *;
 
 .clipboard-history__color-dot {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border-radius: tokens.$radius-md;
+  border-radius: $radius-md;
   flex-shrink: 0;
-  border: 1px solid tokens.$border-200;
+  border: 1px solid var(--border-200);
 }

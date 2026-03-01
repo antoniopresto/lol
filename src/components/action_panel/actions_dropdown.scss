@@ -7,10 +7,10 @@
   min-width: 220px;
   max-height: 300px;
   overflow: hidden;
-  background-color: $color-surface;
-  border: 1px solid $border-100;
+  background-color: var(--color-surface);
+  border: 1px solid var(--border-100);
   border-radius: $radius-lg;
-  box-shadow: $shadow-popover;
+  box-shadow: var(--shadow-popover);
   z-index: $z-dropdown;
   animation: dropdown-appear $transition-normal ease-out both;
 }
@@ -39,7 +39,7 @@
   border: none;
   border-radius: $radius-md;
   cursor: pointer;
-  color: $text-600;
+  color: var(--text-600);
   font-family: $font-family;
   font-size: $font-xs;
   font-weight: $font-weight-medium;
@@ -49,7 +49,7 @@
   transition: background-color $transition-fast ease;
 
   &:hover {
-    background-color: $text-100;
+    background-color: var(--text-100);
   }
 
   svg {
@@ -68,7 +68,7 @@
   border: none;
   border-radius: $radius-md;
   cursor: pointer;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   font-family: $font-family;
   font-size: $font-sm;
   line-height: 1;
@@ -77,21 +77,21 @@
 
   &:hover,
   &--active {
-    background-color: $color-accent;
-    color: $color-text-on-accent;
+    background-color: var(--color-accent);
+    color: var(--color-text-on-accent);
 
     .actions-dropdown__shortcut .kbd__key {
-      background-color: $color-kbd-background-on-accent;
-      color: $color-text-on-accent-secondary;
+      background-color: var(--color-kbd-background-on-accent);
+      color: var(--color-text-on-accent-secondary);
     }
 
     .actions-dropdown__chevron {
-      color: $color-text-on-accent;
+      color: var(--color-text-on-accent);
     }
   }
 
   &:focus-visible {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: -2px;
     border-radius: $radius-md;
   }
@@ -100,7 +100,7 @@
 .actions-dropdown__separator {
   height: 1px;
   margin: $space-1 $space-2;
-  background-color: $border-100;
+  background-color: var(--border-100);
 }
 
 .actions-dropdown__section-title {
@@ -108,7 +108,7 @@
   font-family: $font-family;
   font-size: $font-xs;
   font-weight: $font-weight-medium;
-  color: $text-400;
+  color: var(--text-400);
   line-height: 1;
   white-space: nowrap;
   user-select: none;
@@ -126,7 +126,7 @@
 
 .actions-dropdown__chevron {
   flex-shrink: 0;
-  color: $text-400;
+  color: var(--text-400);
 }
 
 @keyframes dropdown-appear {

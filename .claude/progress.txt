@@ -770,11 +770,37 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 
 === VISUAL POLISH & THEMES ===
 
-- [ ] [P2] THEME001 - Add light theme support. Create _tokens_light.scss with
-  light-mode color values. Add theme toggle mechanism (CSS class on root or
-  CSS custom properties). All components must respect current theme. Background
-  becomes light, text becomes dark, borders adjust. Test all components in
-  both themes.
+- [x] [P2] THEME001 - Add light theme support. Convert Sass color
+  variables to CSS custom properties. Define dark (default) and light themes.
+  All components must respect current theme. Background becomes light, text
+  becomes dark, borders adjust. Test all components in both themes.
+  Done: Complete CSS custom property theme system with dark (:root) and light
+  ([data-theme='light']) themes. All 26 color custom properties defined in both
+  themes in global.scss. All 25+ component SCSS files migrated from Sass color
+  variables to var(--*). useTheme hook with dark/light/system support,
+  localStorage persistence, matchMedia listener for system theme changes,
+  resolved state (not memo) to avoid stale state. FOUC prevention via inline
+  script in index.html. Native color-scheme CSS property on :root and light
+  theme. Settings appearance dropdown wired to setTheme. Reset All resets theme.
+  Tag colors are theme-independent (colored text on alpha bg for list items,
+  full color bg with explicit text for metadata tags). Brand icon colors in
+  SVG components intentionally remain hardcoded. All 93 tests pass.
+  Sub-tasks:
+  - [x] THEME001a - Create CSS custom property theme system in _tokens.scss.
+    Removed all Sass color variables from _tokens.scss. Created :root and
+    [data-theme='light'] blocks in global.scss with 26 custom properties each.
+  - [x] THEME001b - Migrate all 25 component SCSS files from Sass color
+    variables ($color-*, $text-*, $border-*) to var(--*) CSS custom
+    properties. Zero $color-* references remain in any SCSS file.
+  - [x] THEME001c - Create useTheme hook (src/hooks/use_theme.ts) with
+    resolved as state (not memo) for correct system theme updates, localStorage
+    persistence, data-theme attribute on documentElement. Wired into App.tsx
+    at root level for theme on mount. Settings appearance dropdown calls
+    setTheme. FOUC prevention inline script in index.html. Native color-scheme
+    CSS property replaces --color-scheme custom property.
+  - [x] THEME001d - Tag colors in tag_colors.ts and detail_metadata.tsx are
+    theme-independent (self-contained contrast pairs). Brand icon colors in
+    SVG components are intentionally fixed. No changes needed.
 
 - [ ] [P2] THEME002 - Add compact mode. When no query is entered, show only
   the search bar (hide list and action panel). List appears with fade-in when

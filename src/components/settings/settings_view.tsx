@@ -4,6 +4,7 @@ import { useAlert } from '../../hooks/use_alert';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { useTheme } from '../../hooks/use_theme';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
@@ -520,20 +521,35 @@ function AdvancedTab({
 
 export function SettingsView() {
   const nav = useNavigation();
+  const { preference: themePreference, setTheme } = useTheme();
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [settings, setSettings] = useState<GeneralSettings>({
-    appearance: 'dark',
+  const [settings, setSettings] = useState<GeneralSettings>(() => ({
+    appearance: themePreference,
     windowWidth: 'medium',
     showRecentApps: true,
     showDock: true,
     fontSize: 'default',
-  });
+  }));
   const [extensions, setExtensions] = useState<ExtensionEntry[]>(() =>
     MOCK_EXTENSIONS.map(ext => ({ ...ext })));
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
+
+  const handleSettingsChange = useCallback(
+    (newSettings: GeneralSettings) => {
+      setSettings(newSettings);
+      if (
+        newSettings.appearance === 'dark' ||
+        newSettings.appearance === 'light' ||
+        newSettings.appearance === 'system'
+      ) {
+        setTheme(newSettings.appearance);
+      }
+    },
+    [setTheme],
+  );
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -607,6 +623,7 @@ export function SettingsView() {
             showDock: true,
             fontSize: 'default',
           });
+          setTheme('dark');
           setExtensions(MOCK_EXTENSIONS.map(ext => ({ ...ext })));
           showHUD({
             icon: <SuccessHUDIcon />,
@@ -623,6 +640,7 @@ export function SettingsView() {
   }, [
     confirmAlert,
     showHUD,
+    setTheme,
   ]);
 
   const toggleActions = useCallback(() => {
@@ -725,7 +743,10 @@ export function SettingsView() {
         <div className="command-palette__list-container">
           <div className="settings-view">
             {activeTab === 'general' && (
-              <GeneralTab settings={settings} onSettingsChange={setSettings} />
+              <GeneralTab
+                settings={settings}
+                onSettingsChange={handleSettingsChange}
+              />
             )}
             {activeTab === 'extensions' && (
               <ExtensionsTab

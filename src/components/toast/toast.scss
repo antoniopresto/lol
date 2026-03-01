@@ -5,16 +5,16 @@
   align-items: center;
   gap: $space-2;
   padding: $space-2 $space-3;
-  background-color: $color-surface;
-  border: 1px solid $border-100;
+  background-color: var(--color-surface);
+  border: 1px solid var(--border-100);
   border-radius: $radius-md;
-  box-shadow: $shadow-popover;
+  box-shadow: var(--shadow-popover);
   cursor: pointer;
   animation: toast-enter $transition-slow ease-out both;
   max-width: 320px;
 
   &:hover {
-    background-color: $color-surface-hover;
+    background-color: var(--color-surface-hover);
   }
 
   &--exiting {
@@ -23,19 +23,19 @@
 
   &--success {
     .toast__icon {
-      color: $color-success;
+      color: var(--color-success);
     }
   }
 
   &--error {
     .toast__icon {
-      color: $color-destructive;
+      color: var(--color-destructive);
     }
   }
 
   &--info {
     .toast__icon {
-      color: $color-accent;
+      color: var(--color-accent);
     }
   }
 }
@@ -54,7 +54,7 @@
 .toast__title {
   font-size: $font-sm;
   font-weight: $font-weight-semibold;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -62,7 +62,7 @@
 
 .toast__message {
   font-size: $font-xs;
-  color: $text-600;
+  color: var(--text-600);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

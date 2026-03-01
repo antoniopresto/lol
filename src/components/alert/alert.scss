@@ -6,9 +6,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $backdrop-overlay;
-  backdrop-filter: blur($backdrop-blur);
-  -webkit-backdrop-filter: blur($backdrop-blur);
+  background: var(--backdrop-overlay);
+  backdrop-filter: blur(var(--backdrop-blur));
+  -webkit-backdrop-filter: blur(var(--backdrop-blur));
   z-index: $z-alert;
   border-radius: $radius-window;
   animation: alert-backdrop-enter $transition-normal ease-out both;
@@ -24,10 +24,10 @@
   align-items: center;
   width: $alert-dialog-width;
   padding: $space-5 $space-4 $space-4;
-  background: $color-surface;
-  border: 1px solid $border-100;
+  background: var(--color-surface);
+  border: 1px solid var(--border-100);
   border-radius: $radius-lg;
-  box-shadow: $shadow-popover;
+  box-shadow: var(--shadow-popover);
   animation: alert-dialog-enter $transition-normal ease-out both;
 
   &--exiting {
@@ -42,21 +42,21 @@
   width: $space-8;
   height: $space-8;
   margin-bottom: $space-3;
-  color: $text-600;
+  color: var(--text-600);
 }
 
 .alert__title {
   margin: 0;
   font-size: $font-md;
   font-weight: $font-weight-semibold;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   text-align: center;
 }
 
 .alert__message {
   margin: $space-1 0 0;
   font-size: $font-sm;
-  color: $text-600;
+  color: var(--text-600);
   text-align: center;
 }
 
@@ -80,34 +80,34 @@
   transition: background-color $transition-fast ease;
 
   &--default {
-    background: $color-accent;
-    color: $color-text-on-accent;
+    background: var(--color-accent);
+    color: var(--color-text-on-accent);
 
     &:hover {
-      background: $color-accent-hover;
+      background: var(--color-accent-hover);
     }
   }
 
   &--destructive {
-    background: $color-destructive;
-    color: $color-text-on-accent;
+    background: var(--color-destructive);
+    color: var(--color-text-on-accent);
 
     &:hover {
-      background: lighten($color-destructive, 5%);
+      background: var(--color-destructive-hover);
     }
   }
 
   &--cancel {
-    background: $border-100;
-    color: $color-text-primary;
+    background: var(--border-100);
+    color: var(--color-text-primary);
 
     &:hover {
-      background: $border-200;
+      background: var(--border-200);
     }
   }
 
   &:focus-visible {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: -2px;
   }
 }

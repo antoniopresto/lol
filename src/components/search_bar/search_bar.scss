@@ -5,13 +5,13 @@
   align-items: center;
   height: $search-bar-height;
   padding: 0 $space-4;
-  border-bottom: 1px solid $border-100;
+  border-bottom: 1px solid var(--border-100);
   gap: $space-3;
 }
 
 .search-bar__icon {
   flex-shrink: 0;
-  color: $text-400;
+  color: var(--text-400);
 }
 
 .search-bar__breadcrumbs {
@@ -27,20 +27,20 @@
   padding: $space-half $space-2;
   border: none;
   border-radius: $radius-sm;
-  background: $color-surface-hover;
+  background: var(--color-surface-hover);
   font-family: $font-family;
   font-size: $font-sm;
-  color: $text-600;
+  color: var(--text-600);
   cursor: pointer;
   white-space: nowrap;
   transition: background-color $transition-fast ease;
 
   &:hover {
-    background: $border-100;
+    background: var(--border-100);
   }
 
   &:focus-visible {
-    outline: 2px solid $color-accent;
+    outline: 2px solid var(--color-accent);
     outline-offset: -1px;
   }
 
@@ -48,14 +48,14 @@
     cursor: default;
 
     &:hover {
-      background: $color-surface-hover;
+      background: var(--color-surface-hover);
     }
   }
 }
 
 .search-bar__breadcrumb-chevron {
   flex-shrink: 0;
-  color: $text-400;
+  color: var(--text-400);
 }
 
 .search-bar__input {
@@ -67,10 +67,10 @@
   background: transparent;
   font-family: $font-family;
   font-size: $font-search;
-  color: $color-text-primary;
-  caret-color: $color-accent;
+  color: var(--color-text-primary);
+  caret-color: var(--color-accent);
 
   &::placeholder {
-    color: $text-400;
+    color: var(--text-400);
   }
 }

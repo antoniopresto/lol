@@ -7,8 +7,8 @@
   justify-content: space-between;
   height: $action-panel-height;
   padding: 0 $space-2;
-  border-top: 1px solid $border-100;
-  background-color: $color-surface-footer;
+  border-top: 1px solid var(--border-100);
+  background-color: var(--color-surface-footer);
   border-radius: 0 0 $radius-window $radius-window;
   flex-shrink: 0;
   animation: action-panel-slide-up $transition-slow ease-out both;
@@ -27,7 +27,7 @@
   &__context {
     font-family: $font-family;
     font-size: $font-sm;
-    color: $text-600;
+    color: var(--text-600);
     white-space: nowrap;
     line-height: 1;
   }
@@ -49,7 +49,7 @@
     font-family: $font-family;
     line-height: 1;
     &:focus-visible {
-      outline: 2px solid $color-accent;
+      outline: 2px solid var(--color-accent);
       outline-offset: 2px;
       border-radius: $radius-sm;
     }
@@ -58,14 +58,14 @@
   &__primary-label {
     font-size: $font-xs;
     font-weight: $font-weight-semibold;
-    color: $color-text-primary;
+    color: var(--color-text-primary);
     white-space: nowrap;
   }
 
   &__separator {
     width: 2px;
     height: 12px;
-    background-color: $border-100;
+    background-color: var(--border-100);
     flex-shrink: 0;
   }
 
@@ -83,12 +83,12 @@
 
     &:hover {
       .action-panel__actions-label {
-        color: $color-text-primary;
+        color: var(--color-text-primary);
       }
     }
 
     &:focus-visible {
-      outline: 2px solid $color-accent;
+      outline: 2px solid var(--color-accent);
       outline-offset: 2px;
       border-radius: $radius-sm;
     }
@@ -96,7 +96,7 @@
 
   &__actions-label {
     font-size: $font-xs;
-    color: $text-600;
+    color: var(--text-600);
     white-space: nowrap;
   }
 

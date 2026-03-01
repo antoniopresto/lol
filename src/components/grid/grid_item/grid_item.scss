@@ -16,13 +16,13 @@
     background-color $transition-fast ease;
 
   &:hover {
-    background-color: $color-surface-hover;
+    background-color: var(--color-surface-hover);
     transform: scale(1.05);
   }
 
   &--active {
-    border-color: $color-accent;
-    background-color: $color-surface-hover;
+    border-color: var(--color-accent);
+    background-color: var(--color-surface-hover);
   }
 }
 
@@ -43,7 +43,7 @@
 
 .grid-item__title {
   font-size: $font-sm;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -53,7 +53,7 @@
 
 .grid-item__subtitle {
   font-size: $font-xs;
-  color: $text-600;
+  color: var(--text-600);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;

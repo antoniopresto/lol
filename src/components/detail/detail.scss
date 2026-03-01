@@ -6,7 +6,7 @@
   overflow: hidden;
 
   .command-palette__body--has-detail & {
-    border-left: 1px solid $border-100;
+    border-left: 1px solid var(--border-100);
   }
 }
 
@@ -24,7 +24,7 @@
 }
 
 .detail__markdown {
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   font-size: $font-md;
   line-height: 1.6;
 
@@ -38,7 +38,7 @@
   h4,
   h5,
   h6 {
-    color: $color-text-primary;
+    color: var(--color-text-primary);
     font-weight: $font-weight-semibold;
     margin-top: $space-4;
     margin-bottom: $space-2;
@@ -63,17 +63,17 @@
   }
 
   a {
-    color: $color-accent;
+    color: var(--color-accent);
     text-decoration: none;
 
     &:hover {
-      color: $color-accent-hover;
+      color: var(--color-accent-hover);
       text-decoration: underline;
     }
   }
 
   code {
-    background-color: $color-code-background;
+    background-color: var(--color-code-background);
     border-radius: $radius-sm;
     padding: $space-half $space-1;
     font-size: $font-sm;
@@ -81,7 +81,7 @@
   }
 
   pre {
-    background-color: $color-code-background;
+    background-color: var(--color-code-background);
     border-radius: $radius-md;
     padding: $space-3;
     overflow-x: auto;
@@ -106,14 +106,14 @@
 
   hr {
     border: none;
-    border-top: 1px solid $border-100;
+    border-top: 1px solid var(--border-100);
     margin: $space-4 0;
   }
 
   blockquote {
-    border-left: 3px solid $border-100;
+    border-left: 3px solid var(--border-100);
     padding-left: $space-3;
-    color: $text-600;
+    color: var(--text-600);
     margin-bottom: $space-3;
   }
 
@@ -130,21 +130,21 @@
 
   th,
   td {
-    border: 1px solid $border-100;
+    border: 1px solid var(--border-100);
     padding: $space-2 $space-3;
     text-align: left;
     font-size: $font-sm;
   }
 
   th {
-    color: $text-600;
+    color: var(--text-600);
     font-weight: $font-weight-semibold;
   }
 }
 
 .detail__metadata {
   width: 40%;
-  border-left: 1px solid $border-100;
+  border-left: 1px solid var(--border-100);
   overflow-y: auto;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .detail-metadata__label {
-  color: $text-600;
+  color: var(--text-600);
   font-size: $font-sm;
   flex-shrink: 0;
   margin-right: $space-3;
@@ -174,7 +174,7 @@
   display: inline-flex;
   align-items: center;
   gap: $space-1;
-  color: $color-text-primary;
+  color: var(--color-text-primary);
   font-size: $font-sm;
   text-align: right;
 }
@@ -187,12 +187,12 @@
 }
 
 .detail-metadata__link {
-  color: $color-accent;
+  color: var(--color-accent);
   font-size: $font-sm;
   text-decoration: none;
 
   &:hover {
-    color: $color-accent-hover;
+    color: var(--color-accent-hover);
     text-decoration: underline;
   }
 }
@@ -210,13 +210,13 @@
   padding: $space-half $space-2;
   border-radius: $radius-sm;
   font-size: $font-xs;
-  color: $color-text-primary;
-  background-color: $color-tag-background;
+  color: var(--color-text-primary);
+  background-color: var(--color-tag-background);
   line-height: 1.5;
 }
 
 .detail-metadata__separator {
   border: none;
-  border-top: 1px solid $border-100;
+  border-top: 1px solid var(--border-100);
   margin: $space-2 0;
 }
