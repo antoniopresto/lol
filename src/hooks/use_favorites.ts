@@ -1,28 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
+import { isStringArray, storageGet, storageSet } from '../utils/storage';
 
-const STORAGE_KEY = 'raycast-favorites';
+const STORAGE_KEY = 'favorites';
 
 function loadFavorites(): string[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed: unknown = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.every(id => typeof id === 'string')) {
-        return parsed;
-      }
-    }
-  } catch {
-    return [];
-  }
-  return [];
-}
-
-function saveFavorites(ids: string[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    // no-op
-  }
+  return storageGet(STORAGE_KEY, isStringArray) ?? [];
 }
 
 export function useFavorites() {
@@ -43,7 +25,7 @@ export function useFavorites() {
             ...prev,
             id,
           ];
-      saveFavorites(next);
+      storageSet(STORAGE_KEY, next);
       return next;
     });
   }, []);
@@ -57,7 +39,7 @@ export function useFavorites() {
       const next = [...prev];
       next[idx] = prev[targetIdx]!;
       next[targetIdx] = prev[idx]!;
-      saveFavorites(next);
+      storageSet(STORAGE_KEY, next);
       return next;
     });
   }, []);

@@ -891,10 +891,33 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     replace MOCK_SECTIONS import with registry.getSections(), derive isFullView
     from registry.
 
-- [ ] [P2] INFRA002 - Add localStorage persistence layer. Save and restore:
+- [x] [P2] INFRA002 - Add localStorage persistence layer. Save and restore:
   recent commands, favorites, clipboard history, snippets, settings. Create
   src/utils/storage.ts with typed get/set helpers. Used by screens that need
   state persistence.
+  Done: Created src/utils/storage.ts with storageGet/storageSet/storageRemove,
+  JSON serialization, try-catch, and runtime validators (isStringArray, isString,
+  isRecord, isBooleanRecord). Refactored use_favorites.ts, use_theme.ts, and
+  emoji_picker_view.tsx to use storage.ts with legacy migration for existing
+  localStorage keys. Settings persistence: GeneralSettings + extension states
+  via isBooleanRecord shared validator, appearance synced with useTheme hook.
+  Clipboard persistence: pin states + deleted entry IDs tracked separately.
+  Snippet persistence: full CRUD with StoredSnippet serialization (Date→ISO),
+  deserialization with Invalid Date guard, isStoredTag deep validation,
+  crypto.randomUUID() for collision-free IDs. All consumers use "raycast-"
+  prefixed keys via storage.ts. Zero raw localStorage calls outside migration paths.
+  Sub-tasks:
+  - [x] INFRA002a - Create src/utils/storage.ts with typed get/set/remove helpers.
+    Generic storage functions with JSON serialization, try-catch error handling,
+    and runtime validation via caller-provided validator function.
+  - [x] INFRA002b - Refactor existing localStorage usages to use storage.ts:
+    use_favorites.ts, use_theme.ts, emoji_picker_view.tsx.
+  - [x] INFRA002c - Add persistence for settings (GeneralSettings + extensions
+    enabled/disabled state) in SettingsView.
+  - [x] INFRA002d - Add persistence for clipboard history entries (pinned state,
+    entry mutations) in ClipboardHistoryView.
+  - [x] INFRA002e - Add persistence for snippet entries (CRUD operations) in
+    SnippetManagerView.
 
 - [ ] [P3] INFRA003 - Refactor App.tsx into smaller modules. Current App.tsx is
   660+ lines. Extract: RootSearchView, NavigationProvider, KeyboardProvider,

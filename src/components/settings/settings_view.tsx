@@ -5,6 +5,13 @@ import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useTheme } from '../../hooks/use_theme';
+import {
+  isBooleanRecord,
+  isRecord,
+  storageGet,
+  storageRemove,
+  storageSet,
+} from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
@@ -37,6 +44,49 @@ interface GeneralSettings {
   showRecentApps: boolean;
   showDock: boolean;
   fontSize: string;
+}
+
+const SETTINGS_STORAGE_KEY = 'settings-general';
+const EXTENSIONS_STORAGE_KEY = 'settings-extensions';
+
+const DEFAULT_SETTINGS: GeneralSettings = {
+  appearance: 'dark',
+  windowWidth: 'medium',
+  showRecentApps: true,
+  showDock: true,
+  fontSize: 'default',
+};
+
+function isGeneralSettings(value: unknown): value is GeneralSettings {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.appearance === 'string' &&
+    typeof value.windowWidth === 'string' &&
+    typeof value.showRecentApps === 'boolean' &&
+    typeof value.showDock === 'boolean' &&
+    typeof value.fontSize === 'string'
+  );
+}
+
+function loadSettings(themePreference: string): GeneralSettings {
+  const stored = storageGet(SETTINGS_STORAGE_KEY, isGeneralSettings);
+  if (stored)
+    return {
+      ...stored,
+      appearance: themePreference,
+    };
+  return {
+    ...DEFAULT_SETTINGS,
+    appearance: themePreference,
+  };
+}
+
+function loadExtensions(): ExtensionEntry[] {
+  const states = storageGet(EXTENSIONS_STORAGE_KEY, isBooleanRecord);
+  return MOCK_EXTENSIONS.map(ext => ({
+    ...ext,
+    enabled: states ? (states[ext.id] ?? ext.enabled) : ext.enabled,
+  }));
 }
 
 const TAB_SECTIONS: SearchDropdownSection[] = [
@@ -525,21 +575,17 @@ export function SettingsView() {
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [settings, setSettings] = useState<GeneralSettings>(() => ({
-    appearance: themePreference,
-    windowWidth: 'medium',
-    showRecentApps: true,
-    showDock: true,
-    fontSize: 'default',
-  }));
-  const [extensions, setExtensions] = useState<ExtensionEntry[]>(() =>
-    MOCK_EXTENSIONS.map(ext => ({ ...ext })));
+  const [settings, setSettings] = useState<GeneralSettings>(() =>
+    loadSettings(themePreference));
+  const [extensions, setExtensions] =
+    useState<ExtensionEntry[]>(loadExtensions);
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
 
   const handleSettingsChange = useCallback(
     (newSettings: GeneralSettings) => {
       setSettings(newSettings);
+      storageSet(SETTINGS_STORAGE_KEY, newSettings);
       if (
         newSettings.appearance === 'dark' ||
         newSettings.appearance === 'light' ||
@@ -563,14 +609,21 @@ export function SettingsView() {
   }, []);
 
   const handleToggleExtension = useCallback((id: string) => {
-    setExtensions(prev =>
-      prev.map(ext =>
+    setExtensions(prev => {
+      const next = prev.map(ext =>
         ext.id === id
           ? {
               ...ext,
               enabled: !ext.enabled,
             }
-          : ext));
+          : ext);
+      const states: Record<string, boolean> = {};
+      for (const ext of next) {
+        states[ext.id] = ext.enabled;
+      }
+      storageSet(EXTENSIONS_STORAGE_KEY, states);
+      return next;
+    });
   }, []);
 
   const handleExport = useCallback(() => {
@@ -616,15 +669,11 @@ export function SettingsView() {
         label: 'Reset',
         style: 'destructive',
         onAction: () => {
-          setSettings({
-            appearance: 'dark',
-            windowWidth: 'medium',
-            showRecentApps: true,
-            showDock: true,
-            fontSize: 'default',
-          });
+          setSettings({ ...DEFAULT_SETTINGS });
+          storageRemove(SETTINGS_STORAGE_KEY);
           setTheme('dark');
           setExtensions(MOCK_EXTENSIONS.map(ext => ({ ...ext })));
+          storageRemove(EXTENSIONS_STORAGE_KEY);
           showHUD({
             icon: <SuccessHUDIcon />,
             title: 'Settings Reset',

@@ -9,6 +9,7 @@ import {
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { isStringArray, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { EmptyState } from '../empty_state/empty_state';
@@ -20,7 +21,7 @@ import { SearchDropdown } from '../search_bar/search_dropdown';
 import './emoji_picker_view.scss';
 
 const COLUMNS = 6;
-const RECENTLY_USED_KEY = 'emoji-picker-recent';
+const STORAGE_KEY = 'emoji-recent';
 const MAX_RECENT = 12;
 
 function CopyHUDIcon() {
@@ -55,23 +56,23 @@ function SearchEmptyIcon() {
 }
 
 function loadRecentEmojis(): string[] {
-  try {
-    const stored = localStorage.getItem(RECENTLY_USED_KEY);
-    if (!stored) return [];
-    const parsed: unknown = JSON.parse(stored);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter((v): v is string => typeof v === 'string');
-  } catch {
-    return [];
-  }
-}
+  const stored = storageGet(STORAGE_KEY, isStringArray);
+  if (stored) return stored;
 
-function saveRecentEmojis(chars: string[]) {
   try {
-    localStorage.setItem(RECENTLY_USED_KEY, JSON.stringify(chars));
+    const legacy = localStorage.getItem('emoji-picker-recent');
+    if (legacy) {
+      const parsed: unknown = JSON.parse(legacy);
+      if (isStringArray(parsed)) {
+        storageSet(STORAGE_KEY, parsed);
+        localStorage.removeItem('emoji-picker-recent');
+        return parsed;
+      }
+    }
   } catch {
-    // no-op
+    // unavailable
   }
+  return [];
 }
 
 interface EmojiSection {
@@ -215,7 +216,7 @@ export function EmojiPickerView() {
         char,
         ...prev.filter(c => c !== char),
       ].slice(0, MAX_RECENT);
-      saveRecentEmojis(next);
+      storageSet(STORAGE_KEY, next);
       return next;
     });
   }, []);

@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
+import { storageGet, storageSet } from '../utils/storage';
 
 type ThemePreference = 'dark' | 'light' | 'system';
 type ResolvedTheme = 'dark' | 'light';
 
-const STORAGE_KEY = 'raycast-theme';
+const STORAGE_KEY = 'theme';
+
+function isThemePreference(value: unknown): value is ThemePreference {
+  return value === 'dark' || value === 'light' || value === 'system';
+}
 
 function getSystemTheme(): ResolvedTheme {
   return window.matchMedia('(prefers-color-scheme: light)').matches
@@ -16,9 +21,17 @@ function resolveTheme(preference: ThemePreference): ResolvedTheme {
 }
 
 function loadPreference(): ThemePreference {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'dark' || stored === 'light' || stored === 'system') {
-    return stored;
+  const fromStorage = storageGet(STORAGE_KEY, isThemePreference);
+  if (fromStorage) return fromStorage;
+
+  try {
+    const raw = localStorage.getItem('raycast-theme');
+    if (raw && isThemePreference(raw)) {
+      storageSet(STORAGE_KEY, raw);
+      return raw;
+    }
+  } catch {
+    // unavailable
   }
   return 'dark';
 }
@@ -30,7 +43,7 @@ function applyTheme(theme: ResolvedTheme) {
 export function useTheme() {
   const [preference, setPreference] = useState<ThemePreference>(loadPreference);
   const [resolved, setResolved] = useState<ResolvedTheme>(() =>
-    resolveTheme(loadPreference()));
+    resolveTheme(preference));
 
   useEffect(() => {
     const r = resolveTheme(preference);
@@ -53,7 +66,7 @@ export function useTheme() {
 
   const setTheme = useCallback((value: ThemePreference) => {
     setPreference(value);
-    localStorage.setItem(STORAGE_KEY, value);
+    storageSet(STORAGE_KEY, value);
   }, []);
 
   return {

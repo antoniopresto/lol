@@ -12,6 +12,12 @@ import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { formatRelativeDate } from '../../utils/format_date';
+import {
+  isBooleanRecord,
+  isStringArray,
+  storageGet,
+  storageSet,
+} from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
@@ -126,6 +132,31 @@ function renderClipboardIcon(entry: ClipboardEntry): ReactNode {
   return entry.sourceIcon;
 }
 
+const PIN_STATE_KEY = 'clipboard-pins';
+const DELETED_KEY = 'clipboard-deleted';
+
+function loadInitialEntries(): ClipboardEntry[] {
+  const pinState = storageGet(PIN_STATE_KEY, isBooleanRecord) ?? {};
+  const deleted = new Set(storageGet(DELETED_KEY, isStringArray) ?? []);
+  return MOCK_CLIPBOARD_ENTRIES.filter(e => !deleted.has(e.id)).map(e => ({
+    ...e,
+    pinned: e.id in pinState ? pinState[e.id]! : e.pinned,
+  }));
+}
+
+function saveEntryState(entries: ClipboardEntry[]) {
+  const pinState: Record<string, boolean> = {};
+  for (const e of entries) {
+    pinState[e.id] = e.pinned;
+  }
+  storageSet(PIN_STATE_KEY, pinState);
+
+  const allIds = new Set(MOCK_CLIPBOARD_ENTRIES.map(e => e.id));
+  const currentIds = new Set(entries.map(e => e.id));
+  const deleted = [...allIds].filter(id => !currentIds.has(id));
+  storageSet(DELETED_KEY, deleted);
+}
+
 const FILTER_SECTIONS: SearchDropdownSection[] = [
   {
     options: [
@@ -160,9 +191,7 @@ const FILTER_SECTIONS: SearchDropdownSection[] = [
 
 export function ClipboardHistoryView() {
   const nav = useNavigation();
-  const [entries, setEntries] = useState<ClipboardEntry[]>(
-    MOCK_CLIPBOARD_ENTRIES,
-  );
+  const [entries, setEntries] = useState<ClipboardEntry[]>(loadInitialEntries);
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -267,14 +296,17 @@ export function ClipboardHistoryView() {
     setActionsOpen(false);
     const entryId = selectedEntry.id;
     const wasPinned = selectedEntry.pinned;
-    setEntries(prev =>
-      prev.map(e =>
+    setEntries(prev => {
+      const next = prev.map(e =>
         e.id === entryId
           ? {
               ...e,
               pinned: !e.pinned,
             }
-          : e));
+          : e);
+      saveEntryState(next);
+      return next;
+    });
     showHUD({
       icon: <PinIcon />,
       title: wasPinned ? 'Unpinned' : 'Pinned',
@@ -308,7 +340,11 @@ export function ClipboardHistoryView() {
         label: 'Delete',
         style: 'destructive',
         onAction: () => {
-          setEntries(prev => prev.filter(e => e.id !== entryId));
+          setEntries(prev => {
+            const next = prev.filter(e => e.id !== entryId);
+            saveEntryState(next);
+            return next;
+          });
           showHUD({
             icon: <ClipboardHUDIcon />,
             title: 'Deleted',
