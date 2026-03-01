@@ -1313,12 +1313,23 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     SnippetManagerView, EmojiPickerView, FileSearchView) to use fuzzy search
     for filtering and pass query for highlighting.
 
-- [ ] [P1] SRCH002 - Add recent commands tracking. Track last 10 opened
+- [x] [P1] SRCH002 - Add recent commands tracking. Track last 10 opened
   commands with timestamps. Show "Recent Commands" section in root search
   when query is empty (above other sections). Persist via localStorage/
   SQLite. When user opens a command (drill-in), add to recents. Deduplicate.
   Cap at 10. Create src/hooks/use_recent_commands.ts. Wire into App.tsx
   root search sections.
+  Done: Created useRecentCommands hook (src/hooks/use_recent_commands.ts)
+  following useFavorites pattern. localStorage persistence via storage.ts
+  with "recent-commands" key. Max 10 items, most-recent-first ordering,
+  deduplication on add. App.tsx integration: addRecent called only for
+  commands with components (not detail-only or fallback items). Tray
+  navigation also tracks recents. "Recent Commands" section shown in root
+  search when query is empty, below Favorites, above registry sections.
+  Items in Favorites excluded from Recent section. allFlatItems built from
+  unfiltered registrySections to prevent filter-dependent disappearance.
+  clearRecent exported for future UI integration. All 93 tests pass, bun
+  run check passes.
 
 - [ ] [P2] SRCH003 - Add search bar placeholder cycling. When search bar
   is empty, cycle through helpful placeholder texts every 4 seconds:

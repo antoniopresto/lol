@@ -22,6 +22,7 @@ import {
   NavigationContextProvider,
   useNavigationStack,
 } from './hooks/use_navigation';
+import { useRecentCommands } from './hooks/use_recent_commands';
 import { useTheme } from './hooks/use_theme';
 import { useToast } from './hooks/use_toast';
 import { useWindow } from './hooks/use_window';
@@ -199,6 +200,7 @@ export function App() {
   const { push, popToRoot } = nav;
   const { favoriteIds, isFavorite, toggleFavorite, moveFavorite } =
     useFavorites();
+  const { recentIds, addRecent } = useRecentCommands();
 
   const handleTrayNavigate = useCallback(
     (target: string) => {
@@ -215,6 +217,7 @@ export function App() {
       setQuickLookOpen(false);
       setFilterValue('all');
 
+      addRecent(mapping.id);
       push(mapping.name, {
         type: 'command',
         commandId: mapping.id,
@@ -223,6 +226,7 @@ export function App() {
     [
       push,
       popToRoot,
+      addRecent,
     ],
   );
 
@@ -324,7 +328,7 @@ export function App() {
           .filter(s => s.items.length > 0)
       : result;
 
-    const allFlatItems = sections.flatMap(s => s.items);
+    const allFlatItems = registrySections.flatMap(s => s.items);
     const favoriteItems = favoriteIds
       .map(id => allFlatItems.find(item => item.id === id))
       .filter((item): item is ListItemData => !!item);
@@ -354,19 +358,44 @@ export function App() {
       return filteredResult;
     }
 
+    const pinnedSections: SectionData[] = [];
+    const dedupIds = new Set<string>();
+
     if (favoriteItems.length > 0) {
-      const favIds = new Set(favoriteIds);
+      pinnedSections.push({
+        title: 'Favorites',
+        items: favoriteItems,
+      });
+      for (const item of favoriteItems) {
+        dedupIds.add(item.id);
+      }
+    }
+
+    const favSet = new Set(favoriteIds);
+    const recentItems = recentIds
+      .filter(id => !favSet.has(id))
+      .map(id => allFlatItems.find(item => item.id === id))
+      .filter((item): item is ListItemData => !!item);
+
+    if (recentItems.length > 0) {
+      pinnedSections.push({
+        title: 'Recent Commands',
+        items: recentItems,
+      });
+      for (const item of recentItems) {
+        dedupIds.add(item.id);
+      }
+    }
+
+    if (pinnedSections.length > 0) {
       const dedupedSections = filteredResult
         .map(s => ({
           ...s,
-          items: s.items.filter(item => !favIds.has(item.id)),
+          items: s.items.filter(item => !dedupIds.has(item.id)),
         }))
         .filter(s => s.items.length > 0);
       return [
-        {
-          title: 'Favorites',
-          items: favoriteItems,
-        },
+        ...pinnedSections,
         ...dedupedSections,
       ];
     }
@@ -376,6 +405,7 @@ export function App() {
     query,
     filterValue,
     favoriteIds,
+    recentIds,
     registrySections,
   ]);
 
@@ -443,6 +473,7 @@ export function App() {
     const cmd = getCommand(item.id);
 
     if (cmd?.component) {
+      addRecent(item.id);
       push(cmd.name, {
         type: 'command',
         commandId: cmd.id,
@@ -472,6 +503,7 @@ export function App() {
     showHUD,
     calculatorResult,
     push,
+    addRecent,
   ]);
 
   const toggleActions = useCallback(() => {
