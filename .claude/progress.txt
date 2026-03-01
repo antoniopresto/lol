@@ -483,10 +483,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   all use HUD instead of toast. CheckIcon and ClipboardHUDIcon inline SVGs.
   max-width: 280px with text-overflow ellipsis. All 93 tests pass.
 
-- [ ] [P1] COMP007 - Build Form.PasswordField component. Masked text input with
+- [x] [P1] COMP007 - Build Form.PasswordField component. Masked text input with
   optional reveal toggle button (eye icon). Same styling as FormTextField but
   type="password". Create src/components/form/form_password_field.tsx. Add to
   form index.ts exports.
+  Done: FormPasswordField component with password/text toggle via eye icon button.
+  Follows FormTextField pattern exactly (useId, FormField wrapper, aria-invalid,
+  aria-describedby). Reveal toggle: useState for revealed state, type switches
+  between "password" and "text". EyeIcon/EyeOffIcon inline SVGs (16x16, 1.25
+  stroke). Toggle button: keyboard-accessible with focus-visible outline,
+  aria-label updates dynamically. SCSS: form-password-wrapper (relative flex),
+  form-input--password (right padding for toggle), form-password-toggle (absolute
+  positioned, $space-6 size, $text-400 color with hover to primary). All values
+  tokenized. autoComplete="current-password" for proper browser/password manager
+  behavior. Exported from form/index.ts.
 
 - [ ] [P1] COMP008 - Build Form.TagPicker component. Multi-select input where
   user picks tags from a dropdown. Selected tags appear as pills inside the
