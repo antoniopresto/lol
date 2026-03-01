@@ -1207,12 +1207,25 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   replaced local OpenHUDIcon with shared OpenInBrowserHUDIcon. All 93 tests
   pass, bun run check passes.
 
-- [ ] [P1] COMP018 - Build List.Item.Detail inline detail panel. When a
+- [x] [P1] COMP018 - Build List.Item.Detail inline detail panel. When a
   ListItem has a detail prop, the list splits into list (left, ~40%) and
   detail panel (right, ~60%) showing the item's detail content. Reuses
   Detail component. Toggle detail panel visibility with an action or
   automatic on selection. Animate panel slide-in. Update List component
   to accept showDetail prop. Create list_item_detail.scss for split layout.
+  Done: Added `detail` prop (ReactNode) to List component. When `detail` is
+  provided, List renders a `.list-detail-split` flex container with list at
+  $list-detail-ratio (40%) and detail panel at flex:1. Detail panel derived
+  internally from `detail != null` (no separate `showDetail` boolean to
+  prevent invalid state). `.list-detail-panel` has display:flex/flex-direction:
+  column for proper flex chain with Detail component. Slide-in animation
+  (translateX 20px + opacity) with prefers-reduced-motion: reduce fallback.
+  ARIA: role="complementary" aria-label="Item detail" on panel wrapper.
+  Refactored App.tsx root view to use List's `detail` prop instead of manual
+  split layout at command-palette__body level. Removed obsolete
+  `.command-palette__body--has-detail` modifier from command_palette.scss and
+  detail.scss. $list-detail-ratio token added to _tokens.scss. All 93 tests
+  pass, bun run check passes.
 
 - [ ] [P2] COMP019 - Build Action.PickDate component. Date picker that
   appears inline in action panel or as a pushed form field. Supports

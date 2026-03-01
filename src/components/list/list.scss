@@ -5,3 +5,42 @@
   overflow-y: auto;
   padding: 0 $space-2;
 }
+
+.list--with-detail {
+  flex: 0 0 $list-detail-ratio;
+  min-width: 0;
+}
+
+.list-detail-split {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.list-detail-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  border-left: 1px solid var(--border-100);
+  animation: list-detail-slide-in $transition-slow ease-out both;
+}
+
+@keyframes list-detail-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list-detail-panel {
+    animation: none;
+  }
+}

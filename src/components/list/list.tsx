@@ -14,6 +14,7 @@ interface ListProps {
   itemCount: number;
   onActiveIndexChange?: (index: number) => void;
   onAction?: (index: number) => void;
+  detail?: ReactNode;
 }
 
 export function List({
@@ -21,6 +22,7 @@ export function List({
   itemCount,
   onActiveIndexChange,
   onAction,
+  detail,
 }: ListProps) {
   const [activeIndex, setActiveIndexRaw] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -105,6 +107,30 @@ export function List({
       setActiveIndex,
     ],
   );
+
+  if (detail != null) {
+    return (
+      <ListContext value={contextValue}>
+        <div className="list-detail-split">
+          <div
+            ref={containerRef}
+            className="list list--with-detail"
+            role="listbox"
+            id="command-list"
+          >
+            {children}
+          </div>
+          <div
+            className="list-detail-panel"
+            role="complementary"
+            aria-label="Item detail"
+          >
+            {detail}
+          </div>
+        </div>
+      </ListContext>
+    );
+  }
 
   return (
     <ListContext value={contextValue}>

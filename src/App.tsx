@@ -920,9 +920,7 @@ export function App() {
                 </div>
               </div>
             ) : (
-              <div
-                className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
-              >
+              <div className="command-palette__body">
                 <div className="command-palette__list-container">
                   {allItems.length === 0 ? (
                     <EmptyState
@@ -935,6 +933,20 @@ export function App() {
                       itemCount={allItems.length}
                       onActiveIndexChange={handleActiveIndexChange}
                       onAction={handleDrillIn}
+                      detail={
+                        detail ? (
+                          <Detail
+                            markdown={detail.markdown}
+                            metadata={
+                              detail.metadata ? (
+                                <DetailMetadata>
+                                  {detail.metadata.map(renderMetadataEntry)}
+                                </DetailMetadata>
+                              ) : undefined
+                            }
+                          />
+                        ) : undefined
+                      }
                     >
                       {(() => {
                         let globalIndex = 0;
@@ -990,18 +1002,6 @@ export function App() {
                     </List>
                   )}
                 </div>
-                {detail && (
-                  <Detail
-                    markdown={detail.markdown}
-                    metadata={
-                      detail.metadata ? (
-                        <DetailMetadata>
-                          {detail.metadata.map(renderMetadataEntry)}
-                        </DetailMetadata>
-                      ) : undefined
-                    }
-                  />
-                )}
               </div>
             )}
             {!isFullView && (

@@ -4,10 +4,6 @@
   display: flex;
   flex: 1;
   overflow: hidden;
-
-  .command-palette__body--has-detail & {
-    border-left: 1px solid var(--border-100);
-  }
 }
 
 .detail--with-metadata {
