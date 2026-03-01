@@ -8,9 +8,9 @@
 
 .list-section__header {
   font-size: $font-sm;
-  color: $color-text-secondary;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: $font-weight-medium;
+  color: rgba($color-text-primary, 0.6);
+  letter-spacing: 0.1px;
   padding: $space-1 $space-2;
   line-height: 1;
 }

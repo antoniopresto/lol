@@ -340,7 +340,7 @@ screens, plan next tasks and fix it.
   - [x] UXDS002d - [P1] Fix list item spacing and radius. Border-radius 8→10px
     (add $radius-list-item: 10px token). Icon-text gap 8→12px. Left padding 8px
     stays. These match Raycast's ray-so source exactly.
-  - [ ] UXDS002e - [P1] Fix section headers. Font-weight to 500 (medium, add
+  - [x] UXDS002e - [P1] Fix section headers. Font-weight to 500 (medium, add
     $font-weight-medium: 500 token). Letter-spacing from 0.5px to 0.1px. Text
     color from $color-text-secondary to rgba($color-text-primary, 0.6) for
     proper alpha-based approach. Remove text-transform uppercase (Raycast section
