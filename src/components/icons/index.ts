@@ -58,6 +58,7 @@ export {
   KeyIcon,
   LinkIcon,
   LockIcon,
+  StarFilledIcon,
   StarIcon,
 } from './object_icons';
 

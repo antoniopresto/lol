@@ -10,7 +10,7 @@ import { EmptyState } from './components/empty_state/empty_state';
 import { FileSearchView } from './components/file_search/file_search_view';
 import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
-import { CalculatorIcon } from './components/icons';
+import { CalculatorIcon, StarFilledIcon } from './components/icons';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
 import { QuickLook } from './components/quick_look/quick_look';
@@ -22,6 +22,7 @@ import { SnippetManagerView } from './components/snippet_manager/snippet_manager
 import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useAlert } from './hooks/use_alert';
+import { useFavorites } from './hooks/use_favorites';
 import { useHUD } from './hooks/use_hud';
 import { useKeyboardShortcut } from './hooks/use_keyboard_shortcut';
 import {
@@ -254,6 +255,8 @@ export function App() {
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const nav = useNavigationStack<NavViewData>('Raycast');
   const { push } = nav;
+  const { favoriteIds, isFavorite, toggleFavorite, moveFavorite } =
+    useFavorites();
 
   const viewType = nav.currentEntry?.data.type ?? 'root';
 
@@ -335,10 +338,61 @@ export function App() {
     } else if (filterValue === 'applications') {
       sections = sections.filter(s => s.title === 'Applications');
     }
-    return filterSections(sections, query);
+    const result = filterSections(sections, query);
+
+    const allFlatItems = sections.flatMap(s => s.items);
+    const favoriteItems = favoriteIds
+      .map(id => allFlatItems.find(item => item.id === id))
+      .filter((item): item is ListItemData => !!item);
+
+    if (query) {
+      const lower = query.toLowerCase();
+      const filteredFavs = favoriteItems.filter(
+        item =>
+          item.title.toLowerCase().includes(lower) ||
+          item.subtitle?.toLowerCase().includes(lower),
+      );
+      if (filteredFavs.length > 0) {
+        const favIds = new Set(filteredFavs.map(f => f.id));
+        const dedupedSections = result
+          .map(s => ({
+            ...s,
+            items: s.items.filter(item => !favIds.has(item.id)),
+          }))
+          .filter(s => s.items.length > 0);
+        return [
+          {
+            title: 'Favorites',
+            items: filteredFavs,
+          },
+          ...dedupedSections,
+        ];
+      }
+      return result;
+    }
+
+    if (favoriteItems.length > 0) {
+      const favIds = new Set(favoriteIds);
+      const dedupedSections = result
+        .map(s => ({
+          ...s,
+          items: s.items.filter(item => !favIds.has(item.id)),
+        }))
+        .filter(s => s.items.length > 0);
+      return [
+        {
+          title: 'Favorites',
+          items: favoriteItems,
+        },
+        ...dedupedSections,
+      ];
+    }
+
+    return result;
   }, [
     query,
     filterValue,
+    favoriteIds,
   ]);
   const calculatorResult = useMemo(() => {
     if (viewType !== 'root' || !query.trim()) return null;
@@ -518,6 +572,81 @@ export function App() {
     },
   );
 
+  const handleToggleFavorite = useCallback(() => {
+    if (!selectedItem || selectedItem.id === '__calculator__') {
+      return;
+    }
+    const wasAlreadyFavorite = isFavorite(selectedItem.id);
+    toggleFavorite(selectedItem.id);
+    showHUD({
+      icon: <StarFilledIcon />,
+      title: wasAlreadyFavorite
+        ? 'Removed from Favorites'
+        : 'Added to Favorites',
+    });
+  }, [
+    selectedItem,
+    toggleFavorite,
+    isFavorite,
+    showHUD,
+  ]);
+
+  useKeyboardShortcut(
+    {
+      key: 'f',
+      meta: true,
+      shift: true,
+    },
+    handleToggleFavorite,
+    { enabled: viewType === 'root' && !!selectedItem },
+  );
+
+  const handleMoveFavoriteUp = useCallback(() => {
+    if (!selectedItem || !isFavorite(selectedItem.id)) return;
+    moveFavorite(selectedItem.id, 'up');
+    setSelectedIndex(prev => Math.max(0, prev - 1));
+  }, [
+    selectedItem,
+    isFavorite,
+    moveFavorite,
+  ]);
+
+  const handleMoveFavoriteDown = useCallback(() => {
+    if (!selectedItem || !isFavorite(selectedItem.id)) return;
+    moveFavorite(selectedItem.id, 'down');
+    setSelectedIndex(prev => prev + 1);
+  }, [
+    selectedItem,
+    isFavorite,
+    moveFavorite,
+  ]);
+
+  useKeyboardShortcut(
+    {
+      key: 'ArrowUp',
+      meta: true,
+      alt: true,
+    },
+    handleMoveFavoriteUp,
+    {
+      enabled:
+        viewType === 'root' && !!selectedItem && isFavorite(selectedItem.id),
+    },
+  );
+
+  useKeyboardShortcut(
+    {
+      key: 'ArrowDown',
+      meta: true,
+      alt: true,
+    },
+    handleMoveFavoriteDown,
+    {
+      enabled:
+        viewType === 'root' && !!selectedItem && isFavorite(selectedItem.id),
+    },
+  );
+
   const openSettings = useCallback(() => {
     if (viewType !== 'settings') {
       push('Settings', { type: 'settings' });
@@ -619,6 +748,31 @@ export function App() {
               }
             },
           },
+          ...(!isCalculatorSelected && selectedItem
+            ? [
+                {
+                  label:
+                    selectedItem && isFavorite(selectedItem.id)
+                      ? 'Remove from Favorites'
+                      : 'Add to Favorites',
+                  shortcut: (
+                    <Kbd
+                      keys={[
+                        '⌘',
+                        '⇧',
+                        'F',
+                      ]}
+                    />
+                  ),
+                  onClick: () => {
+                    if (selectedItem) {
+                      setActionsOpen(false);
+                      handleToggleFavorite();
+                    }
+                  },
+                },
+              ]
+            : []),
         ],
       },
       {
@@ -754,6 +908,8 @@ export function App() {
       showToast,
       showHUD,
       confirmAlert,
+      isFavorite,
+      handleToggleFavorite,
     ],
   );
 
@@ -905,6 +1061,18 @@ export function App() {
                               >
                                 {section.items.map(item => {
                                   const idx = globalIndex++;
+                                  const showStar =
+                                    isFavorite(item.id) &&
+                                    section.title !== 'Favorites';
+                                  const itemAccessories = showStar
+                                    ? [
+                                        {
+                                          icon: <StarFilledIcon size={12} />,
+                                          tooltip: 'Favorite',
+                                        },
+                                        ...(item.accessories ?? []),
+                                      ]
+                                    : item.accessories;
                                   return (
                                     <ListItem
                                       key={item.id}
@@ -912,7 +1080,7 @@ export function App() {
                                       title={item.title}
                                       subtitle={item.subtitle}
                                       icon={item.icon}
-                                      accessories={item.accessories}
+                                      accessories={itemAccessories}
                                     />
                                   );
                                 })}

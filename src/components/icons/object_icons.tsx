@@ -110,6 +110,21 @@ export function StarIcon(props: IconProps = {}) {
   );
 }
 
+export function StarFilledIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgBase(props)}>
+      <path
+        d="M8 1.5l2 4 4.5.65-3.25 3.17.77 4.48L8 11.65l-4.02 2.15.77-4.48L1.5 6.15 6 5.5z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function HeartIcon(props: IconProps = {}) {
   return (
     <svg {...svgBase(props)}>

@@ -840,10 +840,18 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   ⌘N (create snippet), and ⌘Enter (form submit) with useKeyboardShortcut calls.
   All 93 tests pass, bun run check passes.
 
-- [ ] [P2] KBD002 - Add favorite items support. ⌘⇧F toggles favorite on
+- [x] [P2] KBD002 - Add favorite items support. ⌘⇧F toggles favorite on
   selected item. Favorited items appear in a "Favorites" section at top of
   root search. Persist favorites in state (localStorage for web demo). Show
   star icon on favorited items. ⌘⌥↑/↓ reorders favorites.
+  Done: useFavorites hook (src/hooks/use_favorites.ts) with localStorage
+  persistence, Set-based O(1) isFavorite lookup, toggleFavorite, moveFavorite
+  (swap adjacent). StarFilledIcon added to icon system. App.tsx integration:
+  Favorites section at top of root search (items deduplicated from original
+  sections), ⌘⇧F toggle with HUD feedback, ⌘⌥↑/↓ reorder with selectedIndex
+  tracking, "Add/Remove from Favorites" action in dropdown. Star accessory
+  shown only outside Favorites section (avoids redundancy with section title).
+  All 93 tests pass, bun run check passes.
 
 - [x] [P2] KBD003 - Add ⌃N/⌃P alternative navigation. In addition to arrow
   keys, support Ctrl+N (down) and Ctrl+P (up) for Emacs-style navigation in
