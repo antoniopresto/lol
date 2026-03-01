@@ -798,9 +798,15 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   root search. Persist favorites in state (localStorage for web demo). Show
   star icon on favorited items. ⌘⌥↑/↓ reorders favorites.
 
-- [ ] [P2] KBD003 - Add ⌃N/⌃P alternative navigation. In addition to arrow
+- [x] [P2] KBD003 - Add ⌃N/⌃P alternative navigation. In addition to arrow
   keys, support Ctrl+N (down) and Ctrl+P (up) for Emacs-style navigation in
   lists. Update list keyboard handler.
+  Done: Added Ctrl+N (next/down) and Ctrl+P (previous/up) Emacs-style navigation
+  to List and Grid components. Ctrl+N/P handled before the modifier guard with
+  exact same navigation logic as ArrowDown/ArrowUp. Grid uses 2D row-based
+  vertical movement matching ArrowDown/ArrowUp behavior. Guard: ctrlKey only
+  (no meta, no alt). Shift+Ctrl excluded naturally via lowercase key check.
+  All 93 tests pass, bun run check passes.
 
 === INFRASTRUCTURE ===
 

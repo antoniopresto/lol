@@ -60,6 +60,38 @@ export function Grid({
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (itemCount === 0) return;
+
+      if (e.ctrlKey && !e.metaKey && !e.altKey) {
+        const row = Math.floor(activeIndex / columns);
+        const col = activeIndex % columns;
+        const totalRows = Math.ceil(itemCount / columns);
+
+        if (e.key === 'n') {
+          e.preventDefault();
+          const nextRow = row + 1;
+          if (nextRow < totalRows) {
+            const nextIndex = nextRow * columns + col;
+            setActiveIndex(nextIndex < itemCount ? nextIndex : itemCount - 1);
+          } else {
+            setActiveIndex(col < itemCount ? col : 0);
+          }
+          return;
+        }
+        if (e.key === 'p') {
+          e.preventDefault();
+          const prevRow = row - 1;
+          if (prevRow >= 0) {
+            setActiveIndex(prevRow * columns + col);
+          } else {
+            const lastRowIndex = (totalRows - 1) * columns + col;
+            setActiveIndex(
+              lastRowIndex < itemCount ? lastRowIndex : itemCount - 1,
+            );
+          }
+          return;
+        }
+      }
+
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       const isTextInput =

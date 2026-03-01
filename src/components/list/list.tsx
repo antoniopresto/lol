@@ -58,6 +58,20 @@ export function List({
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (itemCount === 0) return;
+
+      if (e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === 'n') {
+          e.preventDefault();
+          setActiveIndex(activeIndex < itemCount - 1 ? activeIndex + 1 : 0);
+          return;
+        }
+        if (e.key === 'p') {
+          e.preventDefault();
+          setActiveIndex(activeIndex > 0 ? activeIndex - 1 : itemCount - 1);
+          return;
+        }
+      }
+
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       if (e.key === 'ArrowDown') {
