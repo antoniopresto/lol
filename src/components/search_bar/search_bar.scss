@@ -5,13 +5,13 @@
   align-items: center;
   height: $search-bar-height;
   padding: 0 $space-4;
-  border-bottom: 1px solid $color-border;
+  border-bottom: 1px solid $border-100;
   gap: $space-3;
 }
 
 .search-bar__icon {
   flex-shrink: 0;
-  color: $color-text-tertiary;
+  color: $text-400;
 }
 
 .search-bar__breadcrumbs {
@@ -30,13 +30,13 @@
   background: $color-surface-hover;
   font-family: $font-family;
   font-size: $font-sm;
-  color: $color-text-secondary;
+  color: $text-600;
   cursor: pointer;
   white-space: nowrap;
   transition: background-color $transition-fast ease;
 
   &:hover {
-    background: $color-border;
+    background: $border-100;
   }
 
   &:focus-visible {
@@ -55,7 +55,7 @@
 
 .search-bar__breadcrumb-chevron {
   flex-shrink: 0;
-  color: $color-text-tertiary;
+  color: $text-400;
 }
 
 .search-bar__input {
@@ -71,6 +71,6 @@
   caret-color: $color-accent;
 
   &::placeholder {
-    color: $color-text-tertiary;
+    color: $text-400;
   }
 }

@@ -27,7 +27,7 @@
   border: none;
   box-shadow:
     $shadow-window,
-    inset 0 0 0 1px rgba($color-text-primary, 0.2);
+    inset 0 0 0 1px $border-200;
   overflow: hidden;
   animation: palette-appear $transition-slow ease-out both;
 }

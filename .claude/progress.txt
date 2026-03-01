@@ -359,7 +359,7 @@ screens, plan next tasks and fix it.
     width constrained to 200px (not full width). Animation duration 1.5→2s. Gradient:
     transparent→loader color→transparent (simpler 3-stop gradient). Added
     $command-palette-width token. Animation only runs when visible. Linear timing.
-  - [ ] UXDS002i - [P2] Adopt alpha-based color token system. Raycast derives all
+  - [x] UXDS002i - [P2] Adopt alpha-based color token system. Raycast derives all
     UI colors from base text color at various opacities (10%, 40%, 60%). Replace
     flat colors ($color-text-secondary, $color-text-tertiary, $color-border) with
     alpha variants of $color-text-primary. Add tokens: $text-100 (10%), $text-400

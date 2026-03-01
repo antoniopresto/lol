@@ -39,7 +39,7 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  color: $color-text-secondary;
+  color: $text-600;
 }
 
 .list-item__title {
@@ -53,7 +53,7 @@
 
 .list-item__subtitle {
   font-size: $font-sm;
-  color: $color-text-secondary;
+  color: $text-600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -77,6 +77,6 @@
 
 .list-item__accessory-text {
   font-size: $font-xs;
-  color: $color-text-tertiary;
+  color: $text-400;
   white-space: nowrap;
 }
