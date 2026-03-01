@@ -35,6 +35,13 @@ import { SearchDropdown } from '../search_bar/search_dropdown';
 import { ToastContainer } from '../toast/toast_container';
 import './root_search_view.scss';
 
+const CYCLING_PLACEHOLDERS = [
+  'Type a command...',
+  'Search applications...',
+  'Calculate something...',
+  'Find files...',
+];
+
 function flattenItems(sections: SectionData[]): ListItemData[] {
   return sections.flatMap(s => s.items);
 }
@@ -837,6 +844,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
         onChange={handleQueryChange}
         activeDescendantId={activeDescendantId}
         breadcrumbs={nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined}
+        cyclingPlaceholders={CYCLING_PLACEHOLDERS}
         dropdown={
           <SearchDropdown
             sections={searchFilterSections}

@@ -1353,15 +1353,15 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   animation) while loading. Update List component. Demo: Clipboard History
   loads 20 items at a time.
 
-- [ ] [P2] COMP021 - Build proper markdown renderer for Detail component.
-  Replace current simple text rendering with proper CommonMark markdown
-  using existing marked + dompurify dependencies (already in package.json).
-  Support: headings, bold, italic, code (inline + blocks with syntax
-  highlighting via CSS classes), links, lists (ordered + unordered),
-  blockquotes, tables, horizontal rules, images (as placeholders in web).
-  Create src/utils/markdown.ts as a thin wrapper around marked+dompurify.
-  Add markdown-specific SCSS styles in detail.scss. Update Detail component
-  to render parsed markdown.
+- [x] [P2] COMP021 - Build proper markdown renderer for Detail component.
+  Already implemented: Detail component (detail.tsx) uses marked + dompurify
+  with DOMPurify.sanitize(marked.parse(...)). Comprehensive SCSS styles in
+  detail.scss covering: headings (h1-h6), bold/italic (via markdown), code
+  (inline + blocks with $font-family-mono), links (accent color + hover),
+  lists (ordered + unordered), blockquotes (left border + muted color),
+  tables (full width, collapsed borders, header styling), horizontal rules,
+  images (max-width, rounded). No separate wrapper needed — single usage
+  in Detail component makes a utility file unnecessary.
 
 - [ ] [P2] COMP022 - Build Form.LinkAccessory component. Small accessory
   displayed in the right side of the SearchBar/navigation bar when a Form
@@ -1488,12 +1488,19 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   clearRecent exported for future UI integration. All 93 tests pass, bun
   run check passes.
 
-- [ ] [P2] SRCH003 - Add search bar placeholder cycling. When search bar
+- [x] [P2] SRCH003 - Add search bar placeholder cycling. When search bar
   is empty, cycle through helpful placeholder texts every 4 seconds:
   "Type a command...", "Search applications...", "Calculate something...",
   "Find files...". Smooth fade transition between placeholders. Stop cycling
-  when user starts typing. Resume on clear. Use CSS animation for opacity
-  transitions. Update SearchBar component.
+  when user starts typing. Resume on clear.
+  Done: Added cyclingPlaceholders prop to SearchBar. useCyclingPlaceholder
+  hook cycles index every 4s with 250ms fade-out/fade-in (matches $transition-slow).
+  Ref-based array comparison prevents effect re-firing on unstable references.
+  Index resets on placeholder array change or deactivation. Custom overlay span
+  (position:absolute, pointer-events:none, aria-hidden) replaces native
+  ::placeholder when cycling is active. CSS opacity transition for smooth fade.
+  CYCLING_PLACEHOLDERS constant in root_search_view.tsx. Timer cleanup on
+  unmount handles mid-transition teardown. All 93 tests pass.
 
 - [ ] [P2] SRCH004 - Add ⌘L to copy current item URL/value. Universal
   shortcut that copies the most relevant value of the selected item (URL

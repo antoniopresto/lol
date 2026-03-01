@@ -4,6 +4,7 @@ import {
   Fragment,
   useEffect,
   useRef,
+  useState,
 } from 'react';
 import type { BreadcrumbItem } from '../../hooks/use_navigation';
 import './search_bar.scss';
@@ -12,20 +13,88 @@ interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  cyclingPlaceholders?: string[];
   activeDescendantId?: string;
   breadcrumbs?: BreadcrumbItem[];
   dropdown?: ReactNode;
+}
+
+const CYCLE_INTERVAL = 4000;
+const FADE_DURATION = 250;
+
+function useCyclingPlaceholder(
+  placeholders: string[] | undefined,
+  isActive: boolean,
+): {
+  text: string | undefined;
+  visible: boolean;
+} {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const placeholdersRef = useRef(placeholders);
+
+  const contentsChanged =
+    !placeholders ||
+    !placeholdersRef.current ||
+    placeholders.length !== placeholdersRef.current.length ||
+    placeholders.some((p, i) => p !== placeholdersRef.current![i]);
+
+  if (contentsChanged) {
+    placeholdersRef.current = placeholders;
+  }
+
+  useEffect(() => {
+    setIndex(0);
+    setVisible(true);
+
+    const items = placeholdersRef.current;
+    if (!items || items.length <= 1 || !isActive) return;
+
+    let timeout: ReturnType<typeof setTimeout>;
+    const interval = setInterval(() => {
+      setVisible(false);
+      timeout = setTimeout(() => {
+        setIndex(prev => (prev + 1) % items.length);
+        setVisible(true);
+      }, FADE_DURATION);
+    }, CYCLE_INTERVAL);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [
+    contentsChanged,
+    isActive,
+  ]);
+
+  if (!placeholders || placeholders.length === 0) {
+    return {
+      text: undefined,
+      visible: true,
+    };
+  }
+
+  return {
+    text: placeholders[index % placeholders.length],
+    visible,
+  };
 }
 
 export function SearchBar({
   value,
   onChange,
   placeholder = 'Search...',
+  cyclingPlaceholders,
   activeDescendantId,
   breadcrumbs,
   dropdown,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const isEmpty = !value;
+  const cycling = useCyclingPlaceholder(cyclingPlaceholders, isEmpty);
+  const hasCycling =
+    cyclingPlaceholders && cyclingPlaceholders.length > 1 && isEmpty;
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -118,22 +187,32 @@ export function SearchBar({
           })}
         </nav>
       )}
-      <input
-        ref={inputRef}
-        className="search-bar__input"
-        type="text"
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        onKeyDown={handleInputKeyDown}
-        placeholder={placeholder}
-        role="combobox"
-        aria-expanded={true}
-        aria-controls="command-list"
-        aria-activedescendant={activeDescendantId}
-        aria-label="Search commands"
-        spellCheck={false}
-        autoComplete="off"
-      />
+      <div className="search-bar__input-wrapper">
+        <input
+          ref={inputRef}
+          className="search-bar__input"
+          type="text"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          onKeyDown={handleInputKeyDown}
+          placeholder={hasCycling ? undefined : placeholder}
+          role="combobox"
+          aria-expanded={true}
+          aria-controls="command-list"
+          aria-activedescendant={activeDescendantId}
+          aria-label="Search commands"
+          spellCheck={false}
+          autoComplete="off"
+        />
+        {hasCycling && (
+          <span
+            className={`search-bar__cycling-placeholder${cycling.visible ? '' : ' search-bar__cycling-placeholder--hidden'}`}
+            aria-hidden="true"
+          >
+            {cycling.text}
+          </span>
+        )}
+      </div>
       {dropdown}
     </div>
   );
