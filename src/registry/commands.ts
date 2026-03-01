@@ -16,13 +16,14 @@ import {
   SnippetsIcon,
   TerminalIcon,
   VscodeIcon,
-  WindowIcon,
 } from '../components/icons';
 import { QuicklinksView } from '../components/quicklinks/quicklinks_view';
 import { SettingsView } from '../components/settings/settings_view';
 import { SnippetManagerView } from '../components/snippet_manager/snippet_manager_view';
+import { WindowManagementView } from '../components/window_management/window_management_view';
 import { FileSearchCommandIcon } from '../data/file_search_data';
 import { QuicklinksCommandIcon } from '../data/quicklinks_data';
+import { WindowManagementCommandIcon } from '../data/window_layouts_data';
 import { registerCommand } from './command_registry';
 
 registerCommand({
@@ -277,7 +278,7 @@ registerCommand({
   id: 'window-management',
   name: 'Window Management',
   subtitle: 'Organize Windows',
-  icon: WindowIcon(),
+  icon: WindowManagementCommandIcon(),
   keywords: [
     'window',
     'resize',
@@ -301,12 +302,18 @@ registerCommand({
 
 Organize and resize windows efficiently with keyboard shortcuts.
 
-## Available Layouts
-- **Left Half** / **Right Half**
-- **Top Half** / **Bottom Half**
-- **Maximize**
-- **Center**
-- **Reasonable Size**`,
+## Halves
+- **Left Half** / **Right Half** / **Top Half** / **Bottom Half**
+
+## Thirds
+- **First Third** / **Middle Third** / **Last Third**
+- **First Two Thirds** / **Last Two Thirds**
+
+## Quarters
+- **Top Left** / **Top Right** / **Bottom Left** / **Bottom Right**
+
+## Other
+- **Maximize** / **Center** / **Reasonable Size**`,
     metadata: [
       {
         type: 'label',
@@ -335,6 +342,8 @@ Organize and resize windows efficiently with keyboard shortcuts.
       },
     ],
   },
+  component: WindowManagementView,
+  fullView: true,
 });
 
 registerCommand({

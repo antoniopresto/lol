@@ -1114,7 +1114,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   "Search Quicklinks" command. Create src/data/quicklinks_data.ts with 10
   mock quicklinks and src/components/quicklinks/quicklinks_view.tsx.
 
-- [ ] [P1] SCRN011 - Build Window Management screen. Grid or list of window
+- [x] [P1] SCRN011 - Build Window Management screen. Grid or list of window
   layout presets: Left Half, Right Half, Top Half, Bottom Half, Center,
   Maximize, First Third, Middle Third, Last Third, First Two Thirds, Last
   Two Thirds, Top Left Quarter, Top Right Quarter, Bottom Left Quarter,
@@ -1124,6 +1124,18 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   resize/reposition windows. In web mode, show visual demo only. Create
   src/components/window_management/window_management_view.tsx and
   src/data/window_layouts_data.ts.
+  Done: WindowManagementView with self-contained UI (SearchBar, List,
+  ActionPanel, HUDContainer). 16 window layout presets across 4 categories
+  (Halves, Thirds, Quarters, Other) in window_layouts_data.tsx. Each layout
+  has inline SVG visual diagram showing highlighted region on a monitor outline.
+  List grouped by category with SearchDropdown filter. Colored category tags
+  (blue/green/orange/purple). Keyboard shortcut badges (⌃⌥ combos) shown as
+  Kbd accessories. Apply Layout on Enter with HUD, Copy Name via ⌘C. ⌘K
+  actions dropdown. Fuzzy search filtering. selectedIndex bounds clamping.
+  Single-pass Map grouping algorithm. WindowManagementCommandIcon with
+  gradient background. Registered in command registry with fullView:true.
+  Web mode: visual demo (HUD feedback). Tauri integration deferred to
+  TAURI platform tasks. All 93 tests pass, bun run check passes.
 
 - [ ] [P2] SCRN012 - Build Floating Notes screen. Markdown-enabled note
   editor that floats above other apps. In-memory list of notes with titles.
