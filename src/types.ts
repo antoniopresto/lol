@@ -13,6 +13,7 @@ export interface ListItemData {
 export interface ListItemAccessoryData {
   text?: string;
   icon?: ReactNode;
+  date?: Date;
   tag?: {
     text: string;
     color?: TagColor;

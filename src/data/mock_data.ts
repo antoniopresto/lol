@@ -31,6 +31,7 @@ export const MOCK_SECTIONS: SectionData[] = [
               color: 'blue',
             },
           },
+          { date: new Date(Date.now() - 1000 * 60 * 30) },
           { text: 'Raycast' },
         ],
         detail: {
@@ -77,7 +78,10 @@ View and manage your clipboard history. Search through previously copied items a
         title: 'Search Snippets',
         subtitle: 'Search Snippets',
         icon: SnippetsIcon(),
-        accessories: [{ text: 'Raycast' }],
+        accessories: [
+          { date: new Date(Date.now() - 1000 * 60 * 60 * 3) },
+          { text: 'Raycast' },
+        ],
         detail: {
           markdown: `# Search Snippets
 
@@ -142,6 +146,7 @@ Find and copy emoji and special characters instantly. Supports skin tone modifie
               color: 'purple',
             },
           },
+          { date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2) },
           { text: 'Raycast' },
         ],
         detail: {

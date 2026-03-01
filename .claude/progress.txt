@@ -534,11 +534,22 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   height:0), border-top 1px solid $border-100. No props (consistent with other
   form components). Exported from form/index.ts. All checks pass.
 
-- [ ] [P1] COMP011 - Add date accessory type to ListItem. List item accessories
+- [x] [P1] COMP011 - Add date accessory type to ListItem. List item accessories
   should support {date: Date} which renders as relative time ("2 hours ago",
   "Yesterday", "Mar 1"). Update ListItemAccessoryData type in types.ts. Add
   date formatting utility in src/utils/format_date.ts. Update list_item.tsx
   rendering.
+  Done: Added `date?: Date` field to `ListItemAccessoryData` in types.ts.
+  Created `src/utils/format_date.ts` with `formatRelativeDate()` using
+  calendar-day-based logic for Yesterday/N days ago (not elapsed-time-based).
+  Ranges: Just now (<1min), N minutes ago (<1hr), N hours ago (same calendar
+  day), Yesterday (1 calendar day), N days ago (2-6 calendar days), absolute
+  date (7+ days or different year). ListItem renders date accessories with
+  formatted relative text and `title` attribute showing full localized date on
+  hover. Consistent `now` reference via `useMemo` prevents label inconsistency
+  within a single render pass. Added date accessories to 3 mock items
+  (Clipboard History: 30min, Snippets: 3hr, Window Management: 2 days).
+  All 93 tests pass, bun run check passes.
 
 - [ ] [P1] COMP012 - Add tooltip support to accessories and list items. On hover
   over an accessory or list item, show a small tooltip with additional info.

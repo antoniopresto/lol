@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { TAG_COLOR_HEX } from '../../../constants/tag_colors';
 import type { ListItemAccessoryData } from '../../../types';
+import { formatRelativeDate } from '../../../utils/format_date';
 import { useListContext } from '../list_context';
 import './list_item.scss';
 
@@ -24,6 +25,7 @@ export function ListItem({
 }: ListItemProps) {
   const { activeIndex, setActiveIndex } = useListContext();
   const isActive = activeIndex === index;
+  const now = useMemo(() => new Date(), []);
 
   const handleMouseEnter = useCallback(() => {
     setActiveIndex(index);
@@ -71,12 +73,22 @@ export function ListItem({
                 </span>
               );
             }
+            const displayText = accessory.date
+              ? formatRelativeDate(accessory.date, now)
+              : accessory.text;
+
             return (
-              <span key={i} className="list-item__accessory">
+              <span
+                key={i}
+                className="list-item__accessory"
+                title={
+                  accessory.date ? accessory.date.toLocaleString() : undefined
+                }
+              >
                 {accessory.icon}
-                {accessory.text && (
+                {displayText && (
                   <span className="list-item__accessory-text">
-                    {accessory.text}
+                    {displayText}
                   </span>
                 )}
               </span>
