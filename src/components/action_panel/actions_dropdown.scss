@@ -6,14 +6,55 @@
   right: $space-2;
   min-width: 220px;
   max-height: 300px;
-  overflow-y: auto;
+  overflow: hidden;
   background-color: $color-surface;
   border: 1px solid $border-100;
   border-radius: $radius-lg;
   box-shadow: $shadow-popover;
-  padding: $space-1;
   z-index: 100;
   animation: dropdown-appear $transition-normal ease-out both;
+}
+
+.actions-dropdown__content {
+  padding: $space-1;
+  overflow-y: auto;
+  max-height: 296px;
+
+  &--slide-left {
+    animation: submenu-slide-left $transition-normal ease-out both;
+  }
+
+  &--slide-right {
+    animation: submenu-slide-right $transition-normal ease-out both;
+  }
+}
+
+.actions-dropdown__back {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  width: 100%;
+  padding: $space-2 $space-3;
+  background: none;
+  border: none;
+  border-radius: $radius-md;
+  cursor: pointer;
+  color: $text-600;
+  font-family: $font-family;
+  font-size: $font-xs;
+  font-weight: $font-weight-medium;
+  line-height: 1;
+  text-align: left;
+  margin-bottom: $space-1;
+  transition: background-color $transition-fast ease;
+
+  &:hover {
+    background-color: $text-100;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 .actions-dropdown__item {
@@ -42,6 +83,10 @@
     .actions-dropdown__shortcut .kbd__key {
       background-color: $color-kbd-background-on-accent;
       color: $color-text-on-accent-secondary;
+    }
+
+    .actions-dropdown__chevron {
+      color: $color-text-on-accent;
     }
   }
 
@@ -79,6 +124,11 @@
   flex-shrink: 0;
 }
 
+.actions-dropdown__chevron {
+  flex-shrink: 0;
+  color: $text-400;
+}
+
 @keyframes dropdown-appear {
   from {
     opacity: 0;
@@ -88,5 +138,29 @@
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes submenu-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes submenu-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }

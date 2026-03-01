@@ -574,6 +574,51 @@ export function App() {
               }
             },
           },
+          {
+            label: 'Copy As...',
+            submenu: [
+              {
+                actions: [
+                  {
+                    label: 'Copy as Markdown',
+                    onClick: () => {
+                      if (selectedItem) {
+                        showToast({
+                          style: 'info' as const,
+                          title: 'Copied as Markdown',
+                          message: selectedItem.title,
+                        });
+                      }
+                    },
+                  },
+                  {
+                    label: 'Copy as JSON',
+                    onClick: () => {
+                      if (selectedItem) {
+                        showToast({
+                          style: 'info' as const,
+                          title: 'Copied as JSON',
+                          message: selectedItem.title,
+                        });
+                      }
+                    },
+                  },
+                  {
+                    label: 'Copy as Plain Text',
+                    onClick: () => {
+                      if (selectedItem) {
+                        showToast({
+                          style: 'info' as const,
+                          title: 'Copied as Plain Text',
+                          message: selectedItem.title,
+                        });
+                      }
+                    },
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       {

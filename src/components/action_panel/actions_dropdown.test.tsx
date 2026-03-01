@@ -398,3 +398,290 @@ describe('ActionsDropdown', () => {
     );
   });
 });
+
+describe('ActionsDropdown Submenu', () => {
+  function createSubmenuSections(): DropdownSection[] {
+    return [
+      {
+        actions: [
+          {
+            label: 'Open',
+            onClick: vi.fn(),
+          },
+          {
+            label: 'Copy As...',
+            submenu: [
+              {
+                actions: [
+                  {
+                    label: 'Copy as Markdown',
+                    onClick: vi.fn(),
+                  },
+                  {
+                    label: 'Copy as JSON',
+                    onClick: vi.fn(),
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            label: 'Delete',
+            onClick: vi.fn(),
+          },
+        ],
+      },
+    ];
+  }
+
+  it('renders chevron on items with submenu', () => {
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    const submenuItem = screen.getByText('Copy As...').closest('button')!;
+    expect(
+      submenuItem.querySelector('.actions-dropdown__chevron'),
+    ).toBeInTheDocument();
+    expect(submenuItem).toHaveClass('actions-dropdown__item--has-submenu');
+  });
+
+  it('sets aria-haspopup on submenu items', () => {
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    const submenuItem = screen.getByText('Copy As...').closest('button')!;
+    expect(submenuItem).toHaveAttribute('aria-haspopup', 'menu');
+
+    const normalItem = screen.getByText('Open').closest('button')!;
+    expect(normalItem).not.toHaveAttribute('aria-haspopup');
+  });
+
+  it('Enter on submenu item opens submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+    expect(screen.getByText('Copy as JSON')).toBeInTheDocument();
+    expect(screen.queryByText('Open')).not.toBeInTheDocument();
+    expect(screen.queryByText('Delete')).not.toBeInTheDocument();
+  });
+
+  it('ArrowRight on submenu item opens submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{ArrowRight}');
+
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+    expect(screen.getByText('Copy as JSON')).toBeInTheDocument();
+  });
+
+  it('click on submenu item opens submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.click(screen.getByText('Copy As...'));
+
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+    expect(screen.getByText('Copy as JSON')).toBeInTheDocument();
+  });
+
+  it('Escape in submenu goes back to parent', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    const onClose = vi.fn();
+    renderDropdown({
+      sections,
+      onClose,
+    });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByText('Copy As...')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('ArrowLeft in submenu goes back to parent', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{ArrowRight}');
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByText('Copy As...')).toBeInTheDocument();
+  });
+
+  it('Enter on submenu child action executes and closes', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    const childOnClick =
+      sections[0]!.actions[1]!.submenu![0]!.actions[0]!.onClick!;
+    const onClose = vi.fn();
+    renderDropdown({
+      sections,
+      onClose,
+    });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    await user.keyboard('{Enter}');
+
+    expect(childOnClick).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows back button with parent label in submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    const backButton = screen.getByText('Copy As...').closest('button')!;
+    expect(backButton).toHaveClass('actions-dropdown__back');
+  });
+
+  it('clicking back button returns to parent menu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+
+    const backButton = screen
+      .getByText('Copy As...')
+      .closest('.actions-dropdown__back')!;
+    await user.click(backButton);
+
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('ArrowRight on non-submenu item does nothing', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(screen.getByText('Copy As...')).toBeInTheDocument();
+  });
+
+  it('ArrowLeft on root menu does nothing', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    const onClose = vi.fn();
+    renderDropdown({
+      sections,
+      onClose,
+    });
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByText('Open')).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('keyboard nav works in submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    const secondChildOnClick =
+      sections[0]!.actions[1]!.submenu![0]!.actions[1]!.onClick!;
+    const onClose = vi.fn();
+    renderDropdown({
+      sections,
+      onClose,
+    });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    await user.keyboard('{ArrowDown}{Enter}');
+
+    expect(secondChildOnClick).toHaveBeenCalledTimes(1);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('restores active index to submenu parent item on Escape', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+    const submenuItem = screen.getByText('Copy As...').closest('button')!;
+    expect(submenuItem).toHaveClass('actions-dropdown__item--active');
+  });
+
+  it('restores active index to submenu parent item on ArrowLeft', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{ArrowRight}');
+    expect(screen.getByText('Copy as Markdown')).toBeInTheDocument();
+
+    await user.keyboard('{ArrowLeft}');
+    const submenuItem = screen.getByText('Copy As...').closest('button')!;
+    expect(submenuItem).toHaveClass('actions-dropdown__item--active');
+  });
+
+  it('applies slide-left class when entering submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    const { container } = renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    const content = container.querySelector('.actions-dropdown__content');
+    expect(content).toHaveClass('actions-dropdown__content--slide-left');
+  });
+
+  it('applies slide-right class when exiting submenu', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    const { container } = renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    await user.keyboard('{Escape}');
+    const content = container.querySelector('.actions-dropdown__content');
+    expect(content).toHaveClass('actions-dropdown__content--slide-right');
+  });
+
+  it('back button has menuitem role and aria-label', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    const backButton = screen
+      .getByText('Copy As...')
+      .closest('.actions-dropdown__back')!;
+    expect(backButton).toHaveAttribute('role', 'menuitem');
+    expect(backButton).toHaveAttribute(
+      'aria-label',
+      'Back to parent menu from Copy As...',
+    );
+  });
+
+  it('menu aria-label changes to submenu parent label', async () => {
+    const user = userEvent.setup();
+    const sections = createSubmenuSections();
+    renderDropdown({ sections });
+
+    const menu = screen.getByRole('menu');
+    expect(menu).toHaveAttribute('aria-label', 'Available actions');
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(menu).toHaveAttribute('aria-label', 'Copy As...');
+  });
+});

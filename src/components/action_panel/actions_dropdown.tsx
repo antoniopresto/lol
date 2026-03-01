@@ -14,11 +14,18 @@ export interface DropdownAction {
   label: string;
   shortcut?: ReactNode;
   onClick?: () => void;
+  submenu?: DropdownSection[];
 }
 
 export interface DropdownSection {
   title?: string;
   actions: DropdownAction[];
+}
+
+interface SubmenuState {
+  sections: DropdownSection[];
+  parentLabel: string;
+  parentActiveIndex: number;
 }
 
 interface ActionsDropdownProps {
@@ -28,6 +35,88 @@ interface ActionsDropdownProps {
   triggerRef?: RefObject<HTMLButtonElement | null>;
 }
 
+function ChevronRight() {
+  return (
+    <svg
+      className="actions-dropdown__chevron"
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+    >
+      <path
+        d="M4.5 2.5L8 6L4.5 9.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function renderSections(
+  nonEmptySections: DropdownSection[],
+  sectionOffsets: number[],
+  activeIndex: number,
+  onExecute: (index: number) => void,
+  onHover: (index: number) => void
+) {
+  return nonEmptySections.map((section, sectionIndex) => {
+    const offset = sectionOffsets[sectionIndex]!;
+    const titleId = section.title ? `section-title-${sectionIndex}` : undefined;
+
+    return (
+      <Fragment key={`section-${sectionIndex}`}>
+        {sectionIndex > 0 && (
+          <div className="actions-dropdown__separator" role="separator" />
+        )}
+        <div
+          className="actions-dropdown__section"
+          role="group"
+          aria-labelledby={titleId}
+        >
+          {titleId && (
+            <div
+              id={titleId}
+              className="actions-dropdown__section-title"
+              role="presentation"
+            >
+              {section.title}
+            </div>
+          )}
+          {section.actions.map((action, actionIndex) => {
+            const idx = offset + actionIndex;
+            const hasSubmenu = action.submenu && action.submenu.length > 0;
+            return (
+              <button
+                key={`action-${idx}`}
+                id={`action-item-${idx}`}
+                className={`actions-dropdown__item${idx === activeIndex ? ' actions-dropdown__item--active' : ''}${hasSubmenu ? ' actions-dropdown__item--has-submenu' : ''}`}
+                data-dropdown-index={idx}
+                role="menuitem"
+                type="button"
+                aria-haspopup={hasSubmenu ? 'menu' : undefined}
+                onClick={() => onExecute(idx)}
+                onMouseEnter={() => onHover(idx)}
+              >
+                <span className="actions-dropdown__label">{action.label}</span>
+                {hasSubmenu ? (
+                  <ChevronRight />
+                ) : action.shortcut ? (
+                  <span className="actions-dropdown__shortcut">
+                    {action.shortcut}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </Fragment>
+    );
+  });
+}
+
 export function ActionsDropdown({
   sections,
   open,
@@ -35,11 +124,19 @@ export function ActionsDropdown({
   triggerRef,
 }: ActionsDropdownProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [submenu, setSubmenu] = useState<SubmenuState | null>(null);
+  const [submenuDirection, setSubmenuDirection] = useState<
+    'enter' | 'exit' | null
+  >(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const nonEmptySections = useMemo(
-    () => sections.filter(s => s.actions.length > 0),
-    [sections],
+    () =>
+      (submenu ? submenu.sections : sections).filter(s => s.actions.length > 0),
+    [
+      sections,
+      submenu,
+    ],
   );
 
   const flatActions = useMemo(
@@ -60,18 +157,54 @@ export function ActionsDropdown({
   useEffect(() => {
     if (open && dropdownRef.current) {
       setActiveIndex(0);
+      setSubmenu(null);
+      setSubmenuDirection(null);
       dropdownRef.current.focus();
     }
   }, [open]);
 
+  const openSubmenu = useCallback(
+    (index: number): boolean => {
+      const action = flatActions[index];
+      if (!action?.submenu || action.submenu.length === 0) {
+        return false;
+      }
+      setSubmenuDirection('enter');
+      setSubmenu({
+        sections: action.submenu,
+        parentLabel: action.label,
+        parentActiveIndex: index,
+      });
+      setActiveIndex(0);
+      return true;
+    },
+    [flatActions],
+  );
+
+  const closeSubmenu = useCallback((): boolean => {
+    if (!submenu) return false;
+    const restoreIndex = submenu.parentActiveIndex;
+    setSubmenuDirection('exit');
+    setSubmenu(null);
+    setActiveIndex(restoreIndex);
+    return true;
+  }, [submenu]);
+
   const executeAction = useCallback(
     (index: number) => {
-      flatActions[index]?.onClick?.();
+      const action = flatActions[index];
+      if (!action) return;
+      if (action.submenu && action.submenu.length > 0) {
+        openSubmenu(index);
+        return;
+      }
+      action.onClick?.();
       onClose();
     },
     [
       flatActions,
       onClose,
+      openSubmenu,
     ],
   );
 
@@ -89,7 +222,23 @@ export function ActionsDropdown({
       if (e.key === 'Escape') {
         e.preventDefault();
         e.stopPropagation();
-        onClose();
+        if (!closeSubmenu()) {
+          onClose();
+        }
+        return;
+      }
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        e.stopPropagation();
+        closeSubmenu();
+        return;
+      }
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        e.stopPropagation();
+        openSubmenu(activeIndex);
         return;
       }
 
@@ -118,10 +267,11 @@ export function ActionsDropdown({
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [
     open,
-    flatActions.length,
     activeIndex,
     onClose,
     executeAction,
+    openSubmenu,
+    closeSubmenu,
   ]);
 
   useEffect(() => {
@@ -157,70 +307,59 @@ export function ActionsDropdown({
     activeIndex,
   ]);
 
+  useEffect(() => {
+    if (!submenuDirection) return;
+    const timer = setTimeout(() => setSubmenuDirection(null), 150);
+    return () => clearTimeout(timer);
+  }, [submenuDirection]);
+
   if (!open || flatActions.length === 0) return null;
+
+  const slideClass =
+    submenuDirection === 'enter'
+      ? ' actions-dropdown__content--slide-left'
+      : submenuDirection === 'exit'
+        ? ' actions-dropdown__content--slide-right'
+        : '';
 
   return (
     <div
       className="actions-dropdown"
       ref={dropdownRef}
       role="menu"
-      aria-label="Available actions"
+      aria-label={submenu ? submenu.parentLabel : 'Available actions'}
       aria-activedescendant={`action-item-${activeIndex}`}
       tabIndex={-1}
     >
-      {nonEmptySections.map((section, sectionIndex) => {
-        const offset = sectionOffsets[sectionIndex]!;
-        const titleId = section.title
-          ? `section-title-${sectionIndex}`
-          : undefined;
-
-        return (
-          <Fragment key={`section-${sectionIndex}`}>
-            {sectionIndex > 0 && (
-              <div className="actions-dropdown__separator" role="separator" />
-            )}
-            <div
-              className="actions-dropdown__section"
-              role="group"
-              aria-labelledby={titleId}
-            >
-              {titleId && (
-                <div
-                  id={titleId}
-                  className="actions-dropdown__section-title"
-                  role="presentation"
-                >
-                  {section.title}
-                </div>
-              )}
-              {section.actions.map((action, actionIndex) => {
-                const idx = offset + actionIndex;
-                return (
-                  <button
-                    key={`action-${idx}`}
-                    id={`action-item-${idx}`}
-                    className={`actions-dropdown__item${idx === activeIndex ? ' actions-dropdown__item--active' : ''}`}
-                    data-dropdown-index={idx}
-                    role="menuitem"
-                    type="button"
-                    onClick={() => executeAction(idx)}
-                    onMouseEnter={() => setActiveIndex(idx)}
-                  >
-                    <span className="actions-dropdown__label">
-                      {action.label}
-                    </span>
-                    {action.shortcut && (
-                      <span className="actions-dropdown__shortcut">
-                        {action.shortcut}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </Fragment>
-        );
-      })}
+      <div className={`actions-dropdown__content${slideClass}`}>
+        {submenu && (
+          <button
+            className="actions-dropdown__back"
+            type="button"
+            role="menuitem"
+            aria-label={`Back to parent menu from ${submenu.parentLabel}`}
+            onClick={closeSubmenu}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path
+                d="M7.5 2.5L4 6L7.5 9.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span>{submenu.parentLabel}</span>
+          </button>
+        )}
+        {renderSections(
+          nonEmptySections,
+          sectionOffsets,
+          activeIndex,
+          executeAction,
+          setActiveIndex,
+        )}
+      </div>
     </div>
   );
 }

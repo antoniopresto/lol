@@ -442,10 +442,16 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   Precomputed sectionOffsets. Index-based keys. App.tsx demo with 3 sections.
   26 dropdown tests (5 new), all 74 tests pass.
 
-- [ ] [P0] COMP004 - Add ActionPanel.Submenu support. Nested submenu that
+- [x] [P0] COMP004 - Add ActionPanel.Submenu support. Nested submenu that
   replaces the dropdown content with child actions when hovered/selected. Show
   chevron-right indicator on parent item. Escape goes back to parent menu.
   Animate sideways transition. Update actions_dropdown.tsx.
+  Done: DropdownAction.submenu field with DropdownSection[]. SubmenuState tracks
+  parentActiveIndex for restore on exit. ChevronRight indicator on submenu items.
+  Back button with role="menuitem" and aria-label. Slide-left/slide-right CSS
+  animations. ArrowRight/Enter to enter, ArrowLeft/Escape to go back (restores
+  parent position). App.tsx demo with "Copy As..." submenu (3 child actions).
+  45 dropdown tests (5 new for submenu), all 93 tests pass.
 
 - [ ] [P0] COMP005 - Build List.Dropdown component (search bar filter). A small
   dropdown selector inside the SearchBar (right side) for secondary filtering
