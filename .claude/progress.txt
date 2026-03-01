@@ -295,8 +295,22 @@
      vitest + @testing-library/react. Minimum 80% coverage for tested
      components.
 
-- [] UXDS001 - The design is very different from Raycast, colors, spacing,
-icons, etc... fix it.
+- [IN_PROGRESS] UXDS001 - The design is very different from Raycast, colors,
+  spacing, icons, etc... fix it.
+  Sub-tasks:
+  - [x] UXDS001a - Replace monochrome stroke application icons with colorful
+    filled icons matching real app branding (Safari, VS Code, Terminal, Figma,
+    Slack). Each icon should use brand colors and filled/solid style.
+  - [x] UXDS001b - Replace monochrome stroke command icons with more detailed
+    filled icons for Raycast commands (Clipboard, Snippets, Emoji, Window
+    Management, Calculator, Dictionary, System Monitor, Color Picker).
+    Icons should be filled style with color accents. Each command icon now has
+    a colored gradient rounded-rect background with white icon symbols inside.
+  - [ ] UXDS001c - Update color tokens to better match Raycast's actual dark
+    theme (refine background, surface, border, text colors; adjust opacity
+    and blur values on command palette window).
+  - [ ] UXDS001d - Fix spacing and sizing: list item height, padding, icon
+    sizes, search bar dimensions, action panel to match Raycast proportions.
 
 - [ ] UXDS002 - The design is very poor, Raycast has a lot more resources and
 screens, plan next tasks and fix it.
