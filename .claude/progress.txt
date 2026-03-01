@@ -1220,8 +1220,19 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     have .catch(console.error) for error observability. Mock data seeding
     uses Promise.all for batched inserts. Web fallback works through
     clipboardDb's internal localStorage delegation. All 93 tests pass.
-  - [ ] TAURI008e - Migrate snippets persistence to database.ts. Update
+  - [x] TAURI008e - Migrate snippets persistence to database.ts. Update
     snippet_manager_view.tsx to use database helpers.
+    Done: Replaced direct storageGet/storageSet calls with snippetDb helpers
+    from database.ts. rowToEntry/entryToRow converters with validated category
+    (isSnippetCategory guard), tag JSON parsing with try-catch and isTagColor
+    validation. Async initial load with abort guard for unmount safety. Removed
+    old StoredSnippet types, validators (isStoredTag, isStoredSnippetArray),
+    serialization/deserialization functions. Optimistic state updates with
+    granular snippetDb.insert/update/delete calls (fire-and-forget with
+    .catch(console.error)). Mock data seeding uses Promise.all for batched
+    inserts on web when DB is empty. Removed unused entriesRef (no external
+    listener unlike clipboard). Web fallback works through snippetDb's internal
+    localStorage delegation. All 93 tests pass, bun run check passes.
   - [ ] TAURI008f - Migrate quicklinks persistence to database.ts. Update
     quicklinks_view.tsx to use database helpers.
   - [ ] TAURI008g - Migrate settings, recent_commands, favorites, theme,

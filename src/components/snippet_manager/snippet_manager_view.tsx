@@ -17,9 +17,11 @@ import { useAlert } from '../../hooks/use_alert';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { isTauri } from '../../platform';
+import type { SnippetRow } from '../../utils/database';
+import { snippetDb } from '../../utils/database';
 import { formatRelativeDate } from '../../utils/format_date';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
-import { isRecord, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import { createCopyAction, performCopy } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
@@ -95,86 +97,56 @@ function truncateContent(content: string, maxLength: number): string {
   return singleLine.slice(0, maxLength) + '\u2026';
 }
 
-const SNIPPETS_KEY = 'snippets';
-
-interface StoredSnippet {
-  id: string;
-  name: string;
-  keyword: string;
-  content: string;
-  category: string;
-  tags: {
-    text: string;
-    color?: string;
-  }[];
-  createdAt: string;
-}
-
-function isStoredTag(value: unknown): value is {
-  text: string;
-  color?: string;
-} {
-  if (!isRecord(value)) return false;
-  if (typeof value.text !== 'string') return false;
-  if ('color' in value && typeof value.color !== 'string') {
-    return false;
-  }
-  return true;
-}
-
-function isStoredSnippetArray(value: unknown): value is StoredSnippet[] {
-  if (!Array.isArray(value)) return false;
-  return value.every(
-    v =>
-      isRecord(v) &&
-      typeof v.id === 'string' &&
-      typeof v.name === 'string' &&
-      typeof v.keyword === 'string' &&
-      typeof v.content === 'string' &&
-      typeof v.category === 'string' &&
-      typeof v.createdAt === 'string' &&
-      Array.isArray(v.tags) &&
-      v.tags.every(isStoredTag),
-  );
-}
-
-function serializeEntries(entries: SnippetEntry[]): StoredSnippet[] {
-  return entries.map(e => ({
-    ...e,
-    createdAt: e.createdAt.toISOString(),
-  }));
-}
-
 const TAG_COLOR_NAMES = new Set<string>(Object.keys(TAG_COLOR_HEX));
 
 function isTagColor(value: string): value is TagColor {
   return TAG_COLOR_NAMES.has(value);
 }
 
-function deserializeEntries(stored: StoredSnippet[]): SnippetEntry[] {
-  return stored.map(s => {
-    const parsed = new Date(s.createdAt);
-    const createdAt = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
-    return {
-      ...s,
-      category: isSnippetCategory(s.category) ? s.category : 'general',
-      tags: s.tags.map(t => ({
-        text: t.text,
-        color: t.color && isTagColor(t.color) ? t.color : undefined,
-      })),
-      createdAt,
-    };
-  });
+function rowToEntry(row: SnippetRow): SnippetEntry {
+  const parsed = new Date(row.created_at);
+  const createdAt = isNaN(parsed.getTime()) ? new Date() : parsed;
+
+  let tags: SnippetEntry['tags'] = [];
+  try {
+    const raw = JSON.parse(row.tags);
+    if (Array.isArray(raw)) {
+      tags = raw.map((t: {
+        text?: string;
+        color?: string;
+      }) => ({
+        text: typeof t.text === 'string' ? t.text : '',
+        color:
+          typeof t.color === 'string' && isTagColor(t.color)
+            ? t.color
+            : undefined,
+      }));
+    }
+  } catch {
+    // empty
+  }
+
+  return {
+    id: row.id,
+    name: row.name,
+    keyword: row.keyword,
+    content: row.content,
+    category: isSnippetCategory(row.category) ? row.category : 'general',
+    tags,
+    createdAt,
+  };
 }
 
-function loadSnippets(): SnippetEntry[] {
-  const stored = storageGet(SNIPPETS_KEY, isStoredSnippetArray);
-  if (stored) return deserializeEntries(stored);
-  return MOCK_SNIPPET_ENTRIES;
-}
-
-function saveSnippets(entries: SnippetEntry[]) {
-  storageSet(SNIPPETS_KEY, serializeEntries(entries));
+function entryToRow(entry: SnippetEntry): SnippetRow {
+  return {
+    id: entry.id,
+    name: entry.name,
+    keyword: entry.keyword,
+    content: entry.content,
+    category: entry.category,
+    tags: JSON.stringify(entry.tags),
+    created_at: entry.createdAt.toISOString(),
+  };
 }
 
 const FILTER_SECTIONS: SearchDropdownSection[] = [
@@ -342,7 +314,7 @@ type SnippetSubView = 'list' | 'create' | 'edit';
 
 export function SnippetManagerView() {
   const nav = useNavigation();
-  const [entries, setEntries] = useState<SnippetEntry[]>(loadSnippets);
+  const [entries, setEntries] = useState<SnippetEntry[]>([]);
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -354,6 +326,35 @@ export function SnippetManagerView() {
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const now = useMemo(() => new Date(), []);
+
+  useEffect(() => {
+    let aborted = false;
+
+    snippetDb
+      .getAll()
+      .then(rows => {
+        if (aborted) return;
+        if (rows.length > 0) {
+          setEntries(rows.map(rowToEntry));
+        } else if (!isTauri) {
+          const mock = MOCK_SNIPPET_ENTRIES.map(e => ({ ...e }));
+          setEntries(mock);
+          Promise.all(mock.map(e => snippetDb.insert(entryToRow(e)))).catch(
+            console.error,
+          );
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load snippets:', err);
+        if (!isTauri && !aborted) {
+          setEntries(MOCK_SNIPPET_ENTRIES.map(e => ({ ...e })));
+        }
+      });
+
+    return () => {
+      aborted = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     let items = entries;
@@ -498,11 +499,8 @@ export function SnippetManagerView() {
         label: 'Delete',
         style: 'destructive',
         onAction: () => {
-          setEntries(prev => {
-            const next = prev.filter(e => e.id !== entryId);
-            saveSnippets(next);
-            return next;
-          });
+          setEntries(prev => prev.filter(e => e.id !== entryId));
+          snippetDb.delete(entryId).catch(console.error);
           showHUD({
             icon: <SnippetHUDIcon />,
             title: 'Deleted',
@@ -523,28 +521,34 @@ export function SnippetManagerView() {
 
   const handleFormSubmit = useCallback(
     (form: SnippetFormState) => {
+      const tags = form.tags.map(t => {
+        const found = SNIPPET_TAGS.find(st => st.value === t);
+        return {
+          text: found?.label ?? t,
+          color: found?.color,
+        };
+      });
+
       if (subView === 'edit' && editingSnippet) {
-        setEntries(prev => {
-          const next = prev.map(e =>
-            e.id === editingSnippet.id
-              ? {
-                  ...e,
-                  name: form.name,
-                  keyword: form.keyword,
-                  content: form.snippet,
-                  category: form.category,
-                  tags: form.tags.map(t => {
-                    const found = SNIPPET_TAGS.find(st => st.value === t);
-                    return {
-                      text: found?.label ?? t,
-                      color: found?.color,
-                    };
-                  }),
-                }
-              : e);
-          saveSnippets(next);
-          return next;
-        });
+        const updatedEntry = {
+          ...editingSnippet,
+          name: form.name,
+          keyword: form.keyword,
+          content: form.snippet,
+          category: form.category,
+          tags,
+        };
+        setEntries(prev =>
+          prev.map(e => (e.id === editingSnippet.id ? updatedEntry : e)));
+        snippetDb
+          .update(editingSnippet.id, {
+            name: form.name,
+            keyword: form.keyword,
+            content: form.snippet,
+            category: form.category,
+            tags: JSON.stringify(tags),
+          })
+          .catch(console.error);
         showHUD({
           icon: <SnippetHUDIcon />,
           title: 'Snippet Updated',
@@ -556,20 +560,14 @@ export function SnippetManagerView() {
           keyword: form.keyword,
           content: form.snippet,
           category: form.category,
-          tags: form.tags.map(t => {
-            const found = SNIPPET_TAGS.find(st => st.value === t);
-            return { text: found?.label ?? t };
-          }),
+          tags,
           createdAt: new Date(),
         };
-        setEntries(prev => {
-          const next = [
-            newEntry,
-            ...prev,
-          ];
-          saveSnippets(next);
-          return next;
-        });
+        setEntries(prev => [
+          newEntry,
+          ...prev,
+        ]);
+        snippetDb.insert(entryToRow(newEntry)).catch(console.error);
         showHUD({
           icon: <SnippetHUDIcon />,
           title: 'Snippet Created',
