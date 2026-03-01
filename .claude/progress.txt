@@ -679,11 +679,29 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     "Search Snippets" command in root search, handle isFullView for snippets,
     removed old CreateSnippetView from App.tsx (now internal to snippet manager).
 
-- [ ] [P2] SCRN003 - Build Emoji Picker screen. Grid view (6 columns) of emoji
+- [x] [P2] SCRN003 - Build Emoji Picker screen. Grid view (6 columns) of emoji
   characters, organized by category sections (Smileys, People, Animals, Food,
   Activities, Travel, Objects, Symbols, Flags). Search filters across all.
   Click/Enter copies emoji. Show recently used section at top. Push via
   navigation from "Search Emoji" command.
+  Done: EmojiPickerView with self-contained UI (SearchBar, ActionPanel,
+  HUDContainer). 195 emojis across 9 categories in emoji_data.ts. Grid layout
+  (6 columns) with category sections, search filtering (name, keywords, char),
+  SearchDropdown category filter. Recently Used section persisted in localStorage.
+  Copy on Enter/click with HUD notification. Keyboard navigation: all 4 arrow keys
+  with cross-section movement, Enter to copy. ARIA: listbox/option roles,
+  aria-selected, aria-activedescendant on both SearchBar input and grid listbox.
+  actionsOpen guard prevents Enter conflict when actions dropdown is open.
+  All SCSS values tokenized ($font-emoji, $letter-spacing-section tokens added).
+  Sub-tasks:
+  - [x] SCRN003a - Create emoji data (src/data/emoji_data.ts) with EmojiEntry type
+    (char, name, category, keywords), ~200 emojis across 9 categories.
+  - [x] SCRN003b - Create EmojiPickerView component
+    (src/components/emoji_picker/emoji_picker_view.tsx and .scss). Grid view
+    (6 columns) with category sections, search filtering, recently used section,
+    copy on Enter/click with HUD, SearchDropdown filter by category.
+  - [x] SCRN003c - Wire into App.tsx: add 'emoji' to NavViewData, push from
+    "Search Emoji" command in root search.
 
 - [ ] [P2] SCRN004 - Build Calculator inline result. When user types a math
   expression in root search (e.g. "2+2", "sqrt(144)", "15% of 200"), show

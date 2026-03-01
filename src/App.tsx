@@ -5,6 +5,7 @@ import { ClipboardHistoryView } from './components/clipboard_history/clipboard_h
 import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
 import { DetailMetadata } from './components/detail/detail_metadata';
+import { EmojiPickerView } from './components/emoji_picker/emoji_picker_view';
 import { EmptyState } from './components/empty_state/empty_state';
 import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
@@ -36,6 +37,7 @@ type NavViewData =
   | { type: 'grid' }
   | { type: 'clipboard' }
   | { type: 'snippets' }
+  | { type: 'emoji' }
   | {
       type: 'detail';
       item: ListItemData;
@@ -403,6 +405,10 @@ export function App() {
       push('Snippets', { type: 'snippets' });
       setQuery('');
       setSelectedIndex(0);
+    } else if (item.id === 'emoji') {
+      push('Search Emoji', { type: 'emoji' });
+      setQuery('');
+      setSelectedIndex(0);
     } else if (item.id === 'color-picker') {
       push('Color Picker', { type: 'grid' });
       setQuery('');
@@ -450,7 +456,10 @@ export function App() {
     },
     toggleActions,
     {
-      enabled: viewType !== 'clipboard' && viewType !== 'snippets',
+      enabled:
+        viewType !== 'clipboard' &&
+        viewType !== 'snippets' &&
+        viewType !== 'emoji',
     },
   );
 
@@ -693,6 +702,8 @@ export function App() {
         return <ClipboardHistoryView />;
       case 'snippets':
         return <SnippetManagerView />;
+      case 'emoji':
+        return <EmojiPickerView />;
       case 'grid':
         return (
           <ColorPickerView
@@ -707,7 +718,8 @@ export function App() {
     }
   }
 
-  const isFullView = viewType === 'clipboard' || viewType === 'snippets';
+  const isFullView =
+    viewType === 'clipboard' || viewType === 'snippets' || viewType === 'emoji';
 
   return (
     <NavigationContextProvider value={nav}>
