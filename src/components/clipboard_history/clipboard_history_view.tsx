@@ -23,7 +23,9 @@ import { ActionPanel } from '../action_panel/action_panel';
 import {
   ClipboardHUDIcon,
   createCopyAction,
+  createOpenInBrowserAction,
   performCopy,
+  performOpen,
 } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
@@ -380,6 +382,17 @@ export function ClipboardHistoryView() {
     handleTogglePin,
   );
 
+  const handleOpenInBrowser = useCallback(() => {
+    if (!selectedEntry || selectedEntry.contentType !== 'link') {
+      return;
+    }
+    setActionsOpen(false);
+    performOpen(selectedEntry.content, showHUD);
+  }, [
+    selectedEntry,
+    showHUD,
+  ]);
+
   useKeyboardShortcut(
     {
       key: 'Backspace',
@@ -388,33 +401,62 @@ export function ClipboardHistoryView() {
     handleDelete,
   );
 
-  const dropdownSections: DropdownSection[] = useMemo(
-    () => [
+  useKeyboardShortcut(
+    {
+      key: 'o',
+      meta: true,
+    },
+    handleOpenInBrowser,
+  );
+
+  const dropdownSections: DropdownSection[] = useMemo(() => {
+    const primaryActions = [
+      {
+        label: 'Paste',
+        shortcut: <Kbd keys={['↵']} />,
+        onClick: handlePaste,
+      },
+      createCopyAction(
+        {
+          content: selectedEntry?.content ?? '',
+          title: 'Copy',
+          shortcut: (
+            <Kbd
+              keys={[
+                '⌘',
+                'C',
+              ]}
+            />
+          ),
+          hudIcon: <ClipboardHUDIcon />,
+        },
+        showHUD,
+      ),
+    ];
+
+    if (selectedEntry?.contentType === 'link') {
+      primaryActions.push(
+        createOpenInBrowserAction(
+          {
+            url: selectedEntry.content,
+            shortcut: (
+              <Kbd
+                keys={[
+                  '⌘',
+                  'O',
+                ]}
+              />
+            ),
+          },
+          showHUD,
+        ),
+      );
+    }
+
+    return [
       {
         title: 'Actions',
-        actions: [
-          {
-            label: 'Paste',
-            shortcut: <Kbd keys={['↵']} />,
-            onClick: handlePaste,
-          },
-          createCopyAction(
-            {
-              content: selectedEntry?.content ?? '',
-              title: 'Copy',
-              shortcut: (
-                <Kbd
-                  keys={[
-                    '⌘',
-                    'C',
-                  ]}
-                />
-              ),
-              hudIcon: <ClipboardHUDIcon />,
-            },
-            showHUD,
-          ),
-        ],
+        actions: primaryActions,
       },
       {
         title: 'Organize',
@@ -451,16 +493,16 @@ export function ClipboardHistoryView() {
           },
         ],
       },
-    ],
-    [
-      selectedEntry?.pinned,
-      selectedEntry?.content,
-      handlePaste,
-      handleTogglePin,
-      handleDelete,
-      showHUD,
-    ],
-  );
+    ];
+  }, [
+    selectedEntry?.pinned,
+    selectedEntry?.content,
+    selectedEntry?.contentType,
+    handlePaste,
+    handleTogglePin,
+    handleDelete,
+    showHUD,
+  ]);
 
   const activeDescendantId =
     totalItemCount > 0 ? `list-item-${selectedIndex}` : undefined;

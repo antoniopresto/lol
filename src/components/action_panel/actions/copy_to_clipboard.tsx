@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { copyToClipboard } from '../../../utils/clipboard';
 import type { DropdownAction } from '../actions_dropdown';
+import type { ShowHUD } from './types';
 
 export function CopyHUDIcon() {
   return (
@@ -35,11 +36,6 @@ export function ClipboardHUDIcon() {
     </svg>
   );
 }
-
-type ShowHUD = (options: {
-  icon?: ReactNode;
-  title: string;
-}) => string;
 
 interface PerformCopyOptions {
   hudTitle?: string;

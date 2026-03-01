@@ -17,6 +17,7 @@ import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { ActionPanel } from '../action_panel/action_panel';
 import {
   CopyHUDIcon,
+  OpenInBrowserHUDIcon,
   createCopyAction,
   performCopy,
 } from '../action_panel/actions';
@@ -41,32 +42,6 @@ function SearchEmptyIcon() {
         y2="42"
         stroke="currentColor"
         strokeWidth="3"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function OpenHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M6 3H4.5A1.5 1.5 0 003 4.5v7A1.5 1.5 0 004.5 13h7a1.5 1.5 0 001.5-1.5V10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M9 3h4v4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13 3L7.5 8.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </svg>
@@ -214,7 +189,7 @@ export function FileSearchView() {
     if (!selectedEntry) return;
     setActionsOpen(false);
     showHUD({
-      icon: <OpenHUDIcon />,
+      icon: <OpenInBrowserHUDIcon />,
       title: `Opened ${selectedEntry.name}`,
     });
   }, [
@@ -226,7 +201,7 @@ export function FileSearchView() {
     if (!selectedEntry) return;
     setActionsOpen(false);
     showHUD({
-      icon: <OpenHUDIcon />,
+      icon: <OpenInBrowserHUDIcon />,
       title: 'Revealed in Finder',
     });
   }, [

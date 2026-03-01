@@ -1189,10 +1189,23 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     (EmojiPicker, ClipboardHistory, SnippetManager, FileSearch, ColorPicker,
     App.tsx) with createCopyAction. Remove duplicated HUD icons.
 
-- [ ] [P1] COMP017 - Build Action.OpenInBrowser declarative action. Opens
+- [x] [P1] COMP017 - Build Action.OpenInBrowser declarative action. Opens
   URL in default browser. Accepts: url, title (default "Open in Browser"),
   shortcut. In web: window.open(url). In Tauri: @tauri-apps/api/shell open.
   Shows HUD "Opened in Browser". Create open_in_browser.tsx in actions/.
+  Done: Created src/utils/open_url.ts with openUrl(url) async utility —
+  validates URL scheme (http/https only, blocks javascript:/data: URIs),
+  uses window.open for web (future Tauri plugin integration point). Created
+  src/components/action_panel/actions/open_in_browser.tsx with
+  OpenInBrowserHUDIcon (external link SVG), performOpen() for imperative calls
+  (keyboard shortcuts), and createOpenInBrowserAction() factory for declarative
+  dropdown action definitions. Extracted shared ShowHUD type to
+  actions/types.ts (used by both copy_to_clipboard and open_in_browser,
+  eliminates duplication). Barrel export in actions/index.ts. ClipboardHistoryView
+  updated: "Open in Browser" action shown conditionally for link-type entries,
+  ⌘O keyboard shortcut via useKeyboardShortcut. FileSearchView updated:
+  replaced local OpenHUDIcon with shared OpenInBrowserHUDIcon. All 93 tests
+  pass, bun run check passes.
 
 - [ ] [P1] COMP018 - Build List.Item.Detail inline detail panel. When a
   ListItem has a detail prop, the list splits into list (left, ~40%) and
