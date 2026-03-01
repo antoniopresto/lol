@@ -4,6 +4,11 @@ import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import type { ColorItemData } from '../../types';
 import { ActionPanel } from '../action_panel/action_panel';
+import {
+  ClipboardHUDIcon,
+  createCopyAction,
+  performCopy,
+} from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { EmptyState } from '../empty_state/empty_state';
 import { Grid, GridItem } from '../grid';
@@ -13,28 +18,6 @@ import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
 import './color_picker_view.scss';
-
-function ClipboardHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect
-        x="4"
-        y="2"
-        width="8"
-        height="12"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M6 2.5H10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 function SearchIcon() {
   return (
@@ -144,9 +127,9 @@ export function ColorPickerView() {
 
   const handleCopyColor = useCallback(
     (color: ColorItemData) => {
-      showHUD({
-        icon: <ClipboardHUDIcon />,
-        title: `Copied ${color.color}`,
+      performCopy(color.color, showHUD, {
+        hudIcon: <ClipboardHUDIcon />,
+        hudTitle: `Copied ${color.color}`,
       });
     },
     [showHUD],
@@ -196,26 +179,25 @@ export function ColorPickerView() {
               }
             },
           },
-          {
-            label: 'Copy Hex',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'C',
-                ]}
-              />
-            ),
-            onClick: () => {
-              if (selectedColor) {
-                setActionsOpen(false);
-                showHUD({
-                  icon: <ClipboardHUDIcon />,
-                  title: `Copied ${selectedColor.color}`,
-                });
-              }
+          createCopyAction(
+            {
+              content: selectedColor?.color ?? '',
+              title: 'Copy Hex',
+              shortcut: (
+                <Kbd
+                  keys={[
+                    '⌘',
+                    'C',
+                  ]}
+                />
+              ),
+              hudIcon: <ClipboardHUDIcon />,
+              hudTitle: selectedColor
+                ? `Copied ${selectedColor.color}`
+                : 'Copied',
             },
-          },
+            showHUD,
+          ),
         ],
       },
     ],

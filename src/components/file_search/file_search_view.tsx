@@ -15,6 +15,11 @@ import { formatRelativeDate } from '../../utils/format_date';
 import { formatFileSize } from '../../utils/format_file_size';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { ActionPanel } from '../action_panel/action_panel';
+import {
+  CopyHUDIcon,
+  createCopyAction,
+  performCopy,
+} from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
 import { EmptyState } from '../empty_state/empty_state';
@@ -37,20 +42,6 @@ function SearchEmptyIcon() {
         stroke="currentColor"
         strokeWidth="3"
         strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function SuccessHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
@@ -246,9 +237,8 @@ export function FileSearchView() {
   const handleCopyPath = useCallback(() => {
     if (!selectedEntry) return;
     setActionsOpen(false);
-    showHUD({
-      icon: <SuccessHUDIcon />,
-      title: 'Path Copied',
+    performCopy(selectedEntry.path, showHUD, {
+      hudTitle: 'Path Copied',
     });
   }, [
     selectedEntry,
@@ -281,7 +271,7 @@ export function FileSearchView() {
         onAction: () => {
           setEntries(prev => prev.filter(e => e.id !== entryId));
           showHUD({
-            icon: <SuccessHUDIcon />,
+            icon: <CopyHUDIcon />,
             title: `Moved "${entryName}" to Trash`,
           });
         },
@@ -363,18 +353,22 @@ export function FileSearchView() {
             ),
             onClick: handleShowInFinder,
           },
-          {
-            label: 'Copy Path',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'C',
-                ]}
-              />
-            ),
-            onClick: handleCopyPath,
-          },
+          createCopyAction(
+            {
+              content: selectedEntry?.path ?? '',
+              title: 'Copy Path',
+              shortcut: (
+                <Kbd
+                  keys={[
+                    '⌘',
+                    'C',
+                  ]}
+                />
+              ),
+              hudTitle: 'Path Copied',
+            },
+            showHUD,
+          ),
         ],
       },
       {
@@ -396,10 +390,11 @@ export function FileSearchView() {
       },
     ],
     [
+      selectedEntry?.path,
       handleOpen,
       handleShowInFinder,
-      handleCopyPath,
       handleDelete,
+      showHUD,
     ],
   );
 

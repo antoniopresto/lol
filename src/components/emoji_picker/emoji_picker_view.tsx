@@ -12,6 +12,7 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { isStringArray, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
+import { createCopyAction, performCopy } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { EmptyState } from '../empty_state/empty_state';
 import { HUDContainer } from '../hud/hud_container';
@@ -24,20 +25,6 @@ import './emoji_picker_view.scss';
 const COLUMNS = 6;
 const STORAGE_KEY = 'emoji-recent';
 const MAX_RECENT = 12;
-
-function CopyHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 function SearchEmptyIcon() {
   return (
@@ -225,12 +212,10 @@ export function EmojiPickerView() {
     (emoji?: EmojiEntry) => {
       const target = emoji ?? selectedEmoji;
       if (!target) return;
-      navigator.clipboard.writeText(target.char).catch(() => {});
       setActionsOpen(false);
-      addToRecent(target.char);
-      showHUD({
-        icon: <CopyHUDIcon />,
-        title: `Copied ${target.char}`,
+      performCopy(target.char, showHUD, {
+        hudTitle: `Copied ${target.char}`,
+        onCopy: () => addToRecent(target.char),
       });
     },
     [
@@ -412,27 +397,49 @@ export function EmojiPickerView() {
       {
         title: 'Actions',
         actions: [
-          {
-            label: 'Copy Emoji',
-            shortcut: <Kbd keys={['↵']} />,
-            onClick: () => handleCopyEmoji(),
-          },
-          {
-            label: 'Copy to Clipboard',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'C',
-                ]}
-              />
-            ),
-            onClick: () => handleCopyEmoji(),
-          },
+          createCopyAction(
+            {
+              content: selectedEmoji?.char ?? '',
+              title: 'Copy Emoji',
+              shortcut: <Kbd keys={['↵']} />,
+              hudTitle: selectedEmoji
+                ? `Copied ${selectedEmoji.char}`
+                : 'Copied',
+              onCopy: () => {
+                if (selectedEmoji) addToRecent(selectedEmoji.char);
+              },
+            },
+            showHUD,
+          ),
+          createCopyAction(
+            {
+              content: selectedEmoji?.char ?? '',
+              title: 'Copy to Clipboard',
+              shortcut: (
+                <Kbd
+                  keys={[
+                    '⌘',
+                    'C',
+                  ]}
+                />
+              ),
+              hudTitle: selectedEmoji
+                ? `Copied ${selectedEmoji.char}`
+                : 'Copied',
+              onCopy: () => {
+                if (selectedEmoji) addToRecent(selectedEmoji.char);
+              },
+            },
+            showHUD,
+          ),
         ],
       },
     ],
-    [handleCopyEmoji],
+    [
+      selectedEmoji,
+      showHUD,
+      addToRecent,
+    ],
   );
 
   const handleGridMouseOver = useCallback((

@@ -21,6 +21,7 @@ import { formatRelativeDate } from '../../utils/format_date';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { isRecord, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
+import { createCopyAction, performCopy } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
 import { EmptyState } from '../empty_state/empty_state';
@@ -452,9 +453,8 @@ export function SnippetManagerView() {
   const handleCopy = useCallback(() => {
     if (!selectedEntry) return;
     setActionsOpen(false);
-    showHUD({
-      icon: <SnippetHUDIcon />,
-      title: 'Copied to Clipboard',
+    performCopy(selectedEntry.content, showHUD, {
+      hudIcon: <SnippetHUDIcon />,
     });
   }, [
     selectedEntry,
@@ -665,18 +665,22 @@ export function SnippetManagerView() {
             shortcut: <Kbd keys={['↵']} />,
             onClick: handleInsert,
           },
-          {
-            label: 'Copy',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'C',
-                ]}
-              />
-            ),
-            onClick: handleCopy,
-          },
+          createCopyAction(
+            {
+              content: selectedEntry?.content ?? '',
+              title: 'Copy',
+              shortcut: (
+                <Kbd
+                  keys={[
+                    '⌘',
+                    'C',
+                  ]}
+                />
+              ),
+              hudIcon: <SnippetHUDIcon />,
+            },
+            showHUD,
+          ),
           {
             label: 'Edit',
             shortcut: (
@@ -722,11 +726,12 @@ export function SnippetManagerView() {
       },
     ],
     [
+      selectedEntry?.content,
       handleInsert,
-      handleCopy,
       handleEdit,
       handleCreate,
       handleDelete,
+      showHUD,
     ],
   );
 

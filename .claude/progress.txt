@@ -1161,7 +1161,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 === MISSING UI COMPONENTS ===
 
-- [ ] [P1] COMP016 - Build Action.CopyToClipboard declarative action. Create
+- [x] [P1] COMP016 - Build Action.CopyToClipboard declarative action. Create
   reusable action component that copies content to clipboard and shows HUD
   "Copied to Clipboard". Accepts: content (string), title (default "Copy"),
   shortcut. Uses navigator.clipboard.writeText in web, Tauri clipboard
@@ -1169,6 +1169,25 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   with copy_to_clipboard.tsx. Replace ad-hoc clipboard.writeText calls
   across all views (ClipboardHistory, SnippetManager, EmojiPicker,
   Calculator, FileSearch, App.tsx) with this reusable action.
+  Done: Created src/utils/clipboard.ts with copyToClipboard(text) utility as
+  the single point of access for clipboard operations (future Tauri plugin
+  integration point). Created src/components/action_panel/actions/
+  copy_to_clipboard.tsx with CopyHUDIcon, ClipboardHUDIcon, performCopy()
+  for imperative copy calls (keyboard shortcuts), and createCopyAction()
+  factory for declarative dropdown action definitions. Barrel export in
+  actions/index.ts. All 6 views (App.tsx, ClipboardHistoryView,
+  EmojiPickerView, SnippetManagerView, FileSearchView, ColorPickerView)
+  refactored: dropdown copy actions use createCopyAction, keyboard shortcut
+  handlers use performCopy, all imports via barrel export. SettingsView
+  updated to import CopyHUDIcon from barrel. Zero direct navigator.clipboard
+  calls outside clipboard.ts. All 93 tests pass, bun run check passes.
+  Sub-tasks:
+  - [x] COMP016a - Create src/utils/clipboard.ts with copyToClipboard(text)
+    utility and src/components/action_panel/actions/copy_to_clipboard.tsx with
+    createCopyAction factory function and shared CopyHUDIcon.
+  - [x] COMP016b - Replace ad-hoc clipboard/copy handlers in all views
+    (EmojiPicker, ClipboardHistory, SnippetManager, FileSearch, ColorPicker,
+    App.tsx) with createCopyAction. Remove duplicated HUD icons.
 
 - [ ] [P1] COMP017 - Build Action.OpenInBrowser declarative action. Opens
   URL in default browser. Accepts: url, title (default "Open in Browser"),

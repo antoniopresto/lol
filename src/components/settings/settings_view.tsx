@@ -14,6 +14,7 @@ import {
   storageSet,
 } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
+import { CopyHUDIcon } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
 import { EmptyState } from '../empty_state/empty_state';
@@ -190,20 +191,6 @@ function ToggleSwitch({
       <div className="settings-toggle__track" />
       <div className="settings-toggle__knob" />
     </label>
-  );
-}
-
-function SuccessHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
 
@@ -659,21 +646,21 @@ export function SettingsView() {
 
   const handleExport = useCallback(() => {
     showHUD({
-      icon: <SuccessHUDIcon />,
+      icon: <CopyHUDIcon />,
       title: 'Settings Exported',
     });
   }, [showHUD]);
 
   const handleImport = useCallback(() => {
     showHUD({
-      icon: <SuccessHUDIcon />,
+      icon: <CopyHUDIcon />,
       title: 'Settings Imported',
     });
   }, [showHUD]);
 
   const handleClearCache = useCallback(() => {
     showHUD({
-      icon: <SuccessHUDIcon />,
+      icon: <CopyHUDIcon />,
       title: 'Cache Cleared',
     });
   }, [showHUD]);
@@ -707,7 +694,7 @@ export function SettingsView() {
           setExtensions(MOCK_EXTENSIONS.map(ext => ({ ...ext })));
           storageRemove(EXTENSIONS_STORAGE_KEY);
           showHUD({
-            icon: <SuccessHUDIcon />,
+            icon: <CopyHUDIcon />,
             title: 'Settings Reset',
           });
         },

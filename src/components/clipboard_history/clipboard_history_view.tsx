@@ -20,6 +20,11 @@ import {
   storageSet,
 } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
+import {
+  ClipboardHUDIcon,
+  createCopyAction,
+  performCopy,
+} from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { Alert } from '../alert/alert';
 import { EmptyState } from '../empty_state/empty_state';
@@ -30,28 +35,6 @@ import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
 import './clipboard_history_view.scss';
-
-function ClipboardHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect
-        x="4"
-        y="2"
-        width="8"
-        height="12"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M6 2.5H10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 function PinIcon() {
   return (
@@ -268,9 +251,8 @@ export function ClipboardHistoryView() {
   const handleCopy = useCallback(() => {
     if (!selectedEntry) return;
     setActionsOpen(false);
-    showHUD({
-      icon: <ClipboardHUDIcon />,
-      title: 'Copied to Clipboard',
+    performCopy(selectedEntry.content, showHUD, {
+      hudIcon: <ClipboardHUDIcon />,
     });
   }, [
     selectedEntry,
@@ -416,18 +398,22 @@ export function ClipboardHistoryView() {
             shortcut: <Kbd keys={['↵']} />,
             onClick: handlePaste,
           },
-          {
-            label: 'Copy',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'C',
-                ]}
-              />
-            ),
-            onClick: handleCopy,
-          },
+          createCopyAction(
+            {
+              content: selectedEntry?.content ?? '',
+              title: 'Copy',
+              shortcut: (
+                <Kbd
+                  keys={[
+                    '⌘',
+                    'C',
+                  ]}
+                />
+              ),
+              hudIcon: <ClipboardHUDIcon />,
+            },
+            showHUD,
+          ),
         ],
       },
       {
@@ -468,10 +454,11 @@ export function ClipboardHistoryView() {
     ],
     [
       selectedEntry?.pinned,
+      selectedEntry?.content,
       handlePaste,
-      handleCopy,
       handleTogglePin,
       handleDelete,
+      showHUD,
     ],
   );
 

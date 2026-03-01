@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActionPanel } from './components/action_panel/action_panel';
+import {
+  ClipboardHUDIcon,
+  createCopyAction,
+  performCopy,
+} from './components/action_panel/actions';
 import { Alert } from './components/alert/alert';
 import { CommandPalette } from './components/command_palette/command_palette';
 import { Detail } from './components/detail/detail';
@@ -108,42 +113,6 @@ function renderMetadataEntry(entry: ListItemMetadataEntry, index: number) {
     case 'separator':
       return <DetailMetadata.Separator key={index} />;
   }
-}
-
-function CheckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M3.5 8.5L6.5 11.5L12.5 4.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ClipboardHUDIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect
-        x="4"
-        y="2"
-        width="8"
-        height="12"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M6 2.5H10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
 }
 
 function SearchIcon() {
@@ -462,10 +431,10 @@ export function App() {
 
     setActionsOpen(false);
 
-    if (item.id === '__calculator__') {
-      showHUD({
-        icon: <ClipboardHUDIcon />,
-        title: `Copied ${calculatorResult}`,
+    if (item.id === '__calculator__' && calculatorResult) {
+      performCopy(calculatorResult, showHUD, {
+        hudIcon: <ClipboardHUDIcon />,
+        hudTitle: `Copied ${calculatorResult}`,
       });
       return;
     }
@@ -672,23 +641,29 @@ export function App() {
       {
         title: 'Primary Actions',
         actions: [
-          {
-            label: isCalculatorSelected ? 'Copy Result' : 'Open',
-            shortcut: <Kbd keys={['↵']} />,
-            onClick: () => {
-              if (isCalculatorSelected && calculatorResult) {
-                showHUD({
-                  icon: <ClipboardHUDIcon />,
-                  title: `Copied ${calculatorResult}`,
-                });
-              } else if (selectedItem) {
-                showToast({
-                  style: 'success' as const,
-                  title: `Opened ${selectedItem.title}`,
-                });
-              }
-            },
-          },
+          isCalculatorSelected && calculatorResult
+            ? createCopyAction(
+                {
+                  content: calculatorResult,
+                  title: 'Copy Result',
+                  shortcut: <Kbd keys={['↵']} />,
+                  hudIcon: <ClipboardHUDIcon />,
+                  hudTitle: `Copied ${calculatorResult}`,
+                },
+                showHUD,
+              )
+            : {
+                label: 'Open',
+                shortcut: <Kbd keys={['↵']} />,
+                onClick: () => {
+                  if (selectedItem) {
+                    showToast({
+                      style: 'success' as const,
+                      title: `Opened ${selectedItem.title}`,
+                    });
+                  }
+                },
+              },
           {
             label: 'Quick Look',
             shortcut: (
@@ -736,63 +711,53 @@ export function App() {
       {
         title: 'Copy Actions',
         actions: [
-          {
-            label: 'Copy Name',
-            shortcut: (
-              <Kbd
-                keys={[
-                  '⌘',
-                  'C',
-                ]}
-              />
-            ),
-            onClick: () => {
-              if (selectedItem) {
-                showHUD({
-                  icon: <CheckIcon />,
-                  title: 'Copied to Clipboard',
-                });
-              }
+          createCopyAction(
+            {
+              content: selectedItem?.title ?? '',
+              title: 'Copy Name',
+              shortcut: (
+                <Kbd
+                  keys={[
+                    '⌘',
+                    'C',
+                  ]}
+                />
+              ),
             },
-          },
+            showHUD,
+          ),
           {
             label: 'Copy As...',
             submenu: [
               {
                 actions: [
-                  {
-                    label: 'Copy as Markdown',
-                    onClick: () => {
-                      if (selectedItem) {
-                        showHUD({
-                          icon: <CheckIcon />,
-                          title: 'Copied as Markdown',
-                        });
-                      }
+                  createCopyAction(
+                    {
+                      content: `**${selectedItem?.title ?? ''}**${selectedItem?.subtitle ? ` — ${selectedItem.subtitle}` : ''}`,
+                      title: 'Copy as Markdown',
+                      hudTitle: 'Copied as Markdown',
                     },
-                  },
-                  {
-                    label: 'Copy as JSON',
-                    onClick: () => {
-                      if (selectedItem) {
-                        showHUD({
-                          icon: <CheckIcon />,
-                          title: 'Copied as JSON',
-                        });
-                      }
+                    showHUD,
+                  ),
+                  createCopyAction(
+                    {
+                      content: JSON.stringify({
+                        title: selectedItem?.title,
+                        subtitle: selectedItem?.subtitle,
+                      }),
+                      title: 'Copy as JSON',
+                      hudTitle: 'Copied as JSON',
                     },
-                  },
-                  {
-                    label: 'Copy as Plain Text',
-                    onClick: () => {
-                      if (selectedItem) {
-                        showHUD({
-                          icon: <CheckIcon />,
-                          title: 'Copied as Plain Text',
-                        });
-                      }
+                    showHUD,
+                  ),
+                  createCopyAction(
+                    {
+                      content: selectedItem?.title ?? '',
+                      title: 'Copy as Plain Text',
+                      hudTitle: 'Copied as Plain Text',
                     },
-                  },
+                    showHUD,
+                  ),
                 ],
               },
             ],
