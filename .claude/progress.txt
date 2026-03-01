@@ -659,11 +659,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 
 === KEYBOARD & INTERACTION ===
 
-- [ ] [P1] KBD001 - Implement global keyboard shortcut system. Create
+- [x] [P1] KBD001 - Implement global keyboard shortcut system. Create
   src/hooks/use_keyboard_shortcuts.ts that manages all global shortcuts in one
   place. Support modifier combos (⌘, ⌥, ⌃, ⇧). Prevent conflicts. Register
   shortcuts declaratively from components. Replace ad-hoc keydown handlers in
   App.tsx with centralized system.
+  Done: Created src/hooks/use_keyboard_shortcut.ts with useKeyboardShortcut
+  hook. Declarative API: useKeyboardShortcut(combo, handler, options?). KeyCombo
+  supports meta/ctrl/alt/shift modifiers with exact matching. Module-level
+  registry with dev-mode warnings for duplicate combos and bare-key shortcuts
+  (no modifiers). Ref-based handler for stable closures. Enabled/preventDefault
+  options. Handler receives KeyboardEvent for flexibility. Refactored App.tsx:
+  replaced ad-hoc useEffect+addEventListener handlers for ⌘K (toggle actions),
+  ⌘N (create snippet), and ⌘Enter (form submit) with useKeyboardShortcut calls.
+  All 93 tests pass, bun run check passes.
 
 - [ ] [P2] KBD002 - Add favorite items support. ⌘⇧F toggles favorite on
   selected item. Favorited items appear in a "Favorites" section at top of

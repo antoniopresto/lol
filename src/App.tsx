@@ -25,6 +25,7 @@ import { ToastContainer } from './components/toast/toast_container';
 import { MOCK_COLORS, MOCK_SECTIONS } from './data/mock_data';
 import { useAlert } from './hooks/use_alert';
 import { useHUD } from './hooks/use_hud';
+import { useKeyboardShortcut } from './hooks/use_keyboard_shortcut';
 import {
   NavigationContextProvider,
   useNavigationStack,
@@ -281,16 +282,13 @@ function CreateSnippetView({ onSubmit }: CreateSnippetViewProps) {
     onSubmit,
   ]);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Enter' && e.metaKey) {
-        e.preventDefault();
-        handleSubmit();
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSubmit]);
+  useKeyboardShortcut(
+    {
+      key: 'Enter',
+      meta: true,
+    },
+    handleSubmit,
+  );
 
   return (
     <Form onSubmit={handleSubmit}>
@@ -619,25 +617,23 @@ export function App() {
     setActionsOpen(false);
   }, []);
 
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'k' && e.metaKey && viewType !== 'form') {
-        e.preventDefault();
-        setActionsOpen(prev => !prev);
-        return;
-      }
-      if (e.key === 'n' && e.metaKey && viewType === 'root') {
-        e.preventDefault();
-        handleOpenCreateSnippet();
-      }
-    }
+  useKeyboardShortcut(
+    {
+      key: 'k',
+      meta: true,
+    },
+    toggleActions,
+    { enabled: viewType !== 'form' },
+  );
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    viewType,
+  useKeyboardShortcut(
+    {
+      key: 'n',
+      meta: true,
+    },
     handleOpenCreateSnippet,
-  ]);
+    { enabled: viewType === 'root' },
+  );
 
   const detail = selectedItem?.detail;
 
