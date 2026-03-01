@@ -6,6 +6,7 @@ export type { FormDropdownOption } from './form_dropdown';
 export { FormFilePicker } from './form_file_picker';
 export type { FilePickerFile } from './form_file_picker';
 export { FormPasswordField } from './form_password_field';
+export { FormSeparator } from './form_separator';
 export { FormTagPicker } from './form_tag_picker';
 export type { FormTagPickerOption } from './form_tag_picker';
 export { FormTextArea } from './form_text_area';

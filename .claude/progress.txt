@@ -526,9 +526,13 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   FilePickerFile type and FormFilePicker exported from form/index.ts.
   All 93 tests pass, bun run check passes.
 
-- [ ] [P1] COMP010 - Build Form.Separator component. Visual horizontal divider
+- [x] [P1] COMP010 - Build Form.Separator component. Visual horizontal divider
   line within forms. Thin line (1px, $border-100 color) with optional margin.
   Create in src/components/form/form_separator.tsx. Simple component.
+  Done: FormSeparator component using semantic <hr> element with implicit
+  separator role. SCSS: reset browser defaults (border:none, margin:0, padding:0,
+  height:0), border-top 1px solid $border-100. No props (consistent with other
+  form components). Exported from form/index.ts. All checks pass.
 
 - [ ] [P1] COMP011 - Add date accessory type to ListItem. List item accessories
   should support {date: Date} which renders as relative time ("2 hours ago",
