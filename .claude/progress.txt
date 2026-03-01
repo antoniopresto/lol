@@ -1208,9 +1208,18 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     existing storage.ts localStorage keys for backward compatibility. All
     search methods support FTS5 MATCH (Tauri) and substring filter (web).
     All 93 tests pass, bun run check passes.
-  - [ ] TAURI008d - Migrate clipboard_entries persistence to database.ts.
+  - [x] TAURI008d - Migrate clipboard_entries persistence to database.ts.
     Update use_clipboard_history.ts to use database helpers instead of
     direct localStorage.
+    Done: Replaced direct storageGet/storageSet calls with clipboardDb
+    helpers from database.ts. rowToEntry/entryToRow converters with validated
+    contentType (Set-based validation, no raw `as` cast). Async initial load
+    with abort guard for unmount safety. Clipboard listener moved DB side
+    effects outside setState updaters using entriesRef pattern. trimToMaxEntries
+    now returns removed IDs, which are batch-deleted from DB. All DB writes
+    have .catch(console.error) for error observability. Mock data seeding
+    uses Promise.all for batched inserts. Web fallback works through
+    clipboardDb's internal localStorage delegation. All 93 tests pass.
   - [ ] TAURI008e - Migrate snippets persistence to database.ts. Update
     snippet_manager_view.tsx to use database helpers.
   - [ ] TAURI008f - Migrate quicklinks persistence to database.ts. Update
