@@ -1366,13 +1366,29 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   renderNow for date formatting. TrashIcon from icon system for delete alert.
   All 93 tests pass, bun run check passes.
 
-- [ ] [P2] SCRN013 - Build Translator screen. Two-panel layout: source text
+- [x] [P2] SCRN013 - Build Translator screen. Two-panel layout: source text
   (left/top) and translated text (right/bottom). Language selector dropdowns
   for source and target. Swap languages button. Auto-detect source language.
   Copy translation button. In web demo mode, use a simple mock translation
   (reverse text or placeholder). In production, integrate with translation
   API. Support 20+ languages. Create src/components/translator/
   translator_view.tsx and translator.scss. Push from "Translate" command.
+  Done: TranslatorView with self-contained UI (SearchBar, ActionPanel,
+  HUDContainer). Two-panel flex layout with source textarea and translation
+  output. SearchDropdown language selectors for both source (26 langs incl
+  auto-detect) and target (25 langs) in panel headers. Swap languages button
+  (disabled when source is auto). Auto-detect via regex patterns for CJK,
+  Cyrillic, Arabic, Hindi, Thai + keyword scoring with global regex for
+  Romance languages. Mock translation engine: known phrases → word-swap
+  dictionary → prefixed passthrough. 300ms debounce on translation. History
+  sub-view with searchable list, fuzzy filtering, load-from-history. Keyboard
+  shortcuts: ⌘K actions, ⌘C copy translation (guards against textarea focus
+  to preserve native copy), ⌘S save to history, ⌘⇧H show history, Escape
+  back. TranslateIcon (blue gradient) added to icon system. Extension
+  registered with fullView:true in Suggestions section. All SCSS values
+  tokenized (local vars for panel-header-height, textarea-min-height,
+  swap-button-size, line-height-body, disabled-opacity). All 93 tests pass,
+  bun run check passes.
 
 - [ ] [P2] SCRN014 - Build Reminders screen. List of reminders with
   title, due date/time, and repeat options. Create reminder form: title,

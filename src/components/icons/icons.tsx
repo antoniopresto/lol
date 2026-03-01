@@ -503,3 +503,35 @@ export function SlackIcon(props: IconProps = {}) {
     </svg>
   );
 }
+
+export function TranslateIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgBase(props)}>
+      <defs>
+        <linearGradient id="translate-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#5AC8FA" />
+          <stop offset="100%" stopColor="#007AFF" />
+        </linearGradient>
+      </defs>
+      <rect
+        x="1"
+        y="1"
+        width="18"
+        height="18"
+        rx="4"
+        fill="url(#translate-bg)"
+      />
+      <path
+        d="M5 7h5M7.5 7V6M6 7c0 1.5 1 3 3 4"
+        {...WHITE_STROKE}
+        strokeWidth={1.2}
+      />
+      <path d="M9 7c0 1.5-1 3-3 4" {...WHITE_STROKE} strokeWidth={1.2} />
+      <path
+        d="M11 15l1.8-5 1.8 5M11.7 13.5h2.2"
+        {...WHITE_STROKE}
+        strokeWidth={1.2}
+      />
+    </svg>
+  );
+}

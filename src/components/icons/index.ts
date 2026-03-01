@@ -13,6 +13,7 @@ export {
   SlackIcon,
   SnippetsIcon,
   TerminalIcon,
+  TranslateIcon,
   VscodeIcon,
   WindowIcon,
 } from './icons';

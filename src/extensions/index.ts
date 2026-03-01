@@ -11,6 +11,7 @@ import { quicklinksExtension } from './quicklinks/manifest';
 import { settingsExtension } from './settings/manifest';
 import { snippetsExtension } from './snippets/manifest';
 import { systemMonitorExtension } from './system_monitor/manifest';
+import { translatorExtension } from './translator/manifest';
 import { windowManagementExtension } from './window_management/manifest';
 
 registerExtension(clipboardExtension);
@@ -25,4 +26,5 @@ registerExtension(dictionaryExtension);
 registerExtension(systemMonitorExtension);
 registerExtension(colorPickerExtension);
 registerExtension(settingsExtension);
+registerExtension(translatorExtension);
 registerExtension(applicationsExtension);
