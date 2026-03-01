@@ -94,7 +94,10 @@ function trimToMaxEntries(entries: ClipboardEntry[]): ClipboardEntry[] {
   const pinned = entries.filter(e => e.pinned);
   const unpinned = entries.filter(e => !e.pinned);
   const unpinnedLimit = Math.max(0, MAX_ENTRIES - pinned.length);
-  return [...pinned, ...unpinned.slice(0, unpinnedLimit)];
+  return [
+    ...pinned,
+    ...unpinned.slice(0, unpinnedLimit),
+  ];
 }
 
 export function useClipboardHistory() {
@@ -118,11 +121,17 @@ export function useClipboardHistory() {
           let next: ClipboardEntry[];
           if (existing) {
             next = [
-              { ...existing, copiedAt: new Date(event.timestamp) },
+              {
+                ...existing,
+                copiedAt: new Date(event.timestamp),
+              },
               ...prev.filter(e => e.id !== existing.id),
             ];
           } else {
-            next = [createEntryFromEvent(event), ...prev];
+            next = [
+              createEntryFromEvent(event),
+              ...prev,
+            ];
           }
 
           next = trimToMaxEntries(next);

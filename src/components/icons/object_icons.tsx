@@ -125,6 +125,15 @@ export function StarFilledIcon(props: IconProps = {}) {
   );
 }
 
+export function MagnifyingGlassIcon(props: IconProps = {}) {
+  return (
+    <svg {...svgBase(props)}>
+      <circle cx="7" cy="7" r="4" {...STROKE_DEFAULTS} />
+      <line x1="10" y1="10" x2="14" y2="14" {...STROKE_DEFAULTS} />
+    </svg>
+  );
+}
+
 export function HeartIcon(props: IconProps = {}) {
   return (
     <svg {...svgBase(props)}>

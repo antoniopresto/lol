@@ -926,10 +926,31 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] INFRA002e - Add persistence for snippet entries (CRUD operations) in
     SnippetManagerView.
 
-- [ ] [P3] INFRA003 - Refactor App.tsx into smaller modules. Current App.tsx is
-  660+ lines. Extract: RootSearchView, NavigationProvider, KeyboardProvider,
+- [x] [P3] INFRA003 - Refactor App.tsx into smaller modules. Current App.tsx is
+  1064 lines. Extract: RootSearchView, NavigationProvider, KeyboardProvider,
   command handlers. Each view should be its own component file. App.tsx should
   only compose providers and the root view.
+  Done: App.tsx reduced from 1064 to 147 lines. RootSearchView extracted to
+  src/components/root_search/ (833 lines) with barrel export. NavViewData type
+  and TRAY_COMMAND_MAP extracted to src/app_types.ts. DetailItemView and
+  renderMetadataEntry extracted to src/components/detail/. SearchIcon replaced
+  with MagnifyingGlassIcon in icon system. Compact mode wired via
+  onCompactChange callback from RootSearchView to App.tsx. Window hide resets
+  RootSearchView via key-based remount (rootResetKey). Non-fullView command
+  views get static SearchBar + minimal ActionPanel. All 93 tests pass.
+  Sub-tasks:
+  - [x] INFRA003a - Extract utility functions and small components: moved SearchIcon
+    to icons system (MagnifyingGlassIcon in object_icons.tsx), extracted
+    renderMetadataEntry+DetailItemView to detail/, extracted NavViewData type and
+    TRAY_COMMAND_MAP constant to app_types.ts, flattenItems stays local to
+    RootSearchView (single-use 1-liner).
+  - [x] INFRA003b - Extract RootSearchView component to
+    src/components/root_search/root_search_view.tsx with all root search state
+    (query, filterValue, selectedIndex, actionsOpen, quickLookOpen), calculator,
+    favorites, keyboard shortcuts, filtering, and JSX rendering. Barrel export
+    in index.ts.
+  - [x] INFRA003c - Simplify App.tsx to compose providers (theme, navigation,
+    window) and route between RootSearchView vs pushed views. Result: 147 lines.
 
 === TESTS ===
 
