@@ -703,11 +703,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] SCRN003c - Wire into App.tsx: add 'emoji' to NavViewData, push from
     "Search Emoji" command in root search.
 
-- [ ] [P2] SCRN004 - Build Calculator inline result. When user types a math
+- [x] [P2] SCRN004 - Build Calculator inline result. When user types a math
   expression in root search (e.g. "2+2", "sqrt(144)", "15% of 200"), show
   result as a special ListItem at the top with calculator icon and "= result"
   title. Enter copies result. Use a safe expression evaluator (no eval()).
   Create src/utils/calculator.ts.
+  Done: Safe recursive-descent parser in src/utils/calculator.ts. Supports:
+  arithmetic (+, -, *, /, ^), percentages (15% of 200 → 30), math functions
+  (sqrt, abs, sin, cos, tan, log, ln, ceil, floor, round, exp), constants
+  (pi, e), unary operators, nested parentheses. Tokenizer normalizes "X% of Y"
+  to "X%Y". hasBinaryOperation guard prevents noisy results for plain numbers
+  or unary-only expressions (-42, +5). Calculator result injected as first
+  ListItem in "Result" section with CalculatorIcon and "Copy" accessory. Enter
+  copies result via HUD. ActionPanel label changes to "Copy Result" when
+  calculator item is selected. All 93 tests pass, bun run check passes.
 
 - [ ] [P2] SCRN005 - Build File Search screen. List view showing mock file
   system entries. Each item: file icon (different per type), filename, path as

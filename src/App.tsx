@@ -9,6 +9,7 @@ import { EmojiPickerView } from './components/emoji_picker/emoji_picker_view';
 import { EmptyState } from './components/empty_state/empty_state';
 import { Grid, GridItem } from './components/grid';
 import { HUDContainer } from './components/hud/hud_container';
+import { CalculatorIcon } from './components/icons';
 import { Kbd } from './components/kbd/kbd';
 import { List, ListItem, ListSection } from './components/list';
 import { QuickLook } from './components/quick_look/quick_look';
@@ -32,6 +33,7 @@ import type {
   ListItemMetadataEntry,
   SectionData,
 } from './types';
+import { evaluate } from './utils/calculator';
 
 type NavViewData =
   | { type: 'grid' }
@@ -332,7 +334,34 @@ export function App() {
     query,
     filterValue,
   ]);
-  const allItems = useMemo(() => flattenItems(filtered), [filtered]);
+  const calculatorResult = useMemo(() => {
+    if (viewType !== 'root' || !query.trim()) return null;
+    return evaluate(query);
+  }, [
+    query,
+    viewType,
+  ]);
+
+  const allItems = useMemo(() => {
+    const items = flattenItems(filtered);
+    if (calculatorResult) {
+      const calcItem: ListItemData = {
+        id: '__calculator__',
+        title: `= ${calculatorResult}`,
+        subtitle: query.trim(),
+        icon: <CalculatorIcon />,
+      };
+      return [
+        calcItem,
+        ...items,
+      ];
+    }
+    return items;
+  }, [
+    filtered,
+    calculatorResult,
+    query,
+  ]);
   const filteredColors = useMemo(() => {
     let colors = MOCK_COLORS;
     if (colorFilterValue !== 'all') {
@@ -397,6 +426,14 @@ export function App() {
 
     setActionsOpen(false);
 
+    if (item.id === '__calculator__') {
+      showHUD({
+        icon: <ClipboardHUDIcon />,
+        title: `Copied ${calculatorResult}`,
+      });
+      return;
+    }
+
     if (item.id === 'clipboard-history') {
       push('Clipboard History', { type: 'clipboard' });
       setQuery('');
@@ -438,6 +475,8 @@ export function App() {
     allItems,
     selectedIndex,
     showToast,
+    showHUD,
+    calculatorResult,
     push,
   ]);
 
@@ -502,7 +541,8 @@ export function App() {
     query,
   ]);
 
-  const detail = selectedItem?.detail;
+  const isCalculatorSelected = selectedItem?.id === '__calculator__';
+  const detail = isCalculatorSelected ? undefined : selectedItem?.detail;
 
   const dropdownSections = useMemo(
     () => [
@@ -510,10 +550,15 @@ export function App() {
         title: 'Primary Actions',
         actions: [
           {
-            label: 'Open',
+            label: isCalculatorSelected ? 'Copy Result' : 'Open',
             shortcut: <Kbd keys={['↵']} />,
             onClick: () => {
-              if (selectedItem) {
+              if (isCalculatorSelected && calculatorResult) {
+                showHUD({
+                  icon: <ClipboardHUDIcon />,
+                  title: `Copied ${calculatorResult}`,
+                });
+              } else if (selectedItem) {
                 showToast({
                   style: 'success' as const,
                   title: `Opened ${selectedItem.title}`,
@@ -668,6 +713,8 @@ export function App() {
     ],
     [
       selectedItem,
+      isCalculatorSelected,
+      calculatorResult,
       showToast,
       showHUD,
       confirmAlert,
@@ -786,23 +833,41 @@ export function App() {
                 >
                   {(() => {
                     let globalIndex = 0;
-                    return filtered.map(section => (
-                      <ListSection key={section.title} title={section.title}>
-                        {section.items.map(item => {
-                          const idx = globalIndex++;
-                          return (
+                    return (
+                      <>
+                        {calculatorResult && (
+                          <ListSection title="Result">
                             <ListItem
-                              key={item.id}
-                              index={idx}
-                              title={item.title}
-                              subtitle={item.subtitle}
-                              icon={item.icon}
-                              accessories={item.accessories}
+                              index={globalIndex++}
+                              title={`= ${calculatorResult}`}
+                              subtitle={query.trim()}
+                              icon={<CalculatorIcon />}
+                              accessories={[{ text: 'Copy' }]}
                             />
-                          );
-                        })}
-                      </ListSection>
-                    ));
+                          </ListSection>
+                        )}
+                        {filtered.map(section => (
+                          <ListSection
+                            key={section.title}
+                            title={section.title}
+                          >
+                            {section.items.map(item => {
+                              const idx = globalIndex++;
+                              return (
+                                <ListItem
+                                  key={item.id}
+                                  index={idx}
+                                  title={item.title}
+                                  subtitle={item.subtitle}
+                                  icon={item.icon}
+                                  accessories={item.accessories}
+                                />
+                              );
+                            })}
+                          </ListSection>
+                        ))}
+                      </>
+                    );
                   })()}
                 </List>
               )}
@@ -826,7 +891,7 @@ export function App() {
             contextLabel={contextLabel}
             actions={[
               {
-                label: 'Open',
+                label: isCalculatorSelected ? 'Copy Result' : 'Open',
                 shortcut: <Kbd keys={['↵']} />,
               },
               {
