@@ -61,10 +61,17 @@ export interface PlatformApps {
   launchApplication(path: string): Promise<void>;
 }
 
+export interface PlatformAutostart {
+  enable(): Promise<void>;
+  disable(): Promise<void>;
+  isEnabled(): Promise<boolean>;
+}
+
 export interface PlatformAPI {
   readonly clipboard: PlatformClipboard;
   readonly shell: PlatformShell;
   readonly window: PlatformWindow;
   readonly files: PlatformFiles;
   readonly apps: PlatformApps;
+  readonly autostart: PlatformAutostart;
 }

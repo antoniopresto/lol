@@ -7,6 +7,7 @@ export type {
   FileSearchResult,
   PlatformAPI,
   PlatformApps,
+  PlatformAutostart,
   PlatformClipboard,
   PlatformFiles,
   PlatformShell,

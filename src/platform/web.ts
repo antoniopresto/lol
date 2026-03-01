@@ -1,6 +1,7 @@
 import type {
   PlatformAPI,
   PlatformApps,
+  PlatformAutostart,
   PlatformClipboard,
   PlatformFiles,
   PlatformShell,
@@ -70,10 +71,19 @@ const apps: PlatformApps = {
   async launchApplication() {},
 };
 
+const autostart: PlatformAutostart = {
+  async enable() {},
+  async disable() {},
+  async isEnabled() {
+    return false;
+  },
+};
+
 export const webPlatform: PlatformAPI = {
   clipboard,
   shell,
   window: platformWindow,
   files,
   apps,
+  autostart,
 };

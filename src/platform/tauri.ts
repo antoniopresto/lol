@@ -5,6 +5,7 @@ import type {
   FileSearchResult,
   PlatformAPI,
   PlatformApps,
+  PlatformAutostart,
   PlatformClipboard,
   PlatformFiles,
   PlatformShell,
@@ -130,10 +131,26 @@ const apps: PlatformApps = {
   },
 };
 
+const autostart: PlatformAutostart = {
+  async enable() {
+    const { enable } = await import('@tauri-apps/plugin-autostart');
+    await enable();
+  },
+  async disable() {
+    const { disable } = await import('@tauri-apps/plugin-autostart');
+    await disable();
+  },
+  async isEnabled() {
+    const { isEnabled } = await import('@tauri-apps/plugin-autostart');
+    return isEnabled();
+  },
+};
+
 export const tauriPlatform: PlatformAPI = {
   clipboard,
   shell,
   window: platformWindow,
   files,
   apps,
+  autostart,
 };

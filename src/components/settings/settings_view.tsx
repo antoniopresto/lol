@@ -6,6 +6,7 @@ import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useTheme } from '../../hooks/use_theme';
 import { useWindow } from '../../hooks/use_window';
+import { getPlatform, isTauri } from '../../platform';
 import { settingsDb } from '../../utils/database';
 import { isBooleanRecord, isRecord } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
@@ -287,10 +288,14 @@ function GeneralTab({
   settings,
   onSettingsChange,
   onWindowPositionChange,
+  autoLaunch,
+  onAutoLaunchChange,
 }: {
   settings: GeneralSettings;
   onSettingsChange: (settings: GeneralSettings) => void;
   onWindowPositionChange: (position: string) => void;
+  autoLaunch: boolean;
+  onAutoLaunchChange: (enabled: boolean) => void;
 }) {
   return (
     <div className="form">
@@ -341,6 +346,14 @@ function GeneralTab({
           options={FONT_SIZE_OPTIONS}
         />
         <FormSeparator />
+        {isTauri && (
+          <FormCheckbox
+            label="Launch at Login"
+            checked={autoLaunch}
+            onChange={onAutoLaunchChange}
+            description="Automatically start Raycast when you log in"
+          />
+        )}
         <FormCheckbox
           label="Show Recent Applications"
           checked={settings.showRecentApps}
@@ -594,8 +607,40 @@ export function SettingsView() {
   });
   const [extensions, setExtensions] = useState<ExtensionEntry[]>(() =>
     MOCK_EXTENSIONS.map(ext => ({ ...ext })));
+  const [autoLaunch, setAutoLaunch] = useState(false);
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
+
+  useEffect(() => {
+    if (!isTauri) return;
+    let cancelled = false;
+    getPlatform()
+      .autostart.isEnabled()
+      .then(enabled => {
+        if (!cancelled) setAutoLaunch(enabled);
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleAutoLaunchChange = useCallback(
+    (enabled: boolean) => {
+      if (!isTauri) return;
+      setAutoLaunch(enabled);
+      const autostart = getPlatform().autostart;
+      (enabled ? autostart.enable() : autostart.disable()).catch(err => {
+        console.error(err);
+        setAutoLaunch(!enabled);
+        showHUD({
+          icon: <CopyHUDIcon />,
+          title: 'Failed to update launch setting',
+        });
+      });
+    },
+    [showHUD],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -733,6 +778,7 @@ export function SettingsView() {
           setPositionPreference(DEFAULT_SETTINGS.windowPosition);
           setExtensions(MOCK_EXTENSIONS.map(ext => ({ ...ext })));
           settingsDb.delete(EXTENSIONS_DB_KEY).catch(console.error);
+          handleAutoLaunchChange(false);
           showHUD({
             icon: <CopyHUDIcon />,
             title: 'Settings Reset',
@@ -750,6 +796,7 @@ export function SettingsView() {
     showHUD,
     setTheme,
     setPositionPreference,
+    handleAutoLaunchChange,
   ]);
 
   const toggleActions = useCallback(() => {
@@ -856,6 +903,8 @@ export function SettingsView() {
                 settings={settings}
                 onSettingsChange={handleSettingsChange}
                 onWindowPositionChange={setPositionPreference}
+                autoLaunch={autoLaunch}
+                onAutoLaunchChange={handleAutoLaunchChange}
               />
             )}
             {activeTab === 'extensions' && (

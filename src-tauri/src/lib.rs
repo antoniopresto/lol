@@ -11,6 +11,8 @@ use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 #[cfg(desktop)]
 use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
+#[cfg(desktop)]
+use tauri_plugin_autostart::MacosLauncher;
 
 struct WindowConfig {
     position_pref: String,
@@ -795,6 +797,11 @@ pub fn run() {
         .setup(|app| {
             #[cfg(desktop)]
             {
+                app.handle().plugin(tauri_plugin_autostart::init(
+                    MacosLauncher::LaunchAgent,
+                    None,
+                ))?;
+
                 let shortcut = Shortcut::new(Some(Modifiers::ALT), Code::Space);
                 let window = app
                     .get_webview_window("main")

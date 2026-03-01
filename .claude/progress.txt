@@ -1282,11 +1282,26 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     helper in database.ts. Exported rowToEntry from use_clipboard_history.ts.
     All 93 tests pass, bun run check passes.
 
-- [ ] [P2] TAURI009 - Configure auto-launch on login. Use
+- [x] [P2] TAURI009 - Configure auto-launch on login. Use
   @tauri-apps/plugin-autostart to register app for login auto-start.
   Add toggle in Settings > General: "Launch at Login" checkbox. Default:
   enabled. Store preference in settings. Handle platform differences
   (macOS LaunchAgent, Windows registry, Linux autostart desktop file).
+  Done: Installed tauri-plugin-autostart v2 (Rust) and
+  @tauri-apps/plugin-autostart v2.5.1 (JS). Rust-side: plugin initialized
+  with MacosLauncher::LaunchAgent inside #[cfg(desktop)] setup block.
+  Capabilities: autostart:allow-enable, autostart:allow-disable,
+  autostart:allow-is-enabled. PlatformAutostart interface added to
+  platform abstraction layer (types.ts) with enable/disable/isEnabled
+  methods. Tauri implementation uses dynamic imports from
+  @tauri-apps/plugin-autostart. Web implementation provides noop
+  fallbacks. Settings GeneralTab: "Launch at Login" FormCheckbox shown
+  only in Tauri mode (isTauri guard), reads initial state from OS via
+  isEnabled() on mount. Optimistic state update with rollback and HUD
+  error feedback on failure. Reset All disables autostart. Autostart
+  state is OS-managed (LaunchAgent/registry/desktop file) — not
+  persisted in settings DB to avoid sync issues. All 93 tests pass,
+  cargo check passes, bun run check passes.
 
 - [ ] [P2] TAURI010 - Add auto-update system. Use @tauri-apps/plugin-updater
   for in-app updates. Configure update endpoint URL in tauri.conf.json.
