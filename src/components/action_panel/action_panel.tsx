@@ -1,6 +1,6 @@
 import { type ReactNode, useRef } from 'react';
 import './action_panel.scss';
-import { ActionsDropdown, type DropdownAction } from './actions_dropdown';
+import { ActionsDropdown, type DropdownSection } from './actions_dropdown';
 
 export interface Action {
   label: string;
@@ -11,7 +11,7 @@ export interface Action {
 export interface ActionPanelProps {
   actions: Action[];
   dropdownOpen: boolean;
-  dropdownActions: DropdownAction[];
+  dropdownSections: DropdownSection[];
   onDropdownClose: () => void;
   contextLabel?: string;
 }
@@ -56,7 +56,7 @@ function RaycastLogo() {
 export function ActionPanel({
   actions,
   dropdownOpen,
-  dropdownActions,
+  dropdownSections,
   onDropdownClose,
   contextLabel,
 }: ActionPanelProps) {
@@ -105,7 +105,7 @@ export function ActionPanel({
         )}
       </div>
       <ActionsDropdown
-        actions={dropdownActions}
+        sections={dropdownSections}
         open={dropdownOpen}
         onClose={onDropdownClose}
         triggerRef={actionsTriggerRef}

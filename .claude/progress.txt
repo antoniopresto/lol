@@ -431,11 +431,16 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] COMP002d - Update SearchBar to consume breadcrumbs from navigation
     context (or keep prop-based) and wire Escape to pop().
 
-- [ ] [P0] COMP003 - Add ActionPanel.Section support. Group actions in the
+- [x] [P0] COMP003 - Add ActionPanel.Section support. Group actions in the
   dropdown with visual section separators and optional section titles. Update
   actions_dropdown.tsx to accept sections (array of {title?, actions[]}). Render
   separator line + small title between groups. Update App.tsx demo to show
   sections: "Primary Actions", "Copy Actions", "Danger Zone".
+  Done: DropdownSection type with optional title. Sections prop replaces flat
+  actions. Separators between groups (outside role="group"). Empty sections
+  filtered. aria-activedescendant on menu, aria-labelledby on titled groups.
+  Precomputed sectionOffsets. Index-based keys. App.tsx demo with 3 sections.
+  26 dropdown tests (5 new), all 74 tests pass.
 
 - [ ] [P0] COMP004 - Add ActionPanel.Submenu support. Nested submenu that
   replaces the dropdown content with child actions when hovered/selected. Show

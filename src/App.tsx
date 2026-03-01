@@ -503,122 +503,137 @@ export function App() {
 
   const detail = selectedItem?.detail;
 
-  const dropdownActions = useMemo(
+  const dropdownSections = useMemo(
     () => [
       {
-        label: 'Open',
-        shortcut: <Kbd keys={['↵']} />,
-        onClick: () => {
-          if (selectedItem) {
-            showToast({
-              style: 'success',
-              title: `Opened ${selectedItem.title}`,
-            });
-          }
-        },
-      },
-      {
-        label: 'Copy Name',
-        shortcut: (
-          <Kbd
-            keys={[
-              '⌘',
-              'C',
-            ]}
-          />
-        ),
-        onClick: () => {
-          if (selectedItem) {
-            showToast({
-              style: 'info',
-              title: 'Copied to clipboard',
-              message: selectedItem.title,
-            });
-          }
-        },
-      },
-      {
-        label: 'Show Detail',
-        shortcut: (
-          <Kbd
-            keys={[
-              '⌘',
-              'D',
-            ]}
-          />
-        ),
-        onClick: () => {
-          showToast({
-            style: 'info',
-            title: 'Detail panel toggled',
-          });
-        },
-      },
-      {
-        label: 'Create Snippet',
-        shortcut: (
-          <Kbd
-            keys={[
-              '⌘',
-              'N',
-            ]}
-          />
-        ),
-        onClick: handleOpenCreateSnippet,
-      },
-      {
-        label: 'Delete',
-        shortcut: (
-          <Kbd
-            keys={[
-              '⌘',
-              '⌫',
-            ]}
-          />
-        ),
-        onClick: () => {
-          if (!selectedItem) return;
-          const itemTitle = selectedItem.title;
-          setActionsOpen(false);
-          confirmAlert({
-            title: `Delete "${itemTitle}"?`,
-            message: 'This action cannot be undone.',
-            icon: (
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <circle
-                  cx="16"
-                  cy="16"
-                  r="14"
-                  fill="currentColor"
-                  opacity="0.15"
-                />
-                <path
-                  d="M12 13V22M16 13V22M20 13V22M10 10H22M13 10V9C13 8.45 13.45 8 14 8H18C18.55 8 19 8.45 19 9V10"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ),
-            primaryAction: {
-              label: 'Delete',
-              style: 'destructive',
-              onAction: () => {
+        title: 'Primary Actions',
+        actions: [
+          {
+            label: 'Open',
+            shortcut: <Kbd keys={['↵']} />,
+            onClick: () => {
+              if (selectedItem) {
                 showToast({
-                  style: 'error',
-                  title: 'Deleted',
-                  message: itemTitle,
+                  style: 'success' as const,
+                  title: `Opened ${selectedItem.title}`,
                 });
-              },
+              }
             },
-            dismissAction: {
-              label: 'Cancel',
-              style: 'cancel',
-              onAction: () => {},
+          },
+          {
+            label: 'Show Detail',
+            shortcut: (
+              <Kbd
+                keys={[
+                  '⌘',
+                  'D',
+                ]}
+              />
+            ),
+            onClick: () => {
+              showToast({
+                style: 'info' as const,
+                title: 'Detail panel toggled',
+              });
             },
-          });
-        },
+          },
+          {
+            label: 'Create Snippet',
+            shortcut: (
+              <Kbd
+                keys={[
+                  '⌘',
+                  'N',
+                ]}
+              />
+            ),
+            onClick: handleOpenCreateSnippet,
+          },
+        ],
+      },
+      {
+        title: 'Copy Actions',
+        actions: [
+          {
+            label: 'Copy Name',
+            shortcut: (
+              <Kbd
+                keys={[
+                  '⌘',
+                  'C',
+                ]}
+              />
+            ),
+            onClick: () => {
+              if (selectedItem) {
+                showToast({
+                  style: 'info' as const,
+                  title: 'Copied to clipboard',
+                  message: selectedItem.title,
+                });
+              }
+            },
+          },
+        ],
+      },
+      {
+        title: 'Danger Zone',
+        actions: [
+          {
+            label: 'Delete',
+            shortcut: (
+              <Kbd
+                keys={[
+                  '⌘',
+                  '⌫',
+                ]}
+              />
+            ),
+            onClick: () => {
+              if (!selectedItem) return;
+              const itemTitle = selectedItem.title;
+              setActionsOpen(false);
+              confirmAlert({
+                title: `Delete "${itemTitle}"?`,
+                message: 'This action cannot be undone.',
+                icon: (
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <circle
+                      cx="16"
+                      cy="16"
+                      r="14"
+                      fill="currentColor"
+                      opacity="0.15"
+                    />
+                    <path
+                      d="M12 13V22M16 13V22M20 13V22M10 10H22M13 10V9C13 8.45 13.45 8 14 8H18C18.55 8 19 8.45 19 9V10"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                ),
+                primaryAction: {
+                  label: 'Delete',
+                  style: 'destructive',
+                  onAction: () => {
+                    showToast({
+                      style: 'error',
+                      title: 'Deleted',
+                      message: itemTitle,
+                    });
+                  },
+                },
+                dismissAction: {
+                  label: 'Cancel',
+                  style: 'cancel',
+                  onAction: () => {},
+                },
+              });
+            },
+          },
+        ],
       },
     ],
     [
@@ -779,7 +794,7 @@ export function App() {
                 ]
           }
           dropdownOpen={actionsOpen}
-          dropdownActions={dropdownActions}
+          dropdownSections={dropdownSections}
           onDropdownClose={closeActions}
         />
         {alertState && (

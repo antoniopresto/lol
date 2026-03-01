@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import type { DropdownAction } from './actions_dropdown';
+import type { DropdownAction, DropdownSection } from './actions_dropdown';
 import { ActionsDropdown } from './actions_dropdown';
 
 function createActions(): DropdownAction[] {
@@ -25,23 +25,26 @@ function createActions(): DropdownAction[] {
 
 function renderDropdown(
   overrides: {
-    actions?: DropdownAction[];
+    sections?: DropdownSection[];
     open?: boolean;
     onClose?: () => void;
   } = {},
 ) {
-  const actions = overrides.actions ?? createActions();
+  const actions = createActions();
+  const defaultSections: DropdownSection[] = [{ actions }];
+  const sections = overrides.sections ?? defaultSections;
+  const flatActions = sections.flatMap(s => s.actions);
   const onClose = overrides.onClose ?? vi.fn();
   const result = render(
     <ActionsDropdown
-      actions={actions}
+      sections={sections}
       open={overrides.open ?? true}
       onClose={onClose}
     />,
   );
   return {
     ...result,
-    actions,
+    actions: flatActions,
     onClose,
   };
 }
@@ -52,9 +55,9 @@ describe('ActionsDropdown', () => {
     expect(container.innerHTML).toBe('');
   });
 
-  it('renders nothing when actions are empty', () => {
+  it('renders nothing when sections have no actions', () => {
     const { container } = renderDropdown({
-      actions: [],
+      sections: [{ actions: [] }],
       open: true,
     });
     expect(container.innerHTML).toBe('');
@@ -179,5 +182,219 @@ describe('ActionsDropdown', () => {
 
     await user.keyboard('{Meta>}k{/Meta}');
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders section titles', () => {
+    renderDropdown({
+      sections: [
+        {
+          title: 'Primary',
+          actions: [
+            {
+              label: 'Open',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+        {
+          title: 'Other',
+          actions: [
+            {
+              label: 'Close',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    expect(screen.getByText('Primary')).toBeInTheDocument();
+    expect(screen.getByText('Other')).toBeInTheDocument();
+  });
+
+  it('renders separator between sections', () => {
+    const { container } = renderDropdown({
+      sections: [
+        {
+          title: 'First',
+          actions: [
+            {
+              label: 'A',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+        {
+          title: 'Second',
+          actions: [
+            {
+              label: 'B',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    const separators = container.querySelectorAll(
+      '.actions-dropdown__separator',
+    );
+    expect(separators).toHaveLength(1);
+  });
+
+  it('does not render separator before first section', () => {
+    const { container } = renderDropdown({
+      sections: [
+        {
+          title: 'Only',
+          actions: [
+            {
+              label: 'Solo',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    expect(
+      container.querySelector('.actions-dropdown__separator'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('keyboard navigation works across sections', async () => {
+    const user = userEvent.setup();
+    const onClick1 = vi.fn();
+    const onClick2 = vi.fn();
+    renderDropdown({
+      sections: [
+        {
+          actions: [
+            {
+              label: 'First',
+              onClick: onClick1,
+            },
+          ],
+        },
+        {
+          actions: [
+            {
+              label: 'Second',
+              onClick: onClick2,
+            },
+          ],
+        },
+      ],
+    });
+
+    await user.keyboard('{ArrowDown}{Enter}');
+    expect(onClick2).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips empty sections and renders only non-empty ones', () => {
+    const { container } = renderDropdown({
+      sections: [
+        {
+          title: 'Empty',
+          actions: [],
+        },
+        {
+          title: 'Has Items',
+          actions: [
+            {
+              label: 'Action',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    expect(screen.queryByText('Empty')).not.toBeInTheDocument();
+    expect(screen.getByText('Has Items')).toBeInTheDocument();
+    expect(
+      container.querySelector('.actions-dropdown__separator'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders section without title (no title div)', () => {
+    const { container } = renderDropdown({
+      sections: [
+        {
+          actions: [
+            {
+              label: 'Untitled Action',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    expect(screen.getByText('Untitled Action')).toBeInTheDocument();
+    expect(
+      container.querySelector('.actions-dropdown__section-title'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders correct number of separators for 3 sections', () => {
+    const { container } = renderDropdown({
+      sections: [
+        {
+          title: 'A',
+          actions: [
+            {
+              label: 'A1',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+        {
+          title: 'B',
+          actions: [
+            {
+              label: 'B1',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+        {
+          title: 'C',
+          actions: [
+            {
+              label: 'C1',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    const separators = container.querySelectorAll(
+      '.actions-dropdown__separator',
+    );
+    expect(separators).toHaveLength(2);
+  });
+
+  it('sets aria-activedescendant on menu', () => {
+    renderDropdown();
+    const menu = screen.getByRole('menu');
+    expect(menu).toHaveAttribute('aria-activedescendant', 'action-item-0');
+  });
+
+  it('section groups use aria-labelledby when titled', () => {
+    renderDropdown({
+      sections: [
+        {
+          title: 'My Section',
+          actions: [
+            {
+              label: 'X',
+              onClick: vi.fn(),
+            },
+          ],
+        },
+      ],
+    });
+    const group = screen.getByRole('group');
+    expect(group).toHaveAttribute('aria-labelledby', 'section-title-0');
+    expect(screen.getByText('My Section')).toHaveAttribute(
+      'id',
+      'section-title-0',
+    );
   });
 });

@@ -3,13 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import type { Action } from './action_panel';
 import { ActionPanel } from './action_panel';
-import type { DropdownAction } from './actions_dropdown';
+import type { DropdownSection } from './actions_dropdown';
 
 function renderActionPanel(
   overrides: {
     actions?: Action[];
     dropdownOpen?: boolean;
-    dropdownActions?: DropdownAction[];
+    dropdownSections?: DropdownSection[];
     onDropdownClose?: () => void;
     contextLabel?: string;
   } = {},
@@ -27,23 +27,27 @@ function renderActionPanel(
     },
   ];
 
-  const defaultDropdownActions: DropdownAction[] = [
+  const defaultDropdownSections: DropdownSection[] = [
     {
-      label: 'Delete',
-      shortcut: <span>⌘D</span>,
-      onClick: vi.fn(),
-    },
-    {
-      label: 'Move',
-      shortcut: <span>⌘M</span>,
-      onClick: vi.fn(),
+      actions: [
+        {
+          label: 'Delete',
+          shortcut: <span>⌘D</span>,
+          onClick: vi.fn(),
+        },
+        {
+          label: 'Move',
+          shortcut: <span>⌘M</span>,
+          onClick: vi.fn(),
+        },
+      ],
     },
   ];
 
   const props = {
     actions: overrides.actions ?? defaultActions,
     dropdownOpen: overrides.dropdownOpen ?? false,
-    dropdownActions: overrides.dropdownActions ?? defaultDropdownActions,
+    dropdownSections: overrides.dropdownSections ?? defaultDropdownSections,
     onDropdownClose: overrides.onDropdownClose ?? vi.fn(),
     contextLabel: overrides.contextLabel,
   };
@@ -76,7 +80,7 @@ describe('ActionPanel', () => {
       <ActionPanel
         actions={[]}
         dropdownOpen={false}
-        dropdownActions={[]}
+        dropdownSections={[]}
         onDropdownClose={vi.fn()}
       />,
     );
