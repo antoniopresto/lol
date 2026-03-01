@@ -32,6 +32,33 @@
   animation: palette-appear $transition-slow ease-out both;
 }
 
+.command-palette__collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows $transition-slow ease-out;
+
+  .command-palette--compact & {
+    grid-template-rows: 0fr;
+  }
+}
+
+.command-palette__collapsible-inner {
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity $transition-normal ease-out $transition-fast,
+    visibility 0s;
+
+  .command-palette--compact & {
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity $transition-normal ease-out,
+      visibility 0s $transition-slow;
+  }
+}
+
 .command-palette__body {
   display: flex;
   flex: 1;

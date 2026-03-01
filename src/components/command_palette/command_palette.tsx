@@ -5,12 +5,19 @@ import './command_palette.scss';
 interface CommandPaletteProps {
   children: ReactNode;
   isLoading?: boolean;
+  compact?: boolean;
 }
 
-export function CommandPalette({ children, isLoading }: CommandPaletteProps) {
+export function CommandPalette({
+  children,
+  isLoading,
+  compact,
+}: CommandPaletteProps) {
   return (
     <div className="command-palette-overlay">
-      <div className="command-palette">
+      <div
+        className={`command-palette${compact ? ' command-palette--compact' : ''}`}
+      >
         <LoadingBar visible={isLoading} />
         {children}
       </div>

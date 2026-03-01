@@ -812,9 +812,11 @@ export function App() {
     viewType === 'file-search' ||
     viewType === 'settings';
 
+  const isCompact = viewType === 'root' && !query.trim();
+
   return (
     <NavigationContextProvider value={nav}>
-      <CommandPalette isLoading>
+      <CommandPalette isLoading compact={isCompact}>
         {!isFullView && (
           <SearchBar
             value={query}
@@ -840,122 +842,130 @@ export function App() {
             }
           />
         )}
-        {isFullView && nav.currentEntry ? (
-          <div
-            key={nav.navKey}
-            className={`command-palette__nav-view${navDirectionClass}`}
-          >
-            {renderCurrentView()}
-          </div>
-        ) : nav.currentEntry ? (
-          <div
-            key={nav.navKey}
-            className={`command-palette__nav-view${navDirectionClass}`}
-          >
-            <div className="command-palette__body">
-              <div className="command-palette__list-container">
+        <div
+          className="command-palette__collapsible"
+          aria-hidden={isCompact}
+          inert={isCompact ? true : undefined}
+        >
+          <div className="command-palette__collapsible-inner">
+            {isFullView && nav.currentEntry ? (
+              <div
+                key={nav.navKey}
+                className={`command-palette__nav-view${navDirectionClass}`}
+              >
                 {renderCurrentView()}
               </div>
-            </div>
-          </div>
-        ) : (
-          <div
-            className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
-          >
-            <div className="command-palette__list-container">
-              {allItems.length === 0 ? (
-                <EmptyState
-                  icon={<SearchIcon />}
-                  title="No Results"
-                  description="Try a different search term"
-                />
-              ) : (
-                <List
-                  itemCount={allItems.length}
-                  onActiveIndexChange={handleActiveIndexChange}
-                  onAction={handleDrillIn}
-                >
-                  {(() => {
-                    let globalIndex = 0;
-                    return (
-                      <>
-                        {calculatorResult && (
-                          <ListSection title="Result">
-                            <ListItem
-                              index={globalIndex++}
-                              title={`= ${calculatorResult}`}
-                              subtitle={query.trim()}
-                              icon={<CalculatorIcon />}
-                              accessories={[{ text: 'Copy' }]}
-                            />
-                          </ListSection>
-                        )}
-                        {filtered.map(section => (
-                          <ListSection
-                            key={section.title}
-                            title={section.title}
-                          >
-                            {section.items.map(item => {
-                              const idx = globalIndex++;
-                              return (
+            ) : nav.currentEntry ? (
+              <div
+                key={nav.navKey}
+                className={`command-palette__nav-view${navDirectionClass}`}
+              >
+                <div className="command-palette__body">
+                  <div className="command-palette__list-container">
+                    {renderCurrentView()}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={`command-palette__body${detail ? ' command-palette__body--has-detail' : ''}`}
+              >
+                <div className="command-palette__list-container">
+                  {allItems.length === 0 ? (
+                    <EmptyState
+                      icon={<SearchIcon />}
+                      title="No Results"
+                      description="Try a different search term"
+                    />
+                  ) : (
+                    <List
+                      itemCount={allItems.length}
+                      onActiveIndexChange={handleActiveIndexChange}
+                      onAction={handleDrillIn}
+                    >
+                      {(() => {
+                        let globalIndex = 0;
+                        return (
+                          <>
+                            {calculatorResult && (
+                              <ListSection title="Result">
                                 <ListItem
-                                  key={item.id}
-                                  index={idx}
-                                  title={item.title}
-                                  subtitle={item.subtitle}
-                                  icon={item.icon}
-                                  accessories={item.accessories}
+                                  index={globalIndex++}
+                                  title={`= ${calculatorResult}`}
+                                  subtitle={query.trim()}
+                                  icon={<CalculatorIcon />}
+                                  accessories={[{ text: 'Copy' }]}
                                 />
-                              );
-                            })}
-                          </ListSection>
-                        ))}
-                      </>
-                    );
-                  })()}
-                </List>
-              )}
-            </div>
-            {detail && (
-              <Detail
-                markdown={detail.markdown}
-                metadata={
-                  detail.metadata ? (
-                    <DetailMetadata>
-                      {detail.metadata.map(renderMetadataEntry)}
-                    </DetailMetadata>
-                  ) : undefined
-                }
+                              </ListSection>
+                            )}
+                            {filtered.map(section => (
+                              <ListSection
+                                key={section.title}
+                                title={section.title}
+                              >
+                                {section.items.map(item => {
+                                  const idx = globalIndex++;
+                                  return (
+                                    <ListItem
+                                      key={item.id}
+                                      index={idx}
+                                      title={item.title}
+                                      subtitle={item.subtitle}
+                                      icon={item.icon}
+                                      accessories={item.accessories}
+                                    />
+                                  );
+                                })}
+                              </ListSection>
+                            ))}
+                          </>
+                        );
+                      })()}
+                    </List>
+                  )}
+                </div>
+                {detail && (
+                  <Detail
+                    markdown={detail.markdown}
+                    metadata={
+                      detail.metadata ? (
+                        <DetailMetadata>
+                          {detail.metadata.map(renderMetadataEntry)}
+                        </DetailMetadata>
+                      ) : undefined
+                    }
+                  />
+                )}
+              </div>
+            )}
+            {!isFullView && (
+              <ActionPanel
+                contextLabel={contextLabel}
+                actions={[
+                  {
+                    label: isCalculatorSelected ? 'Copy Result' : 'Open',
+                    shortcut: <Kbd keys={['↵']} />,
+                  },
+                  {
+                    label: 'Actions',
+                    shortcut: (
+                      <Kbd
+                        keys={[
+                          '⌘',
+                          'K',
+                        ]}
+                      />
+                    ),
+                    onClick: toggleActions,
+                  },
+                ]}
+                dropdownOpen={actionsOpen}
+                dropdownSections={dropdownSections}
+                onDropdownClose={closeActions}
               />
             )}
           </div>
-        )}
-        {!isFullView && (
-          <ActionPanel
-            contextLabel={contextLabel}
-            actions={[
-              {
-                label: isCalculatorSelected ? 'Copy Result' : 'Open',
-                shortcut: <Kbd keys={['↵']} />,
-              },
-              {
-                label: 'Actions',
-                shortcut: (
-                  <Kbd
-                    keys={[
-                      '⌘',
-                      'K',
-                    ]}
-                  />
-                ),
-                onClick: toggleActions,
-              },
-            ]}
-            dropdownOpen={actionsOpen}
-            dropdownSections={dropdownSections}
-            onDropdownClose={closeActions}
-          />
-        )}
+        </div>
         {!isFullView && quickLookOpen && selectedItem?.detail && (
           <QuickLook title={selectedItem.title} onClose={closeQuickLook}>
             <Detail

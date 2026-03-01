@@ -802,10 +802,20 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     theme-independent (self-contained contrast pairs). Brand icon colors in
     SVG components are intentionally fixed. No changes needed.
 
-- [ ] [P2] THEME002 - Add compact mode. When no query is entered, show only
+- [x] [P2] THEME002 - Add compact mode. When no query is entered, show only
   the search bar (hide list and action panel). List appears with fade-in when
   user starts typing. Revert to compact when query is cleared. Toggle via
   prop on CommandPalette. Animate height transition.
+  Done: Added `compact` boolean prop to CommandPalette (applies BEM modifier
+  `command-palette--compact`). CSS Grid row collapse trick for smooth height
+  animation (`grid-template-rows: 1fr → 0fr` transition). Opacity fade with
+  staggered timing (expand: 80ms delay on opacity so content fades in after
+  height mostly opens; collapse: opacity fades immediately, visibility hidden
+  after 250ms). `isCompact` computed as `viewType === 'root' && !query.trim()`.
+  Collapsible wrapper wraps body + ActionPanel; overlays (QuickLook, Alert,
+  Toast, HUD) remain outside. Accessibility: `aria-hidden` and `inert` on
+  collapsible wrapper when compact to prevent focus/screen-reader access to
+  hidden content. All 93 tests pass, bun run check passes.
 
 - [ ] [P3] THEME003 - Add proper semantic color system. Create Color enum/object
   matching Raycast's: Blue, Green, Magenta, Orange, Purple, Red, Yellow,
