@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import type { FileEntry, FileType } from '../../data/file_search_data';
@@ -11,6 +12,8 @@ import { useAlert } from '../../hooks/use_alert';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import type { FileSearchResult } from '../../platform';
+import { getPlatform, isTauri } from '../../platform';
 import { formatRelativeDate } from '../../utils/format_date';
 import { formatFileSize } from '../../utils/format_file_size';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
@@ -27,9 +30,62 @@ import { EmptyState } from '../empty_state/empty_state';
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
+
+const FILE_TYPES: FileType[] = [
+  'folder',
+  'document',
+  'code',
+  'image',
+  'pdf',
+  'archive',
+  'spreadsheet',
+  'presentation',
+];
+
+function isValidFileType(value: string): value is FileType {
+  return (FILE_TYPES as string[]).includes(value);
+}
+
+function mapSearchResult(result: FileSearchResult): FileEntry {
+  return {
+    id: result.id,
+    name: result.name,
+    path: result.path,
+    fileType: isValidFileType(result.fileType) ? result.fileType : 'document',
+    size: result.size,
+    modifiedAt: new Date(result.modifiedAt),
+  };
+}
+
+function ErrorHUDIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+      <line
+        x1="8"
+        y1="8"
+        x2="16"
+        y2="16"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <line
+        x1="16"
+        y1="8"
+        x2="8"
+        y2="16"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 function SearchEmptyIcon() {
   return (
@@ -109,21 +165,52 @@ const FILTER_SECTIONS: SearchDropdownSection[] = [
 
 export function FileSearchView() {
   const nav = useNavigation();
-  const [entries, setEntries] = useState<FileEntry[]>(MOCK_FILE_ENTRIES);
+  const [entries, setEntries] = useState<FileEntry[]>(
+    isTauri ? [] : MOCK_FILE_ENTRIES,
+  );
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const now = useMemo(() => new Date(), []);
+  const searchRequestRef = useRef(0);
+
+  useEffect(() => {
+    if (!isTauri) return;
+
+    setIsLoading(true);
+
+    const timer = setTimeout(() => {
+      const requestId = ++searchRequestRef.current;
+
+      getPlatform()
+        .files.searchFiles(query)
+        .then(results => {
+          if (requestId !== searchRequestRef.current) return;
+          setEntries(results.map(mapSearchResult));
+        })
+        .catch(() => {
+          if (requestId !== searchRequestRef.current) return;
+          setEntries([]);
+        })
+        .finally(() => {
+          if (requestId !== searchRequestRef.current) return;
+          setIsLoading(false);
+        });
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const filtered = useMemo(() => {
     let items = entries;
     if (filterValue !== 'all') {
       items = items.filter(e => e.fileType === filterValue);
     }
-    if (query) {
+    if (!isTauri && query) {
       items = items.filter(
         e => fuzzyMatch(query, e.name) || fuzzyMatch(query, e.path),
       );
@@ -188,10 +275,27 @@ export function FileSearchView() {
   const handleOpen = useCallback(() => {
     if (!selectedEntry) return;
     setActionsOpen(false);
-    showHUD({
-      icon: <OpenInBrowserHUDIcon />,
-      title: `Opened ${selectedEntry.name}`,
-    });
+    if (isTauri) {
+      getPlatform()
+        .files.openFile(selectedEntry.path)
+        .then(() => {
+          showHUD({
+            icon: <OpenInBrowserHUDIcon />,
+            title: `Opened ${selectedEntry.name}`,
+          });
+        })
+        .catch(() => {
+          showHUD({
+            icon: <ErrorHUDIcon />,
+            title: `Failed to open ${selectedEntry.name}`,
+          });
+        });
+    } else {
+      showHUD({
+        icon: <OpenInBrowserHUDIcon />,
+        title: `Opened ${selectedEntry.name}`,
+      });
+    }
   }, [
     selectedEntry,
     showHUD,
@@ -200,10 +304,27 @@ export function FileSearchView() {
   const handleShowInFinder = useCallback(() => {
     if (!selectedEntry) return;
     setActionsOpen(false);
-    showHUD({
-      icon: <OpenInBrowserHUDIcon />,
-      title: 'Revealed in Finder',
-    });
+    if (isTauri) {
+      getPlatform()
+        .files.revealInFinder(selectedEntry.path)
+        .then(() => {
+          showHUD({
+            icon: <OpenInBrowserHUDIcon />,
+            title: 'Revealed in Finder',
+          });
+        })
+        .catch(() => {
+          showHUD({
+            icon: <ErrorHUDIcon />,
+            title: 'Failed to reveal in Finder',
+          });
+        });
+    } else {
+      showHUD({
+        icon: <OpenInBrowserHUDIcon />,
+        title: 'Revealed in Finder',
+      });
+    }
   }, [
     selectedEntry,
     showHUD,
@@ -224,6 +345,7 @@ export function FileSearchView() {
     if (!selectedEntry) return;
     const entryId = selectedEntry.id;
     const entryName = selectedEntry.name;
+    const entryPath = selectedEntry.path;
     setActionsOpen(false);
     confirmAlert({
       title: `Move "${entryName}" to Trash?`,
@@ -244,11 +366,29 @@ export function FileSearchView() {
         label: 'Move to Trash',
         style: 'destructive',
         onAction: () => {
-          setEntries(prev => prev.filter(e => e.id !== entryId));
-          showHUD({
-            icon: <CopyHUDIcon />,
-            title: `Moved "${entryName}" to Trash`,
-          });
+          if (isTauri) {
+            getPlatform()
+              .files.moveToTrash(entryPath)
+              .then(() => {
+                setEntries(prev => prev.filter(e => e.id !== entryId));
+                showHUD({
+                  icon: <CopyHUDIcon />,
+                  title: `Moved "${entryName}" to Trash`,
+                });
+              })
+              .catch(() => {
+                showHUD({
+                  icon: <ErrorHUDIcon />,
+                  title: `Failed to trash "${entryName}"`,
+                });
+              });
+          } else {
+            setEntries(prev => prev.filter(e => e.id !== entryId));
+            showHUD({
+              icon: <CopyHUDIcon />,
+              title: `Moved "${entryName}" to Trash`,
+            });
+          }
         },
       },
       dismissAction: {
@@ -426,9 +566,10 @@ export function FileSearchView() {
           />
         }
       />
+      <LoadingBar visible={isLoading} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
-          {totalItemCount === 0 ? (
+          {totalItemCount === 0 && !isLoading ? (
             <EmptyState
               icon={<SearchEmptyIcon />}
               title="No Results"

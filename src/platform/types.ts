@@ -29,8 +29,29 @@ export interface PlatformWindow {
   syncStoredPositionToBackend(): Promise<void>;
 }
 
+export interface FileSearchResult {
+  id: string;
+  name: string;
+  path: string;
+  fileType: string;
+  size: number;
+  modifiedAt: number;
+}
+
+export interface PlatformFiles {
+  searchFiles(
+    query: string,
+    paths?: string[],
+    maxResults?: number,
+  ): Promise<FileSearchResult[]>;
+  openFile(path: string): Promise<void>;
+  revealInFinder(path: string): Promise<void>;
+  moveToTrash(path: string): Promise<void>;
+}
+
 export interface PlatformAPI {
   readonly clipboard: PlatformClipboard;
   readonly shell: PlatformShell;
   readonly window: PlatformWindow;
+  readonly files: PlatformFiles;
 }

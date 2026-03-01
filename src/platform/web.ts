@@ -1,6 +1,7 @@
 import type {
   PlatformAPI,
   PlatformClipboard,
+  PlatformFiles,
   PlatformShell,
   PlatformWindow,
 } from './types';
@@ -52,8 +53,18 @@ const platformWindow: PlatformWindow = {
   async syncStoredPositionToBackend() {},
 };
 
+const files: PlatformFiles = {
+  async searchFiles() {
+    return [];
+  },
+  async openFile() {},
+  async revealInFinder() {},
+  async moveToTrash() {},
+};
+
 export const webPlatform: PlatformAPI = {
   clipboard,
   shell,
   window: platformWindow,
+  files,
 };

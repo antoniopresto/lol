@@ -1114,14 +1114,42 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     In Tauri mode: real clipboard data from monitoring. In web mode: mock data
     as seed. Remove direct MOCK_CLIPBOARD_ENTRIES dependency from view.
 
-- [ ] [P1] TAURI006 - Add native file system access. Use @tauri-apps/api/fs
+- [x] [P1] TAURI006 - Add native file system access. Use @tauri-apps/api/fs
   and @tauri-apps/plugin-fs for real file operations. Replace mock file
   search with real directory scanning. Create Rust command for fast
   recursive file search (ignore node_modules, .git, hidden dirs by default).
-  Index common directories (~/, ~/Documents, ~/Downloads, ~/Desktop).
+  Index common directories (~/Documents, ~/Downloads, ~/Desktop, ~/Projects).
   Return file metadata (size, modified date, type). Wire into FileSearchView
   to replace mock data. Add "Open" action that uses @tauri-apps/api/shell
   to open files with default app.
+  Done: Rust-side search_files (async, WalkDir max_depth 5, 200 max results),
+  open_file, reveal_in_finder, move_to_trash commands in lib.rs. Dependencies:
+  walkdir 2, dirs-next 2, open 5, trash 5 (cross-platform safe trash). File
+  type detection for code/image/pdf/archive/spreadsheet/presentation/document/
+  folder. Path validation (is_path_within_home) on open/reveal/trash to prevent
+  unauthorized file access. Hash-based file IDs from path for stable identity.
+  PlatformFiles interface in types.ts, implemented in tauri.ts (invoke) and
+  web.ts (noop fallback). FileSearchView: 250ms debounce on search IPC calls,
+  race-safe request tracking, proper ErrorHUDIcon for failure HUDs,
+  OpenInBrowserHUDIcon for success. reveal_in_finder checks exit status on all
+  platforms. Removed .DS_Store from directory ignore list (it's a file). All 93
+  tests pass, cargo check passes, bun run check passes.
+  Sub-tasks:
+  - [x] TAURI006a - Rust-side: Add walkdir + tauri-plugin-shell + trash
+    dependencies. Create search_files (async) Tauri command with recursive dir
+    traversal, .git/node_modules/hidden exclusion, extension-based file type
+    detection, file metadata. Add open_file, reveal_in_finder, move_to_trash
+    commands with path validation (is_path_within_home). trash crate for
+    cross-platform safe trash (replaces osascript injection vulnerability).
+  - [x] TAURI006b - Update capabilities/default.json with shell:allow-open
+    permission. Install @tauri-apps/plugin-shell JS package via bun.
+  - [x] TAURI006c - Extend PlatformAPI: add PlatformFiles interface (searchFiles,
+    openFile, revealInFinder, moveToTrash) to types.ts. Implement in tauri.ts
+    (invoke Tauri commands) and web.ts (mock/noop fallbacks). Export from index.ts.
+  - [x] TAURI006d - Refactor FileSearchView to use PlatformAPI for real file search
+    in Tauri mode, mock data in web mode. Wire open/reveal/trash actions to real
+    platform operations. Add 250ms debounce, loading state, ErrorHUDIcon for
+    failure states.
 
 - [ ] [P1] TAURI007 - Add native app launching. Use @tauri-apps/api/shell
   to launch applications. On macOS: scan /Applications and ~/Applications

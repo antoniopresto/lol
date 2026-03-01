@@ -1,6 +1,8 @@
 use std::sync::Mutex;
 use std::time::Duration;
+use serde::Serialize;
 use tauri::{Emitter, Manager};
+use walkdir::WalkDir;
 #[cfg(desktop)]
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 #[cfg(desktop)]
@@ -146,6 +148,247 @@ fn start_clipboard_monitor(app_handle: tauri::AppHandle) {
     });
 }
 
+#[derive(Serialize)]
+struct FileEntryResult {
+    id: String,
+    name: String,
+    path: String,
+    #[serde(rename = "fileType")]
+    file_type: String,
+    size: u64,
+    #[serde(rename = "modifiedAt")]
+    modified_at: u64,
+}
+
+fn detect_file_type(path: &std::path::Path) -> &'static str {
+    if path.is_dir() {
+        return "folder";
+    }
+
+    match path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_lowercase())
+        .as_deref()
+    {
+        Some(
+            "ts" | "tsx" | "js" | "jsx" | "rs" | "py" | "rb" | "go" | "java" | "c" | "cpp" | "h"
+            | "hpp" | "cs" | "swift" | "kt" | "scala" | "sh" | "bash" | "zsh" | "json" | "yaml"
+            | "yml" | "toml" | "xml" | "html" | "css" | "scss" | "less" | "sql" | "graphql"
+            | "proto" | "lua" | "r" | "php" | "pl" | "ex" | "exs" | "erl" | "hs" | "ml"
+            | "vim" | "el" | "clj" | "dart",
+        ) => "code",
+        Some("png" | "jpg" | "jpeg" | "gif" | "bmp" | "svg" | "webp" | "ico" | "tiff" | "avif") => {
+            "image"
+        }
+        Some("pdf") => "pdf",
+        Some("zip" | "tar" | "gz" | "bz2" | "xz" | "7z" | "rar" | "dmg" | "iso") => "archive",
+        Some("xlsx" | "xls" | "csv" | "numbers" | "ods") => "spreadsheet",
+        Some("pptx" | "ppt" | "key" | "odp") => "presentation",
+        Some(
+            "md" | "txt" | "rtf" | "doc" | "docx" | "pages" | "odt" | "tex" | "log" | "conf"
+            | "cfg" | "ini" | "env" | "fig",
+        ) => "document",
+        _ => "document",
+    }
+}
+
+fn is_ignored_dir(name: &str) -> bool {
+    matches!(
+        name,
+        ".git"
+            | "node_modules"
+            | "__pycache__"
+            | ".next"
+            | ".cache"
+            | ".vscode"
+            | ".idea"
+            | "target"
+            | "dist"
+            | "build"
+            | ".Trash"
+    )
+}
+
+fn is_path_within_home(path: &std::path::Path) -> bool {
+    let canonical = match path.canonicalize() {
+        Ok(p) => p,
+        Err(_) => return false,
+    };
+    if let Some(home) = dirs_next::home_dir() {
+        return canonical.starts_with(&home);
+    }
+    false
+}
+
+#[tauri::command(async)]
+fn search_files(query: String, paths: Vec<String>, max_results: usize) -> Vec<FileEntryResult> {
+    let max = if max_results == 0 { 200 } else { max_results };
+    let query_lower = query.to_lowercase();
+    let mut results: Vec<FileEntryResult> = Vec::new();
+
+    let search_paths: Vec<String> = if paths.is_empty() {
+        if let Some(home) = dirs_next::home_dir() {
+            let home_str = home.to_string_lossy().to_string();
+            vec![
+                format!("{home_str}/Documents"),
+                format!("{home_str}/Downloads"),
+                format!("{home_str}/Desktop"),
+                format!("{home_str}/Projects"),
+            ]
+        } else {
+            return results;
+        }
+    } else {
+        paths
+    };
+
+    for search_path in &search_paths {
+        if results.len() >= max {
+            break;
+        }
+
+        let walker = WalkDir::new(search_path)
+            .max_depth(5)
+            .follow_links(false)
+            .into_iter()
+            .filter_entry(|entry| {
+                let name = entry.file_name().to_string_lossy();
+                if name.starts_with('.') && entry.depth() > 0 {
+                    return false;
+                }
+                if entry.file_type().is_dir() && is_ignored_dir(&name) {
+                    return false;
+                }
+                true
+            });
+
+        for entry in walker.flatten() {
+            if results.len() >= max {
+                break;
+            }
+
+            let name = entry.file_name().to_string_lossy().to_string();
+
+            if !query_lower.is_empty() && !name.to_lowercase().contains(&query_lower) {
+                continue;
+            }
+
+            if entry.depth() == 0 {
+                continue;
+            }
+
+            let path = entry.path();
+            let metadata = match entry.metadata() {
+                Ok(m) => m,
+                Err(_) => continue,
+            };
+
+            let size = metadata.len();
+            let modified_at = metadata
+                .modified()
+                .ok()
+                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                .map(|d| d.as_millis() as u64)
+                .unwrap_or(0);
+
+            let file_type = detect_file_type(path);
+            let path_str = path.to_string_lossy().to_string();
+
+            let id = format!("fs-{:x}", {
+                use std::hash::{Hash, Hasher};
+                let mut h = std::collections::hash_map::DefaultHasher::new();
+                path_str.hash(&mut h);
+                h.finish()
+            });
+
+            results.push(FileEntryResult {
+                id,
+                name,
+                path: path_str,
+                file_type: file_type.to_string(),
+                size,
+                modified_at,
+            });
+        }
+    }
+
+    results
+}
+
+#[tauri::command]
+fn open_file(path: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    if !is_path_within_home(p) {
+        return Err(format!("path not allowed: {path}"));
+    }
+    open::that(&path).map_err(|e| format!("failed to open {path}: {e}"))
+}
+
+#[tauri::command]
+fn reveal_in_finder(path: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    if !is_path_within_home(p) {
+        return Err(format!("path not allowed: {path}"));
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let output = std::process::Command::new("open")
+            .arg("-R")
+            .arg(&path)
+            .output()
+            .map_err(|e| format!("failed to reveal {path}: {e}"))?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("failed to reveal {path}: {stderr}"));
+        }
+        return Ok(());
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        let output = std::process::Command::new("explorer")
+            .arg(format!("/select,{}", &path))
+            .output()
+            .map_err(|e| format!("failed to reveal {path}: {e}"))?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("failed to reveal {path}: {stderr}"));
+        }
+        return Ok(());
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let parent = std::path::Path::new(&path)
+            .parent()
+            .map(|p| p.to_string_lossy().to_string())
+            .unwrap_or_else(|| path.clone());
+        let output = std::process::Command::new("xdg-open")
+            .arg(&parent)
+            .output()
+            .map_err(|e| format!("failed to reveal: {e}"))?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("failed to reveal: {stderr}"));
+        }
+        return Ok(());
+    }
+
+    #[allow(unreachable_code)]
+    Err("unsupported platform".to_string())
+}
+
+#[tauri::command]
+fn move_to_trash(path: String) -> Result<(), String> {
+    let p = std::path::Path::new(&path);
+    if !is_path_within_home(p) {
+        return Err(format!("path not allowed: {path}"));
+    }
+    trash::delete(p).map_err(|e| format!("failed to trash {path}: {e}"))
+}
+
 #[tauri::command]
 fn set_window_position_pref(
     state: tauri::State<'_, Mutex<WindowConfig>>,
@@ -168,8 +411,15 @@ fn set_window_position_pref(
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
+        .plugin(tauri_plugin_shell::init())
         .manage(Mutex::new(WindowConfig::default()))
-        .invoke_handler(tauri::generate_handler![set_window_position_pref])
+        .invoke_handler(tauri::generate_handler![
+            set_window_position_pref,
+            search_files,
+            open_file,
+            reveal_in_finder,
+            move_to_trash
+        ])
         .setup(|app| {
             #[cfg(desktop)]
             {

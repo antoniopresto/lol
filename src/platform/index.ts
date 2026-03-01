@@ -3,8 +3,10 @@ import { webPlatform } from './web';
 
 export type {
   ClipboardChangeEvent,
+  FileSearchResult,
   PlatformAPI,
   PlatformClipboard,
+  PlatformFiles,
   PlatformShell,
   PlatformWindow,
   Unsubscribe,

@@ -1,8 +1,10 @@
 import { storageGet } from '../utils/storage';
 import type {
   ClipboardChangeEvent,
+  FileSearchResult,
   PlatformAPI,
   PlatformClipboard,
+  PlatformFiles,
   PlatformShell,
   PlatformWindow,
 } from './types';
@@ -86,8 +88,36 @@ const platformWindow: PlatformWindow = {
   },
 };
 
+const files: PlatformFiles = {
+  async searchFiles(
+    query: string,
+    paths?: string[],
+    maxResults?: number,
+  ): Promise<FileSearchResult[]> {
+    const { invoke } = await import('@tauri-apps/api/core');
+    return invoke<FileSearchResult[]>('search_files', {
+      query,
+      paths: paths ?? [],
+      maxResults: maxResults ?? 200,
+    });
+  },
+  async openFile(path: string) {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('open_file', { path });
+  },
+  async revealInFinder(path: string) {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('reveal_in_finder', { path });
+  },
+  async moveToTrash(path: string) {
+    const { invoke } = await import('@tauri-apps/api/core');
+    await invoke('move_to_trash', { path });
+  },
+};
+
 export const tauriPlatform: PlatformAPI = {
   clipboard,
   shell,
   window: platformWindow,
+  files,
 };
