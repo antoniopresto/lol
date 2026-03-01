@@ -1002,12 +1002,25 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   onHide clears query/selectedIndex/actionsOpen/quickLookOpen/filterValue
   and calls popToRoot. All 93 tests pass, cargo check passes.
 
-- [ ] [P0] TAURI003 - Add system tray with menu. Use @tauri-apps/api/tray
+- [x] [P0] TAURI003 - Add system tray with menu. Use @tauri-apps/api/tray
   to create system tray icon (Raycast logo). Tray menu items: Show Raycast
   (trigger global hotkey), Clipboard History, Snippets, Settings, separator,
   Check for Updates, About, Quit. Clicking tray icon toggles window. Create
   tray icon SVG (16x16 and 32x32 for retina). Wire tray menu actions to
   IPC commands that push appropriate views.
+  Done: Tray icon built with TrayIconBuilder in lib.rs. Monochrome template
+  icon (32x32 + 64x64 @2x PNG) embedded via include_bytes!. icon_as_template
+  for macOS menu bar adaptation. Menu: Show Raycast, separator, Clipboard
+  History, Snippets, Settings, separator, Check for Updates, About, Quit.
+  Left-click toggles window (show_menu_on_left_click=false), right-click shows
+  menu. Menu events emit "tray-navigate" event to React frontend. Quit calls
+  app.exit(0). Extracted show_and_focus/toggle_window helpers shared between
+  global shortcut and tray handlers. React side: use_window.ts listens for
+  "tray-navigate" events. App.tsx maps tray targets (clipboard→clipboard-history,
+  snippets→snippets, settings/about/check-updates→settings) to navigation
+  pushes via TRAY_COMMAND_MAP. Cargo.toml: tray-icon + image-png features.
+  Capabilities: core:event:allow-listen added. All 93 tests pass, cargo check
+  passes, bun run check passes.
 
 - [ ] [P0] TAURI004 - Configure window behavior to match Raycast. Hide on
   blur (window loses focus → hide, like Spotlight). Disable window

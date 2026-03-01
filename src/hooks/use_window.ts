@@ -12,47 +12,59 @@ export { isTauri };
 interface UseWindowOptions {
   onShow?: () => void;
   onHide?: () => void;
+  onTrayNavigate?: (target: string) => void;
 }
 
 export function useWindow(options: UseWindowOptions = {}) {
   const onShowRef = useRef(options.onShow);
   const onHideRef = useRef(options.onHide);
+  const onTrayNavigateRef = useRef(options.onTrayNavigate);
 
   useEffect(() => {
     onShowRef.current = options.onShow;
     onHideRef.current = options.onHide;
+    onTrayNavigateRef.current = options.onTrayNavigate;
   });
 
   useEffect(() => {
     if (!isTauri) return;
 
-    let unlisten: (() => void) | undefined;
+    let unlistenFocus: (() => void) | undefined;
+    let unlistenTray: (() => void) | undefined;
     let cancelled = false;
 
     (async () => {
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const { listen } = await import('@tauri-apps/api/event');
       const appWindow = getCurrentWindow();
 
-      const unlistenFocus = await appWindow.onFocusChanged(
-        ({ payload: focused }) => {
-          if (focused) {
-            onShowRef.current?.();
-          } else {
-            onHideRef.current?.();
-          }
-        },
-      );
+      const focusUnsub = await appWindow.onFocusChanged(({
+        payload: focused,
+      }) => {
+        if (focused) {
+          onShowRef.current?.();
+        } else {
+          onHideRef.current?.();
+        }
+      });
+
+      const trayUnsub = await listen<string>('tray-navigate', event => {
+        onTrayNavigateRef.current?.(event.payload);
+      });
 
       if (cancelled) {
-        unlistenFocus();
+        focusUnsub();
+        trayUnsub();
       } else {
-        unlisten = unlistenFocus;
+        unlistenFocus = focusUnsub;
+        unlistenTray = trayUnsub;
       }
     })();
 
     return () => {
       cancelled = true;
-      unlisten?.();
+      unlistenFocus?.();
+      unlistenTray?.();
     };
   }, []);
 
@@ -62,5 +74,8 @@ export function useWindow(options: UseWindowOptions = {}) {
     await getCurrentWindow().hide();
   }, []);
 
-  return { hideWindow, isTauri };
+  return {
+    hideWindow,
+    isTauri,
+  };
 }

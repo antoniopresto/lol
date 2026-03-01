@@ -39,6 +39,35 @@ type NavViewData =
       item: ListItemData;
     };
 
+const TRAY_COMMAND_MAP: Record<
+  string,
+  {
+    id: string;
+    name: string;
+  }
+> = {
+  clipboard: {
+    id: 'clipboard-history',
+    name: 'Clipboard History',
+  },
+  snippets: {
+    id: 'snippets',
+    name: 'Snippets',
+  },
+  settings: {
+    id: 'settings',
+    name: 'Settings',
+  },
+  about: {
+    id: 'settings',
+    name: 'Settings',
+  },
+  'check-updates': {
+    id: 'settings',
+    name: 'Settings',
+  },
+};
+
 function flattenItems(sections: SectionData[]): ListItemData[] {
   return sections.flatMap(s => s.items);
 }
@@ -166,9 +195,35 @@ export function App() {
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const nav = useNavigationStack<NavViewData>('Raycast');
-  const { push } = nav;
+  const { push, popToRoot } = nav;
   const { favoriteIds, isFavorite, toggleFavorite, moveFavorite } =
     useFavorites();
+
+  const handleTrayNavigate = useCallback(
+    (target: string) => {
+      const mapping = TRAY_COMMAND_MAP[target];
+      if (!mapping) return;
+
+      const cmd = getCommand(mapping.id);
+      if (!cmd?.component) return;
+
+      popToRoot();
+      setQuery('');
+      setSelectedIndex(0);
+      setActionsOpen(false);
+      setQuickLookOpen(false);
+      setFilterValue('all');
+
+      push(mapping.name, {
+        type: 'command',
+        commandId: mapping.id,
+      });
+    },
+    [
+      push,
+      popToRoot,
+    ],
+  );
 
   useWindow({
     onShow: () => {
@@ -178,12 +233,13 @@ export function App() {
     },
     onHide: () => {
       setQuery('');
-      nav.popToRoot();
+      popToRoot();
       setActionsOpen(false);
       setQuickLookOpen(false);
       setSelectedIndex(0);
       setFilterValue('all');
     },
+    onTrayNavigate: handleTrayNavigate,
   });
 
   const currentNavData = nav.currentEntry?.data;
