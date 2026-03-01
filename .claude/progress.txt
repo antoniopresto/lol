@@ -1248,8 +1248,25 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     null (not undefined) for application column to ensure DB column is
     explicitly set. Web fallback works through quicklinkDb's internal
     localStorage delegation. All 93 tests pass, bun run check passes.
-  - [ ] TAURI008g - Migrate settings, recent_commands, favorites, theme,
+  - [x] TAURI008g - Migrate settings, recent_commands, favorites, theme,
     emoji_recent to database.ts. Update respective hooks/components.
+    Done: Replaced direct storageGet/storageSet calls with settingsDb and
+    recentCommandDb helpers from database.ts. use_recent_commands.ts uses
+    recentCommandDb.getAll/add/clear. use_favorites.ts uses settingsDb
+    get/set with JSON-serialized string array. use_theme.ts uses settingsDb
+    get/set with plain string value. emoji_picker_view.tsx uses settingsDb
+    get/set with JSON-serialized string array, removed legacy localStorage
+    migration code. settings_view.tsx uses settingsDb get/set/delete with
+    JSON-serialized objects for general settings and extension states.
+    Removed duplicate isBooleanRecord (imported from storage.ts). Fixed
+    settings load effect race condition: split into one-time DB load ([])
+    and separate themePreference sync effect. Fixed windowPosition validator
+    to require string (was incorrectly accepting undefined). Updated
+    index.html FOUC prevention script to read theme from raycast-settings-all
+    localStorage key (settingsDb web fallback format). All hooks changed
+    from synchronous init to async useEffect with cancelled-flag abort
+    guards. All DB writes fire-and-forget with .catch(console.error).
+    All 93 tests pass, bun run check passes.
   - [ ] TAURI008h - Add full-text search queries in database.ts for
     clipboard, snippets, quicklinks content search.
 

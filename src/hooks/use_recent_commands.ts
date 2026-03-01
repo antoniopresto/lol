@@ -1,15 +1,23 @@
-import { useCallback, useState } from 'react';
-import { isStringArray, storageGet, storageSet } from '../utils/storage';
+import { useCallback, useEffect, useState } from 'react';
+import { recentCommandDb } from '../utils/database';
 
-const STORAGE_KEY = 'recent-commands';
 const MAX_RECENT = 10;
 
-function loadRecent(): string[] {
-  return storageGet(STORAGE_KEY, isStringArray) ?? [];
-}
-
 export function useRecentCommands() {
-  const [recentIds, setRecentIds] = useState<string[]>(loadRecent);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    recentCommandDb
+      .getAll(MAX_RECENT)
+      .then(ids => {
+        if (!cancelled) setRecentIds(ids);
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const addRecent = useCallback((id: string) => {
     setRecentIds(prev => {
@@ -17,14 +25,14 @@ export function useRecentCommands() {
         id,
         ...prev.filter(rid => rid !== id),
       ].slice(0, MAX_RECENT);
-      storageSet(STORAGE_KEY, next);
       return next;
     });
+    recentCommandDb.add(id).catch(console.error);
   }, []);
 
   const clearRecent = useCallback(() => {
     setRecentIds([]);
-    storageSet(STORAGE_KEY, []);
+    recentCommandDb.clear().catch(console.error);
   }, []);
 
   return {

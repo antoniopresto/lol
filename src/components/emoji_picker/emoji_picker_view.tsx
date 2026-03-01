@@ -9,8 +9,8 @@ import {
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { settingsDb } from '../../utils/database';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
-import { isStringArray, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import { createCopyAction, performCopy } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
@@ -23,7 +23,7 @@ import { SearchDropdown } from '../search_bar/search_dropdown';
 import './emoji_picker_view.scss';
 
 const COLUMNS = 6;
-const STORAGE_KEY = 'emoji-recent';
+const DB_KEY = 'emoji-recent';
 const MAX_RECENT = 12;
 
 function SearchEmptyIcon() {
@@ -43,22 +43,15 @@ function SearchEmptyIcon() {
   );
 }
 
-function loadRecentEmojis(): string[] {
-  const stored = storageGet(STORAGE_KEY, isStringArray);
-  if (stored) return stored;
-
+function parseRecentEmojis(raw: string | null): string[] {
+  if (!raw) return [];
   try {
-    const legacy = localStorage.getItem('emoji-picker-recent');
-    if (legacy) {
-      const parsed: unknown = JSON.parse(legacy);
-      if (isStringArray(parsed)) {
-        storageSet(STORAGE_KEY, parsed);
-        localStorage.removeItem('emoji-picker-recent');
-        return parsed;
-      }
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.every(v => typeof v === 'string')) {
+      return parsed as string[];
     }
   } catch {
-    // unavailable
+    // invalid
   }
   return [];
 }
@@ -92,7 +85,20 @@ export function EmojiPickerView() {
   const [filterValue, setFilterValue] = useState('all');
   const [activeIndex, setActiveIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [recentChars, setRecentChars] = useState<string[]>(loadRecentEmojis);
+  const [recentChars, setRecentChars] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    settingsDb
+      .get(DB_KEY)
+      .then(raw => {
+        if (!cancelled) setRecentChars(parseRecentEmojis(raw));
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const { items: hudItems, show: showHUD } = useHUD();
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -203,7 +209,7 @@ export function EmojiPickerView() {
         char,
         ...prev.filter(c => c !== char),
       ].slice(0, MAX_RECENT);
-      storageSet(STORAGE_KEY, next);
+      settingsDb.set(DB_KEY, JSON.stringify(next)).catch(console.error);
       return next;
     });
   }, []);

@@ -1,14 +1,36 @@
-import { useCallback, useMemo, useState } from 'react';
-import { isStringArray, storageGet, storageSet } from '../utils/storage';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { settingsDb } from '../utils/database';
 
-const STORAGE_KEY = 'favorites';
+const DB_KEY = 'favorites';
 
-function loadFavorites(): string[] {
-  return storageGet(STORAGE_KEY, isStringArray) ?? [];
+function parseIds(raw: string | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.every(v => typeof v === 'string')) {
+      return parsed as string[];
+    }
+  } catch {
+    // invalid
+  }
+  return [];
 }
 
 export function useFavorites() {
-  const [favoriteIds, setFavoriteIds] = useState<string[]>(loadFavorites);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    settingsDb
+      .get(DB_KEY)
+      .then(raw => {
+        if (!cancelled) setFavoriteIds(parseIds(raw));
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const favoriteSet = useMemo(() => new Set(favoriteIds), [favoriteIds]);
 
@@ -25,7 +47,7 @@ export function useFavorites() {
             ...prev,
             id,
           ];
-      storageSet(STORAGE_KEY, next);
+      settingsDb.set(DB_KEY, JSON.stringify(next)).catch(console.error);
       return next;
     });
   }, []);
@@ -39,7 +61,7 @@ export function useFavorites() {
       const next = [...prev];
       next[idx] = prev[targetIdx]!;
       next[targetIdx] = prev[idx]!;
-      storageSet(STORAGE_KEY, next);
+      settingsDb.set(DB_KEY, JSON.stringify(next)).catch(console.error);
       return next;
     });
   }, []);

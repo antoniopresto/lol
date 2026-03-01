@@ -12,7 +12,19 @@
     <title>lol</title>
     <script>
       (function () {
-        var t = localStorage.getItem('raycast-theme');
+        var t;
+        try {
+          var raw = localStorage.getItem('raycast-settings-all');
+          if (raw) {
+            var arr = JSON.parse(raw);
+            for (var i = 0; i < arr.length; i++) {
+              if (arr[i].key === 'theme') {
+                t = arr[i].value;
+                break;
+              }
+            }
+          }
+        } catch (e) {}
         if (t === 'light')
           document.documentElement.setAttribute('data-theme', 'light');
         else if (

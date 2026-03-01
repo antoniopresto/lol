@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { storageGet, storageSet } from '../utils/storage';
+import { settingsDb } from '../utils/database';
 
 type ThemePreference = 'dark' | 'light' | 'system';
 type ResolvedTheme = 'dark' | 'light';
 
-const STORAGE_KEY = 'theme';
+const DB_KEY = 'theme';
 
 function isThemePreference(value: unknown): value is ThemePreference {
   return value === 'dark' || value === 'light' || value === 'system';
@@ -20,30 +20,32 @@ function resolveTheme(preference: ThemePreference): ResolvedTheme {
   return preference === 'system' ? getSystemTheme() : preference;
 }
 
-function loadPreference(): ThemePreference {
-  const fromStorage = storageGet(STORAGE_KEY, isThemePreference);
-  if (fromStorage) return fromStorage;
-
-  try {
-    const raw = localStorage.getItem('raycast-theme');
-    if (raw && isThemePreference(raw)) {
-      storageSet(STORAGE_KEY, raw);
-      return raw;
-    }
-  } catch {
-    // unavailable
-  }
-  return 'dark';
-}
-
 function applyTheme(theme: ResolvedTheme) {
   document.documentElement.setAttribute('data-theme', theme);
 }
 
 export function useTheme() {
-  const [preference, setPreference] = useState<ThemePreference>(loadPreference);
+  const [preference, setPreference] = useState<ThemePreference>('dark');
   const [resolved, setResolved] = useState<ResolvedTheme>(() =>
-    resolveTheme(preference));
+    resolveTheme('dark'));
+
+  useEffect(() => {
+    let cancelled = false;
+    settingsDb
+      .get(DB_KEY)
+      .then(raw => {
+        if (cancelled) return;
+        const pref = isThemePreference(raw) ? raw : 'dark';
+        setPreference(pref);
+        const r = resolveTheme(pref);
+        setResolved(r);
+        applyTheme(r);
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const r = resolveTheme(preference);
@@ -66,7 +68,7 @@ export function useTheme() {
 
   const setTheme = useCallback((value: ThemePreference) => {
     setPreference(value);
-    storageSet(STORAGE_KEY, value);
+    settingsDb.set(DB_KEY, value).catch(console.error);
   }, []);
 
   return {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { type ExtensionEntry, MOCK_EXTENSIONS } from '../../data/settings_data';
 import { useAlert } from '../../hooks/use_alert';
 import { useHUD } from '../../hooks/use_hud';
@@ -6,13 +6,8 @@ import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useTheme } from '../../hooks/use_theme';
 import { useWindow } from '../../hooks/use_window';
-import {
-  isBooleanRecord,
-  isRecord,
-  storageGet,
-  storageRemove,
-  storageSet,
-} from '../../utils/storage';
+import { settingsDb } from '../../utils/database';
+import { isBooleanRecord, isRecord } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import { CopyHUDIcon } from '../action_panel/actions';
 import type { DropdownSection } from '../action_panel/actions_dropdown';
@@ -49,8 +44,8 @@ interface GeneralSettings {
   fontSize: string;
 }
 
-const SETTINGS_STORAGE_KEY = 'settings-general';
-const EXTENSIONS_STORAGE_KEY = 'settings-extensions';
+const SETTINGS_DB_KEY = 'settings-general';
+const EXTENSIONS_DB_KEY = 'settings-extensions';
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   appearance: 'dark',
@@ -69,30 +64,30 @@ function isGeneralSettings(value: unknown): value is GeneralSettings {
     typeof value.showRecentApps === 'boolean' &&
     typeof value.showDock === 'boolean' &&
     typeof value.fontSize === 'string' &&
-    (value.windowPosition === undefined ||
-      typeof value.windowPosition === 'string')
+    typeof value.windowPosition === 'string'
   );
 }
 
-function loadSettings(themePreference: string): GeneralSettings {
-  const stored = storageGet(SETTINGS_STORAGE_KEY, isGeneralSettings);
-  if (stored)
-    return {
-      ...stored,
-      appearance: themePreference,
-    };
-  return {
-    ...DEFAULT_SETTINGS,
-    appearance: themePreference,
-  };
+function parseSettings(raw: string | null): GeneralSettings | null {
+  if (!raw) return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return isGeneralSettings(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
-function loadExtensions(): ExtensionEntry[] {
-  const states = storageGet(EXTENSIONS_STORAGE_KEY, isBooleanRecord);
-  return MOCK_EXTENSIONS.map(ext => ({
-    ...ext,
-    enabled: states ? (states[ext.id] ?? ext.enabled) : ext.enabled,
-  }));
+function parseExtensionStates(
+  raw: string | null,
+): Record<string, boolean> | null {
+  if (!raw) return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return isBooleanRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 const TAB_SECTIONS: SearchDropdownSection[] = [
@@ -593,17 +588,60 @@ export function SettingsView() {
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [actionsOpen, setActionsOpen] = useState(false);
-  const [settings, setSettings] = useState<GeneralSettings>(() =>
-    loadSettings(themePreference));
-  const [extensions, setExtensions] =
-    useState<ExtensionEntry[]>(loadExtensions);
+  const [settings, setSettings] = useState<GeneralSettings>({
+    ...DEFAULT_SETTINGS,
+    appearance: themePreference,
+  });
+  const [extensions, setExtensions] = useState<ExtensionEntry[]>(() =>
+    MOCK_EXTENSIONS.map(ext => ({ ...ext })));
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      settingsDb.get(SETTINGS_DB_KEY),
+      settingsDb.get(EXTENSIONS_DB_KEY),
+    ])
+      .then(([rawSettings, rawExtensions]) => {
+        if (cancelled) return;
+        const stored = parseSettings(rawSettings);
+        if (stored) {
+          setSettings(prev => ({
+            ...prev,
+            ...stored,
+            appearance: prev.appearance,
+          }));
+        }
+        const states = parseExtensionStates(rawExtensions);
+        if (states) {
+          setExtensions(
+            MOCK_EXTENSIONS.map(ext => ({
+              ...ext,
+              enabled: states[ext.id] ?? ext.enabled,
+            })),
+          );
+        }
+      })
+      .catch(console.error);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    setSettings(prev => ({
+      ...prev,
+      appearance: themePreference,
+    }));
+  }, [themePreference]);
 
   const handleSettingsChange = useCallback(
     (newSettings: GeneralSettings) => {
       setSettings(newSettings);
-      storageSet(SETTINGS_STORAGE_KEY, newSettings);
+      settingsDb
+        .set(SETTINGS_DB_KEY, JSON.stringify(newSettings))
+        .catch(console.error);
       if (
         newSettings.appearance === 'dark' ||
         newSettings.appearance === 'light' ||
@@ -639,7 +677,9 @@ export function SettingsView() {
       for (const ext of next) {
         states[ext.id] = ext.enabled;
       }
-      storageSet(EXTENSIONS_STORAGE_KEY, states);
+      settingsDb
+        .set(EXTENSIONS_DB_KEY, JSON.stringify(states))
+        .catch(console.error);
       return next;
     });
   }, []);
@@ -688,11 +728,11 @@ export function SettingsView() {
         style: 'destructive',
         onAction: () => {
           setSettings({ ...DEFAULT_SETTINGS });
-          storageRemove(SETTINGS_STORAGE_KEY);
+          settingsDb.delete(SETTINGS_DB_KEY).catch(console.error);
           setTheme('dark');
           setPositionPreference(DEFAULT_SETTINGS.windowPosition);
           setExtensions(MOCK_EXTENSIONS.map(ext => ({ ...ext })));
-          storageRemove(EXTENSIONS_STORAGE_KEY);
+          settingsDb.delete(EXTENSIONS_DB_KEY).catch(console.error);
           showHUD({
             icon: <CopyHUDIcon />,
             title: 'Settings Reset',
