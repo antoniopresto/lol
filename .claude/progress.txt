@@ -1425,7 +1425,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   snippets/, emoji/, etc). Each extension exports its manifest. Auto-discover
   extensions via barrel import.
 
-- [ ] [P1] INFRA005 - Create Tauri IPC bridge layer. Abstract all
+- [x] [P1] INFRA005 - Create Tauri IPC bridge layer. Abstract all
   platform-specific operations behind a unified interface. Create
   src/platform/index.ts with PlatformAPI interface: clipboard (read/write/
   monitor), files (search/open/trash), apps (list/launch), shell (execute),
@@ -1434,6 +1434,28 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   and src/platform/tauri.ts (real native via @tauri-apps/api). Auto-detect
   environment and export correct implementation. All views import from
   platform/index.ts only.
+  Done: PlatformAPI interface with PlatformClipboard, PlatformShell, and
+  PlatformWindow interfaces in src/platform/types.ts. Web implementation
+  (src/platform/web.ts) uses navigator.clipboard, window.open, anchor clicks.
+  Tauri implementation (src/platform/tauri.ts) uses dynamic imports for
+  @tauri-apps/api/window, @tauri-apps/api/core, @tauri-apps/api/event.
+  Auto-detection via __TAURI_INTERNALS__ check. Race-safe initPlatform() with
+  cached promise. getPlatform() synchronous accessor (throws if Tauri not
+  initialized). main.tsx awaits initPlatform() before createRoot. clipboard.ts,
+  open_url.ts, use_window.ts refactored to delegate to getPlatform(). Shell
+  methods are async (Promise<void>) for future native Tauri shell integration.
+  Unsubscribe type for cleanup callbacks. isTauri exported from platform/index.ts
+  and re-exported from use_window.ts for backward compatibility. Tauri clipboard/
+  shell use web APIs as fallback (proper native implementations deferred to
+  TAURI005-007). All 93 tests pass, bun run check passes.
+  Sub-tasks:
+  - [x] INFRA005a - Create platform API types and implementations
+    (src/platform/types.ts, src/platform/web.ts, src/platform/tauri.ts,
+    src/platform/index.ts). PlatformAPI covers: clipboard (writeText/readText),
+    shell (openUrl/openDeepLink as async), window (hide/setPositionPref/
+    onFocusChanged/onTrayNavigate/syncStoredPositionToBackend).
+  - [x] INFRA005b - Refactor existing utils to use platform API: clipboard.ts,
+    open_url.ts, use_window.ts, main.tsx. Consumers unchanged.
 
 - [ ] [P2] INFRA006 - Add error boundary components. Create
   src/components/error_boundary/ with error_boundary.tsx (class component

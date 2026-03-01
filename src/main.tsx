@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
-import { isTauri } from './hooks/use_window';
+import { initPlatform, isTauri } from './platform';
 import './styles/global.scss';
 
 if (isTauri) {
@@ -14,8 +14,10 @@ if (!root) {
   throw new Error('Root element not found');
 }
 
-createRoot(root).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+initPlatform().then(() => {
+  createRoot(root).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+});

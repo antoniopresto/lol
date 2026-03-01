@@ -1,41 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { storageGet } from '../utils/storage';
+import { getPlatform, isTauri } from '../platform';
 
-export const isTauri = (() => {
-  try {
-    return '__TAURI_INTERNALS__' in window;
-  } catch {
-    return false;
-  }
-})();
+export { isTauri };
 
 interface UseWindowOptions {
   onShow?: () => void;
   onHide?: () => void;
   onTrayNavigate?: (target: string) => void;
-}
-
-const SETTINGS_STORAGE_KEY = 'settings-general';
-
-function isSettingsWithPosition(v: unknown): v is { windowPosition: string } {
-  return (
-    typeof v === 'object' &&
-    v !== null &&
-    typeof (v as Record<string, unknown>).windowPosition === 'string'
-  );
-}
-
-async function syncStoredPositionToBackend() {
-  if (!isTauri) return;
-  const stored = storageGet(SETTINGS_STORAGE_KEY, isSettingsWithPosition);
-  if (stored?.windowPosition) {
-    const { invoke } = await import('@tauri-apps/api/core');
-    await invoke('set_window_position_pref', {
-      position: stored.windowPosition,
-    }).catch((e: unknown) => {
-      console.warn('failed to sync position preference:', e);
-    });
-  }
 }
 
 export function useWindow(options: UseWindowOptions = {}) {
@@ -56,16 +27,12 @@ export function useWindow(options: UseWindowOptions = {}) {
     let unlistenTray: (() => void) | undefined;
     let cancelled = false;
 
+    const platformWindow = getPlatform().window;
+
     (async () => {
-      const { getCurrentWindow } = await import('@tauri-apps/api/window');
-      const { listen } = await import('@tauri-apps/api/event');
-      const appWindow = getCurrentWindow();
+      await platformWindow.syncStoredPositionToBackend();
 
-      await syncStoredPositionToBackend();
-
-      const focusUnsub = await appWindow.onFocusChanged(({
-        payload: focused,
-      }) => {
+      const focusUnsub = await platformWindow.onFocusChanged(focused => {
         if (focused) {
           onShowRef.current?.();
         } else {
@@ -73,8 +40,8 @@ export function useWindow(options: UseWindowOptions = {}) {
         }
       });
 
-      const trayUnsub = await listen<string>('tray-navigate', event => {
-        onTrayNavigateRef.current?.(event.payload);
+      const trayUnsub = await platformWindow.onTrayNavigate(target => {
+        onTrayNavigateRef.current?.(target);
       });
 
       if (cancelled) {
@@ -95,14 +62,12 @@ export function useWindow(options: UseWindowOptions = {}) {
 
   const hideWindow = useCallback(async () => {
     if (!isTauri) return;
-    const { getCurrentWindow } = await import('@tauri-apps/api/window');
-    await getCurrentWindow().hide();
+    await getPlatform().window.hide();
   }, []);
 
   const setPositionPreference = useCallback(async (position: string) => {
     if (!isTauri) return;
-    const { invoke } = await import('@tauri-apps/api/core');
-    await invoke('set_window_position_pref', { position });
+    await getPlatform().window.setPositionPreference(position);
   }, []);
 
   return {
