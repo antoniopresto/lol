@@ -60,6 +60,9 @@ export interface GridItemData {
   icon?: ReactNode;
 }
 
+export type ColorCategory = 'warm' | 'cool' | 'neutral';
+
 export interface ColorItemData extends GridItemData {
   color: string;
+  category: ColorCategory;
 }

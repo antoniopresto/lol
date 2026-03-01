@@ -607,9 +607,17 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] COMP014e - Create status icons in status_icons.tsx
   - [x] COMP014f - Create index.ts and update imports
 
-- [ ] [P2] COMP015 - Add Grid.Dropdown component (same as List.Dropdown but
+- [x] [P2] COMP015 - Add Grid.Dropdown component (same as List.Dropdown but
   for Grid view). Reuse SearchDropdown component from COMP005. Wire into Grid
   header. Demo: filter colors by category.
+  Done: Reused SearchDropdown in SearchBar when viewType === 'grid'. Added
+  ColorCategory union type ('warm' | 'cool' | 'neutral') to ColorItemData
+  (required field). Mock colors categorized: warm (red, orange, yellow, pink),
+  cool (green, teal, blue, indigo, purple), neutral (brown, gray, white).
+  colorFilterValue state with reset on navigation pop and grid re-entry.
+  handleColorFilterChange resets selectedIndex. ColorPickerView keyed on
+  colorFilterValue to prevent Grid internal activeIndex desync. colorFilterSections
+  with All Colors + Category (Warm/Cool/Neutral). All 93 tests pass.
 
 === FULL SCREENS / VIEWS ===
 

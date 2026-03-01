@@ -235,6 +235,7 @@ function DetailView({ item }: { item: ListItemData }) {
 export function App() {
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
+  const [colorFilterValue, setColorFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [quickLookOpen, setQuickLookOpen] = useState(false);
@@ -273,10 +274,42 @@ export function App() {
     [],
   );
 
+  const colorFilterSections: SearchDropdownSection[] = useMemo(
+    () => [
+      {
+        options: [
+          {
+            label: 'All Colors',
+            value: 'all',
+          },
+        ],
+      },
+      {
+        title: 'Category',
+        options: [
+          {
+            label: 'Warm',
+            value: 'warm',
+          },
+          {
+            label: 'Cool',
+            value: 'cool',
+          },
+          {
+            label: 'Neutral',
+            value: 'neutral',
+          },
+        ],
+      },
+    ],
+    [],
+  );
+
   useEffect(() => {
     if (nav.stackDepth === 0) {
       setQuery('');
       setFilterValue('all');
+      setColorFilterValue('all');
       setSelectedIndex(0);
       setActionsOpen(false);
       setQuickLookOpen(false);
@@ -298,10 +331,16 @@ export function App() {
     filterValue,
   ]);
   const allItems = useMemo(() => flattenItems(filtered), [filtered]);
-  const filteredColors = useMemo(
-    () => filterColors(MOCK_COLORS, query),
-    [query],
-  );
+  const filteredColors = useMemo(() => {
+    let colors = MOCK_COLORS;
+    if (colorFilterValue !== 'all') {
+      colors = colors.filter(c => c.category === colorFilterValue);
+    }
+    return filterColors(colors, query);
+  }, [
+    query,
+    colorFilterValue,
+  ]);
 
   const selectedItem =
     viewType === 'root' ? allItems[selectedIndex] : undefined;
@@ -314,6 +353,11 @@ export function App() {
 
   const handleFilterChange = useCallback((value: string) => {
     setFilterValue(value);
+    setSelectedIndex(0);
+  }, []);
+
+  const handleColorFilterChange = useCallback((value: string) => {
+    setColorFilterValue(value);
     setSelectedIndex(0);
   }, []);
 
@@ -363,6 +407,7 @@ export function App() {
       push('Color Picker', { type: 'grid' });
       setQuery('');
       setSelectedIndex(0);
+      setColorFilterValue('all');
       showToast({
         style: 'success',
         title: 'Opened Color Picker',
@@ -430,12 +475,7 @@ export function App() {
     if (viewType !== 'root' || !selectedItem?.detail) return;
 
     function handleSpaceBar(e: KeyboardEvent) {
-      if (
-      e.key !== ' ' ||
-      e.metaKey ||
-      e.ctrlKey ||
-      e.altKey
-      ) {
+      if (e.key !== ' ' || e.metaKey || e.ctrlKey || e.altKey) {
         return;
       }
       if (query !== '') return;
@@ -656,6 +696,7 @@ export function App() {
       case 'grid':
         return (
           <ColorPickerView
+            key={colorFilterValue}
             colors={filteredColors}
             onActiveIndexChange={handleActiveIndexChange}
             onAction={handleGridAction}
@@ -685,6 +726,12 @@ export function App() {
                   sections={searchFilterSections}
                   value={filterValue}
                   onChange={handleFilterChange}
+                />
+              ) : viewType === 'grid' ? (
+                <SearchDropdown
+                  sections={colorFilterSections}
+                  value={colorFilterValue}
+                  onChange={handleColorFilterChange}
                 />
               ) : undefined
             }
