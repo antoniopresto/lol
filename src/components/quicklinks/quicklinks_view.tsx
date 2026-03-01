@@ -16,10 +16,12 @@ import { useAlert } from '../../hooks/use_alert';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
+import { isTauri } from '../../platform';
+import type { QuicklinkRow } from '../../utils/database';
+import { quicklinkDb } from '../../utils/database';
 import { formatRelativeDate } from '../../utils/format_date';
 import { fuzzyMatch } from '../../utils/fuzzy_search';
 import { openDeepLink, openUrl } from '../../utils/open_url';
-import { isRecord, storageGet, storageSet } from '../../utils/storage';
 import { ActionPanel } from '../action_panel/action_panel';
 import {
   OpenInBrowserHUDIcon,
@@ -84,98 +86,79 @@ function QuicklinkHUDIcon() {
   );
 }
 
-const QUICKLINKS_KEY = 'quicklinks';
-
-interface StoredQuicklink {
-  id: string;
-  name: string;
-  link: string;
-  type: QuicklinkType;
-  application?: string;
-  tags?: {
-    text: string;
-    color?: string;
-  }[];
-  createdAt: string;
-}
-
-function isStoredTag(value: unknown): value is {
-  text: string;
-  color?: string;
-} {
-  if (!isRecord(value)) return false;
-  if (typeof value.text !== 'string') return false;
-  if ('color' in value && typeof value.color !== 'string') {
-    return false;
-  }
-  return true;
-}
-
-function isQuicklinkType(value: string): value is QuicklinkType {
-  return value === 'url' || value === 'file' || value === 'deeplink';
-}
-
-function isStoredQuicklinkArray(value: unknown): value is StoredQuicklink[] {
-  if (!Array.isArray(value)) return false;
-  return value.every(
-    v =>
-      isRecord(v) &&
-      typeof v.id === 'string' &&
-      typeof v.name === 'string' &&
-      typeof v.link === 'string' &&
-      typeof v.type === 'string' &&
-      typeof v.createdAt === 'string' &&
-      (!v.application || typeof v.application === 'string') &&
-      (!v.tags || (Array.isArray(v.tags) && v.tags.every(isStoredTag))),
-  );
-}
-
 const TAG_COLOR_NAMES = new Set<string>(Object.keys(TAG_COLOR_HEX));
 
 function isTagColor(value: string): value is TagColor {
   return TAG_COLOR_NAMES.has(value);
 }
 
-function serializeEntries(entries: QuicklinkEntry[]): StoredQuicklink[] {
-  return entries.map(e => ({
-    id: e.id,
-    name: e.name,
-    link: e.link,
-    type: e.type,
-    application: e.application,
-    tags: e.tags,
-    createdAt: e.createdAt.toISOString(),
-  }));
+function isQuicklinkType(value: string): value is QuicklinkType {
+  return value === 'url' || value === 'file' || value === 'deeplink';
 }
 
-function deserializeEntries(stored: StoredQuicklink[]): QuicklinkEntry[] {
-  return stored.map(s => {
-    const parsed = new Date(s.createdAt);
-    const createdAt = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
-    return {
-      id: s.id,
-      name: s.name,
-      link: s.link,
-      type: isQuicklinkType(s.type) ? s.type : 'url',
-      application: s.application,
-      icon: getQuicklinkIcon(isQuicklinkType(s.type) ? s.type : 'url'),
-      tags: s.tags?.map(t => ({
-        text: t.text,
-        color: t.color && isTagColor(t.color) ? t.color : undefined,
-      })),
-      createdAt,
-    };
-  });
+function rowToEntry(row: QuicklinkRow): QuicklinkEntry {
+  const parsed = new Date(row.created_at);
+  const createdAt = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
+  const type = isQuicklinkType(row.type) ? row.type : 'url';
+
+  let tags:
+    | {
+        text: string;
+        color?: TagColor;
+      }[]
+    | undefined;
+  if (row.tags) {
+    try {
+      const rawTags = JSON.parse(row.tags);
+      if (Array.isArray(rawTags)) {
+        const validated = rawTags
+          .filter(
+            (
+              t,
+            ): t is {
+              text: string;
+              color?: string;
+            } =>
+              typeof t === 'object' && t !== null && typeof t.text === 'string',
+          )
+          .map(t => ({
+            text: t.text,
+            color:
+              typeof t.color === 'string' && isTagColor(t.color)
+                ? t.color
+                : undefined,
+          }));
+        if (validated.length > 0) {
+          tags = validated;
+        }
+      }
+    } catch {
+      /* empty */
+    }
+  }
+
+  return {
+    id: row.id,
+    name: row.name,
+    link: row.link,
+    type,
+    application: row.application ?? undefined,
+    icon: getQuicklinkIcon(type),
+    tags,
+    createdAt,
+  };
 }
 
-function loadQuicklinks(): QuicklinkEntry[] {
-  const stored = storageGet(QUICKLINKS_KEY, isStoredQuicklinkArray);
-  if (stored) return deserializeEntries(stored);
-  return MOCK_QUICKLINKS;
-}
-
-function saveQuicklinks(entries: QuicklinkEntry[]) {
-  storageSet(QUICKLINKS_KEY, serializeEntries(entries));
+function entryToRow(entry: QuicklinkEntry): QuicklinkRow {
+  return {
+    id: entry.id,
+    name: entry.name,
+    link: entry.link,
+    type: entry.type,
+    application: entry.application ?? null,
+    tags: entry.tags ? JSON.stringify(entry.tags) : '[]',
+    created_at: entry.createdAt.toISOString(),
+  };
 }
 
 const FILTER_SECTIONS: SearchDropdownSection[] = [
@@ -456,7 +439,7 @@ function openQuicklink(link: string, type: QuicklinkType) {
 
 export function QuicklinksView() {
   const nav = useNavigation();
-  const [entries, setEntries] = useState<QuicklinkEntry[]>(loadQuicklinks);
+  const [entries, setEntries] = useState<QuicklinkEntry[]>([]);
   const [query, setQuery] = useState('');
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -473,6 +456,35 @@ export function QuicklinksView() {
   const { items: hudItems, show: showHUD } = useHUD();
   const { alertState, confirmAlert, dismiss: dismissAlert } = useAlert();
   const now = useMemo(() => new Date(), []);
+
+  useEffect(() => {
+    let aborted = false;
+
+    quicklinkDb
+      .getAll()
+      .then(rows => {
+        if (aborted) return;
+        if (rows.length > 0) {
+          setEntries(rows.map(rowToEntry));
+        } else if (!isTauri) {
+          const mock = MOCK_QUICKLINKS.map(e => ({ ...e }));
+          setEntries(mock);
+          Promise.all(mock.map(e => quicklinkDb.insert(entryToRow(e)))).catch(
+            console.error,
+          );
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load quicklinks:', err);
+        if (!isTauri && !aborted) {
+          setEntries(MOCK_QUICKLINKS.map(e => ({ ...e })));
+        }
+      });
+
+    return () => {
+      aborted = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     let items = entries;
@@ -633,11 +645,8 @@ export function QuicklinksView() {
         label: 'Delete',
         style: 'destructive',
         onAction: () => {
-          setEntries(prev => {
-            const next = prev.filter(e => e.id !== entryId);
-            saveQuicklinks(next);
-            return next;
-          });
+          setEntries(prev => prev.filter(e => e.id !== entryId));
+          quicklinkDb.delete(entryId).catch(console.error);
           showHUD({
             icon: <QuicklinkHUDIcon />,
             title: `Deleted "${entryName}"`,
@@ -659,21 +668,24 @@ export function QuicklinksView() {
   const handleFormSubmit = useCallback(
     (form: QuicklinkFormState) => {
       if (subView === 'edit' && editingEntry) {
-        setEntries(prev => {
-          const next = prev.map(e =>
-            e.id === editingEntry.id
-              ? {
-                  ...e,
-                  name: form.name.trim(),
-                  link: form.link.trim(),
-                  type: form.type,
-                  icon: resolveIcon(form.iconChoice, form.type),
-                  application: form.application.trim() || undefined,
-                }
-              : e);
-          saveQuicklinks(next);
-          return next;
-        });
+        const updatedEntry = {
+          ...editingEntry,
+          name: form.name.trim(),
+          link: form.link.trim(),
+          type: form.type,
+          icon: resolveIcon(form.iconChoice, form.type),
+          application: form.application.trim() || undefined,
+        };
+        setEntries(prev =>
+          prev.map(e => (e.id === editingEntry.id ? updatedEntry : e)));
+        quicklinkDb
+          .update(editingEntry.id, {
+            name: form.name.trim(),
+            link: form.link.trim(),
+            type: form.type,
+            application: form.application.trim() || null,
+          })
+          .catch(console.error);
         showHUD({
           icon: <QuicklinkHUDIcon />,
           title: `Updated "${form.name.trim()}"`,
@@ -688,14 +700,11 @@ export function QuicklinksView() {
           application: form.application.trim() || undefined,
           createdAt: new Date(),
         };
-        setEntries(prev => {
-          const next = [
-            newEntry,
-            ...prev,
-          ];
-          saveQuicklinks(next);
-          return next;
-        });
+        setEntries(prev => [
+          newEntry,
+          ...prev,
+        ]);
+        quicklinkDb.insert(entryToRow(newEntry)).catch(console.error);
         showHUD({
           icon: <QuicklinkHUDIcon />,
           title: `Created "${form.name.trim()}"`,
