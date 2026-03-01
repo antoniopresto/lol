@@ -306,9 +306,12 @@
     Management, Calculator, Dictionary, System Monitor, Color Picker).
     Icons should be filled style with color accents. Each command icon now has
     a colored gradient rounded-rect background with white icon symbols inside.
-  - [ ] UXDS001c - Update color tokens to better match Raycast's actual dark
+  - [x] UXDS001c - Update color tokens to better match Raycast's actual dark
     theme (refine background, surface, border, text colors; adjust opacity
-    and blur values on command palette window).
+    and blur values on command palette window). Updated: background #191919,
+    surface #232325, border #2f2f32, text-primary #e5e5ea, footer #1c1c1e.
+    Command palette: opacity 0.78, blur 64px, saturate 200%, rgba border.
+    Deeper shadows. Extracted kbd-on-accent tokens. Subtler scrollbar.
   - [ ] UXDS001d - Fix spacing and sizing: list item height, padding, icon
     sizes, search bar dimensions, action panel to match Raycast proportions.
 
