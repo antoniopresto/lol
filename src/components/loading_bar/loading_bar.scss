@@ -5,7 +5,7 @@
   top: $search-bar-height;
   left: 0;
   right: 0;
-  height: 2px;
+  height: 1px;
   overflow: hidden;
   z-index: 1;
   opacity: 0;
@@ -13,29 +13,32 @@
 
   &--visible {
     opacity: 1;
+
+    .loading-bar__indicator {
+      animation: loading-bar-slide 2s linear infinite;
+    }
   }
 }
 
 .loading-bar__indicator {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100%;
   background: linear-gradient(
     90deg,
     transparent 0%,
-    $color-accent 30%,
-    $color-accent-hover 50%,
-    $color-accent 70%,
+    $color-accent 50%,
     transparent 100%
   );
-  background-size: 200% 100%;
-  animation: loading-bar-slide 1.5s ease-in-out infinite;
 }
 
 @keyframes loading-bar-slide {
   0% {
-    background-position: 200% 0;
+    transform: translateX(-200px);
   }
   100% {
-    background-position: -200% 0;
+    transform: translateX($command-palette-width);
   }
 }

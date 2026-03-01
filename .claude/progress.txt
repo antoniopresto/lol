@@ -355,9 +355,10 @@ screens, plan next tasks and fix it.
     to rgba($color-text-primary, 0.1). Remove 1px border. Border-radius from 4px
     to 6px ($radius-md or new $radius-kbd: 6px). Size stays 20px height but Raycast
     uses 22x20px for single chars, 24x20px for symbols.
-  - [ ] UXDS002h - [P2] Fix loading bar to match Raycast. Height 2→1px. Gradient
+  - [x] UXDS002h - [P2] Fix loading bar to match Raycast. Height 2→1px. Gradient
     width constrained to 200px (not full width). Animation duration 1.5→2s. Gradient:
-    transparent→loader color→transparent (simpler 3-stop gradient).
+    transparent→loader color→transparent (simpler 3-stop gradient). Added
+    $command-palette-width token. Animation only runs when visible. Linear timing.
   - [ ] UXDS002i - [P2] Adopt alpha-based color token system. Raycast derives all
     UI colors from base text color at various opacities (10%, 40%, 60%). Replace
     flat colors ($color-text-secondary, $color-text-tertiary, $color-border) with
