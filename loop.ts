@@ -494,14 +494,17 @@ async function main(): Promise<void> {
   syslog('Starting automated task loop...');
 
   let consecutiveFailures = 0;
-  const MAX_CONSECUTIVE_FAILURES = 3;
+  let iteration = 0;
+  const BACKOFF_BASE_MS = 60_000;
+  const BACKOFF_MAX_MS = 5 * 60 * 60_000;
 
-  for (let iteration = 1; iteration <= CONFIG.maxIterations; iteration++) {
-    logBuffer.startNewFile(logFilePath(`iter-${iteration}`));
+  while (iteration < CONFIG.maxIterations) {
+    const attemptNum = iteration + 1;
+    logBuffer.startNewFile(logFilePath(`iter-${attemptNum}`));
 
     println();
     println('==========================================', 'green');
-    syslog(`Iteration #${iteration} / ${CONFIG.maxIterations}`, 'green');
+    syslog(`Iteration #${attemptNum} / ${CONFIG.maxIterations}`, 'green');
     syslog(`Log: ${logBuffer.currentPath()}`, 'green');
     println('==========================================', 'green');
     println();
@@ -516,23 +519,30 @@ async function main(): Promise<void> {
         'Iteration timed out — progress may persist in progress.txt',
         'yellow',
       );
+      consecutiveFailures = 0;
     } else {
       syslog(`Claude Code exited with code ${exitCode}`, 'yellow');
       consecutiveFailures++;
+
+      const backoffMs = Math.min(
+        BACKOFF_BASE_MS * Math.pow(2, consecutiveFailures - 1),
+        BACKOFF_MAX_MS,
+      );
+      const backoffMin = (backoffMs / 60_000).toFixed(1);
+
+      println();
+      println('==========================================', 'yellow');
+      syslog(
+        `${consecutiveFailures} consecutive failure(s) — retrying in ${backoffMin}min`,
+        'yellow',
+      );
+      println('==========================================', 'yellow');
+
+      await Bun.sleep(backoffMs);
+      continue;
     }
 
-    if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-      println();
-      println('==========================================', 'red');
-      syslog(
-        `${MAX_CONSECUTIVE_FAILURES} consecutive failures — aborting loop`,
-        'red',
-      );
-      println('==========================================', 'red');
-      logBuffer.renameFile(logFilePath('fatal-consecutive-failures'));
-      logBuffer.dispose();
-      process.exit(1);
-    }
+    iteration++;
 
     const status = parseRalphStatus(output);
     const taskSlug = status

@@ -295,3 +295,14 @@
      vitest + @testing-library/react. Minimum 80% coverage for tested
      components.
 
+- [] UXDS001 - The design is very different from Raycast, colors, spacing,
+icons, etc... fix it.
+
+- [ ] UXDS002 - The design is very poor, Raycast has a lot more resources and
+screens, plan next tasks and fix it.
+
+- [ ] UXDS003 - Map all real Raycast screens and components, plan every single
+one, add tasks.
+
+- [ ] T0001 - Plan and add minimum 50 tasks to implement real Tauri Raycast
+clone app.
