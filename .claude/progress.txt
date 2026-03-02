@@ -200,16 +200,6 @@ internal package public available in npm. See docs and examples at /Users/anoton
 
 --------------------------------------------------------------------------------
 
-- [x] [P2] INFRA008 - Add proper build configuration for production. Vite
-  production build: minification (terser), tree-shaking, chunk splitting
-  (vendor chunk for React, component chunks per route/view). Configure
-  asset hashing for cache busting. Add bundle size analysis (rollup-plugin-
-  visualizer). Set up path aliases (@/ for src/). Add environment variable
-  support (.env, .env.production). Target: initial bundle < 200KB gzipped.
-  Update vite.config.ts.
-
---------------------------------------------------------------------------------
-
 - [ ] [P3] INFRA010 - Add telemetry/analytics abstraction. Create
   src/utils/analytics.ts with track(event, properties?) function. Events:
   command_opened, search_query, action_triggered, extension_enabled/disabled,
