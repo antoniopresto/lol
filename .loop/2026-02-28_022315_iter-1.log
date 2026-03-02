@@ -1,0 +1,24 @@
+[2026-02-28 02:23:15] 
+[2026-02-28 02:23:15] ==========================================
+[2026-02-28 02:23:15] ‣ Iteration #1 / 100
+[2026-02-28 02:23:15] ‣ Log: ./.loop/2026-02-28_022315_iter-1.log
+[2026-02-28 02:23:15] ==========================================
+[2026-02-28 02:23:15] 
+[2026-02-28 02:23:15] ‣ Executing Claude Code...
+
+
+I'll start by understanding the WORKFLOW and then reading progress.txt.
+
+**My understanding of each WORKFLOW statement:**
+
+0. **Project Facts**: This is a Raycast UI clone using Bun, TypeScript strict, React 19, Vite 6, Sass. No comments, no over-engineering. Pixel-perfect Raycast design replication.
+1. **Read progress.txt**: Find the most important pending task. P0 = highest priority, P1000+ = low priority (do last, revert if taking too long).
+2. **No pending tasks**: Signal exit=true and stop.
+3. **Execute task**: Break if large, execute, run `bun run check`, launch review agent, iterate on feedback, update progress.txt, commit, output status, stop.
+[2026-02-28 02:23:25] 
+1→- [ ] L00235.1 Review tasks, plan and improve and expand tasks needed in order
+     2→to delivery the desired result professionally.
+     3→ [...]
+
+[2026-02-28 02:23:27] 
+[2026-02-28 02:23:27] ‣ Interrupted by SIGINT. Cleaning up...
