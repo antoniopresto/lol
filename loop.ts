@@ -239,8 +239,6 @@ WORKFLOW:
       must be completable in a single iteration (small, atomic, committable change).
    - Execute task
    - Run 'bun run check' and fix found issues.
-   - Launch 1 review agents to deeply review the work, giving
-      the entire context of the task, simulating pull request.
    - Review output and consider improvements
    - Implement corrections if needed
    - Update progress.txt marking task as completed
