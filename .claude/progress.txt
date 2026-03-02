@@ -295,6 +295,8 @@
      vitest + @testing-library/react. Minimum 80% coverage for tested
      components.
 
+--------------------------------------------------------------------------------
+
 - [x] UXDS001 - The design is very different from Raycast, colors,
   spacing, icons, etc... fix it.
   Sub-tasks:
@@ -317,6 +319,8 @@
     12px bottom radius, command palette radius 16→12px, list padding 0 8px,
     section headers 12px font, kbd 20x20 with 12px font, search icon 20x20.
     Added $font-base, $list-item-height, $action-panel-height tokens.
+
+--------------------------------------------------------------------------------
 
 - [x] UXDS002 - The design is very poor, Raycast has a lot more resources and
 screens, plan next tasks and fix it.
@@ -383,6 +387,8 @@ one, add tasks.
   design artifacts. Compared with existing implementation. Identified ~40 missing
   components/screens. Added tasks below organized by priority.
 
+--------------------------------------------------------------------------------
+
 - [x] T0001 - Plan and add minimum 50 tasks to implement real Tauri Raycast
 clone app.
   Done: Researched full Raycast feature set (official API docs, user reviews,
@@ -392,12 +398,11 @@ clone app.
   Infrastructure (9), Testing (8). Total pending tasks: 66 (11 existing + 55
   new). Tasks prioritized P0-P3 based on Raycast core feature importance and
   dependencies.
-
---------------------------------------------------------------------------------
 RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
---------------------------------------------------------------------------------
 
 === CORE MISSING COMPONENTS ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P0] COMP001 - Build Alert/Confirm dialog component. Blocking modal overlay
   for destructive or important confirmations. Fields: title, message, icon,
@@ -413,6 +418,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   $backdrop-blur, $backdrop-overlay added to _tokens.scss). Unique IDs via
   useId(). Stable callback refs to avoid stale closures. Delete action in
   dropdown triggers destructive confirm dialog before showing toast.
+
+--------------------------------------------------------------------------------
 
 - [x] [P0] COMP002 - Build proper navigation stack system (push/pop). Replace
   current breadcrumb-only drill-in with a real stack-based navigation. Create
@@ -438,6 +445,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] COMP002d - Update SearchBar to consume breadcrumbs from navigation
     context (or keep prop-based) and wire Escape to pop().
 
+--------------------------------------------------------------------------------
+
 - [x] [P0] COMP003 - Add ActionPanel.Section support. Group actions in the
   dropdown with visual section separators and optional section titles. Update
   actions_dropdown.tsx to accept sections (array of {title?, actions[]}). Render
@@ -449,6 +458,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   Precomputed sectionOffsets. Index-based keys. App.tsx demo with 3 sections.
   26 dropdown tests (5 new), all 74 tests pass.
 
+--------------------------------------------------------------------------------
+
 - [x] [P0] COMP004 - Add ActionPanel.Submenu support. Nested submenu that
   replaces the dropdown content with child actions when hovered/selected. Show
   chevron-right indicator on parent item. Escape goes back to parent menu.
@@ -459,6 +470,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   animations. ArrowRight/Enter to enter, ArrowLeft/Escape to go back (restores
   parent position). App.tsx demo with "Copy As..." submenu (3 child actions).
   45 dropdown tests (5 new for submenu), all 93 tests pass.
+
+--------------------------------------------------------------------------------
 
 - [x] [P0] COMP005 - Build List.Dropdown component (search bar filter). A small
   dropdown selector inside the SearchBar (right side) for secondary filtering
@@ -476,6 +489,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   SearchBar accepts optional dropdown ReactNode prop. App.tsx demo with
   All/Commands/Applications filter. 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] COMP006 - Build HUD notification component. Compact floating pill
   shown at bottom-center of screen after an action completes (like "Copied to
   clipboard"). Auto-dismisses after 1.5s. Simpler than toast: just icon + text.
@@ -489,6 +504,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   $z-hud: 120 token. Copy Name, Copy As... submenu, and grid color copy actions
   all use HUD instead of toast. CheckIcon and ClipboardHUDIcon inline SVGs.
   max-width: 280px with text-overflow ellipsis. All 93 tests pass.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] COMP007 - Build Form.PasswordField component. Masked text input with
   optional reveal toggle button (eye icon). Same styling as FormTextField but
@@ -505,6 +522,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   tokenized. autoComplete="current-password" for proper browser/password manager
   behavior. Exported from form/index.ts.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] COMP008 - Build Form.TagPicker component. Multi-select input where
   user picks tags from a dropdown. Selected tags appear as pills inside the
   input. Type to filter available tags. Remove tag by clicking X or backspace.
@@ -520,6 +539,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   type. Demo: Tags field in Create Snippet form with 8 language options.
   All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] COMP009 - Build Form.FilePicker component (simulated for web). Shows
   a file input styled like Raycast's file picker. Single or multiple file
   selection. Shows selected file name(s) as pills. Create
@@ -533,6 +554,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   FilePickerFile type and FormFilePicker exported from form/index.ts.
   All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] COMP010 - Build Form.Separator component. Visual horizontal divider
   line within forms. Thin line (1px, $border-100 color) with optional margin.
   Create in src/components/form/form_separator.tsx. Simple component.
@@ -540,6 +563,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   separator role. SCSS: reset browser defaults (border:none, margin:0, padding:0,
   height:0), border-top 1px solid $border-100. No props (consistent with other
   form components). Exported from form/index.ts. All checks pass.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] COMP011 - Add date accessory type to ListItem. List item accessories
   should support {date: Date} which renders as relative time ("2 hours ago",
@@ -558,6 +583,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   (Clipboard History: 30min, Snippets: 3hr, Window Management: 2 days).
   All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] COMP012 - Add tooltip support to accessories and list items. On hover
   over an accessory or list item, show a small tooltip with additional info.
   Create src/components/tooltip/ with tooltip.tsx and tooltip.scss. Position
@@ -572,6 +599,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   tooltip. Explicit tooltip field overrides via nullish coalescing. Added
   tooltip?: string field to ListItemAccessoryData type. Demo tooltip on
   Clipboard History "Raycast" accessory. All 93 tests pass.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] COMP013 - Build Quick Look preview overlay. Full-screen-ish preview
   overlay triggered by spacebar or Action.ToggleQuickLook. Shows larger preview
@@ -588,6 +617,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   z-index ($z-alert: 200). exitingRef guard prevents double-close on rapid key
   presses. Quick Look stays open during list navigation (content updates with
   selection). All 93 tests pass, bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] COMP014 - Expand icon system to 50+ icons. Add missing Raycast Icon
   enum equivalents: arrows (up/down/left/right, chevrons), UI controls (check,
@@ -614,6 +645,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] COMP014e - Create status icons in status_icons.tsx
   - [x] COMP014f - Create index.ts and update imports
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] COMP015 - Add Grid.Dropdown component (same as List.Dropdown but
   for Grid view). Reuse SearchDropdown component from COMP005. Wire into Grid
   header. Demo: filter colors by category.
@@ -627,6 +660,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   with All Colors + Category (Warm/Cool/Neutral). All 93 tests pass.
 
 === FULL SCREENS / VIEWS ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] SCRN001 - Build Clipboard History screen. Dedicated List view showing
   mock clipboard entries (text, links, images, colors). Searchable. Each item
@@ -653,6 +688,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] SCRN001c - Wire into App.tsx: add 'clipboard' to NavViewData, push from
     "Clipboard History" command in root search, handle actions dropdown for
     clipboard-specific actions.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] SCRN002 - Build Snippet Manager screen. List view of saved snippets.
   Each item shows: name, keyword (as tag accessory), preview of content.
@@ -686,6 +723,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     "Search Snippets" command in root search, handle isFullView for snippets,
     removed old CreateSnippetView from App.tsx (now internal to snippet manager).
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] SCRN003 - Build Emoji Picker screen. Grid view (6 columns) of emoji
   characters, organized by category sections (Smileys, People, Animals, Food,
   Activities, Travel, Objects, Symbols, Flags). Search filters across all.
@@ -710,6 +749,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] SCRN003c - Wire into App.tsx: add 'emoji' to NavViewData, push from
     "Search Emoji" command in root search.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] SCRN004 - Build Calculator inline result. When user types a math
   expression in root search (e.g. "2+2", "sqrt(144)", "15% of 200"), show
   result as a special ListItem at the top with calculator icon and "= result"
@@ -724,6 +765,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   ListItem in "Result" section with CalculatorIcon and "Copy" accessory. Enter
   copies result via HUD. ActionPanel label changes to "Copy Result" when
   calculator item is selected. All 93 tests pass, bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] SCRN005 - Build File Search screen. List view showing mock file
   system entries. Each item: file icon (different per type), filename, path as
@@ -740,6 +783,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   ⌘⇧F show in finder, ⌘⌫ move to trash with confirm dialog.
   formatFileSize utility for human-readable file sizes. Folder icons use solid
   fills (no gradient ID collision). All 93 tests pass, bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] SCRN006 - Build Settings/Preferences screen. Pushed view with
   tabbed/sectioned layout. Tabs: General (appearance toggle, hotkey display),
@@ -758,16 +803,22 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   $toggle-padding, $color-toggle-knob, $settings-ext-icon-size added to _tokens.scss).
   MOCK_EXTENSIONS shallow-copied on init and reset. All 93 tests pass.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] SCRN007 - Build Extension Store screen. List view of mock extensions
   with: extension icon, name, developer, download count accessory. Detail panel
   shows description, screenshots placeholder, commands list, install button.
   Search and category filter via List.Dropdown. Push from "Store" command.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] SCRN008 - Build AI Chat interface. Separate view (not in main command
   palette or styled differently). Chat bubbles: user messages (right-aligned),
   AI responses (left-aligned, with markdown rendering). Input bar at bottom
   with send button. Model selector dropdown. Mock streaming response effect
   (typewriter). Push from "AI Chat" command.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] SCRN009 - Build Notes editor screen. Markdown editor with toolbar
   (bold, italic, strikethrough, code, heading, list, checklist). Split or
@@ -776,6 +827,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   .scss files. Push from "Notes" command.
 
 === VISUAL POLISH & THEMES ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] THEME001 - Add light theme support. Convert Sass color
   variables to CSS custom properties. Define dark (default) and light themes.
@@ -809,6 +862,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     theme-independent (self-contained contrast pairs). Brand icon colors in
     SVG components are intentionally fixed. No changes needed.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] THEME002 - Add compact mode. When no query is entered, show only
   the search bar (hide list and action panel). List appears with fade-in when
   user starts typing. Revert to compact when query is cleared. Toggle via
@@ -824,6 +879,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   collapsible wrapper when compact to prevent focus/screen-reader access to
   hidden content. All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] THEME003 - Add proper semantic color system. Create Color enum/object
   matching Raycast's: Blue, Green, Magenta, Orange, Purple, Red, Yellow,
   PrimaryText, SecondaryText. Each color auto-adapts to current theme. Use
@@ -831,6 +888,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   colors. Create src/constants/colors.ts.
 
 === KEYBOARD & INTERACTION ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] KBD001 - Implement global keyboard shortcut system. Create
   src/hooks/use_keyboard_shortcuts.ts that manages all global shortcuts in one
@@ -847,6 +906,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   ⌘N (create snippet), and ⌘Enter (form submit) with useKeyboardShortcut calls.
   All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] KBD002 - Add favorite items support. ⌘⇧F toggles favorite on
   selected item. Favorited items appear in a "Favorites" section at top of
   root search. Persist favorites in state (localStorage for web demo). Show
@@ -860,6 +921,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   shown only outside Favorites section (avoids redundancy with section title).
   All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] KBD003 - Add ⌃N/⌃P alternative navigation. In addition to arrow
   keys, support Ctrl+N (down) and Ctrl+P (up) for Emacs-style navigation in
   lists. Update list keyboard handler.
@@ -871,6 +934,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   All 93 tests pass, bun run check passes.
 
 === INFRASTRUCTURE ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] INFRA001 - Create proper extension/command registry system. Instead
   of hardcoded mock data, create a registry where "extensions" register
@@ -897,6 +962,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
     handleDrillIn switch with registry lookup, simplify NavViewData type,
     replace MOCK_SECTIONS import with registry.getSections(), derive isFullView
     from registry.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] INFRA002 - Add localStorage persistence layer. Save and restore:
   recent commands, favorites, clipboard history, snippets, settings. Create
@@ -926,6 +993,8 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
   - [x] INFRA002e - Add persistence for snippet entries (CRUD operations) in
     SnippetManagerView.
 
+--------------------------------------------------------------------------------
+
 - [x] [P3] INFRA003 - Refactor App.tsx into smaller modules. Current App.tsx is
   1064 lines. Extract: RootSearchView, NavigationProvider, KeyboardProvider,
   command handlers. Each view should be its own component file. App.tsx should
@@ -954,25 +1023,37 @@ RAYCAST CLONE — REMAINING UI/UX TASKS (from UXDS003 mapping)
 
 === TESTS ===
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST001 - Add visual regression tests with Playwright for all
   new components (Alert, HUD, navigation transitions, List.Dropdown,
   Form.TagPicker, Form.PasswordField). Each test captures screenshot and
   compares. Create tests/ directory with playwright config.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST002 - Add interaction tests for navigation stack: push view,
   pop with Escape, popToRoot with ⌘Escape, breadcrumb updates. Test with
   Playwright.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P1000] TEST003 - Add interaction tests for ActionPanel.Section and
   ActionPanel.Submenu: open dropdown, navigate sections, enter submenu,
   escape back to parent. Test with Playwright.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST004 - Add unit tests for new hooks: useAlert, useHUD,
   useNavigation, useKeyboardShortcuts. Test with vitest.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P1000] TEST005 - Add visual tests for Clipboard History, Snippet
   Manager, Emoji Picker, Calculator, File Search screens. Capture screenshots
   at various states (empty, loaded, searching, selecting).
+
+--------------------------------------------------------------------------------
 
 - [ ] [P1000] TEST006 - Add visual tests for light theme. All existing
   component screenshots re-captured in light mode. Compare with dark mode
@@ -983,6 +1064,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 ================================================================================
 
 === TAURI DESKTOP INTEGRATION ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P0] TAURI001 - Initialize Tauri v2 project structure. Run `bun add -D
   @tauri-apps/cli@next` and `bunx tauri init`. Configure src-tauri/ with
@@ -1001,6 +1084,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Pinned time@0.3.36 for Rust 1.87.0 compatibility. Added tauri:dev and tauri:build
   scripts to package.json. cargo check passes, all 93 tests pass, bun run check
   passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P0] TAURI002 - Implement global hotkey to toggle window visibility.
   Use @tauri-apps/plugin-global-shortcut to register Option+Space (macOS)
@@ -1023,6 +1108,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   onHide clears query/selectedIndex/actionsOpen/quickLookOpen/filterValue
   and calls popToRoot. All 93 tests pass, cargo check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P0] TAURI003 - Add system tray with menu. Use @tauri-apps/api/tray
   to create system tray icon (Raycast logo). Tray menu items: Show Raycast
   (trigger global hotkey), Clipboard History, Snippets, Settings, separator,
@@ -1042,6 +1129,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   pushes via TRAY_COMMAND_MAP. Cargo.toml: tray-icon + image-png features.
   Capabilities: core:event:allow-listen added. All 93 tests pass, cargo check
   passes, bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P0] TAURI004 - Configure window behavior to match Raycast.
   Hide on blur (window loses focus → hide, like Spotlight). Disable window
@@ -1074,6 +1163,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     in use_window.ts (invokes Tauri command), Window Position dropdown in
     settings_view.tsx, stored pref synced to Rust backend on startup.
     Files: use_window.ts, settings_view.tsx.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] TAURI005 - Add native clipboard access via Tauri plugin. Use
   @tauri-apps/plugin-clipboard-manager for real clipboard read/write.
@@ -1114,6 +1205,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     In Tauri mode: real clipboard data from monitoring. In web mode: mock data
     as seed. Remove direct MOCK_CLIPBOARD_ENTRIES dependency from view.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] TAURI006 - Add native file system access. Use @tauri-apps/api/fs
   and @tauri-apps/plugin-fs for real file operations. Replace mock file
   search with real directory scanning. Create Rust command for fast
@@ -1151,6 +1244,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     platform operations. Add 250ms debounce, loading state, ErrorHUDIcon for
     failure states.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] TAURI007 - Add native app launching. Use @tauri-apps/api/shell
   to launch applications. On macOS: scan /Applications and ~/Applications
   for .app bundles, extract app name and icon. On Windows: scan Start Menu
@@ -1180,6 +1275,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
       PlatformApps interface with discoverApplications/launchApplication.
     - [x] TAURI007c: Root search integration - useApplications hook with loading state,
       AppIcon with onError fallback, fuzzy search, cache refresh on focus, launch+hide.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] TAURI008 - Add SQLite persistence layer via Tauri.
   Broken into sub-tasks:
@@ -1282,6 +1379,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     helper in database.ts. Exported rowToEntry from use_clipboard_history.ts.
     All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] TAURI009 - Configure auto-launch on login. Use
   @tauri-apps/plugin-autostart to register app for login auto-start.
   Add toggle in Settings > General: "Launch at Login" checkbox. Default:
@@ -1303,6 +1402,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   persisted in settings DB to avoid sync issues. All 93 tests pass,
   cargo check passes, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] TAURI010 - Add auto-update system. Use @tauri-apps/plugin-updater
   for in-app updates. Configure update endpoint URL in tauri.conf.json.
   Check for updates on launch (silent) and via Settings > Advanced. Show
@@ -1311,6 +1412,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Sign updates with Tauri's built-in code signing.
 
 === MISSING RAYCAST SCREENS ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] SCRN010 - Build Quicklinks screen. List view of saved quicklinks
   (URLs, file paths, deep links). Each item: icon (auto-detected from URL
@@ -1321,6 +1424,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   search?q={query}" — when opened, prompts for query input). Push from
   "Search Quicklinks" command. Create src/data/quicklinks_data.ts with 10
   mock quicklinks and src/components/quicklinks/quicklinks_view.tsx.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] SCRN011 - Build Window Management screen. Grid or list of window
   layout presets: Left Half, Right Half, Top Half, Bottom Half, Center,
@@ -1345,6 +1450,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Web mode: visual demo (HUD feedback). Tauri integration deferred to
   TAURI platform tasks. All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] SCRN012 - Build Floating Notes screen. Markdown-enabled note
   editor that floats above other apps. In-memory list of notes with titles.
   Notes list view with search. Click note to open editor. Editor: simple
@@ -1365,6 +1472,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   extensions/index.ts. Database persistence via noteDb (CRUD). Consistent
   renderNow for date formatting. TrashIcon from icon system for delete alert.
   All 93 tests pass, bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] SCRN013 - Build Translator screen. Two-panel layout: source text
   (left/top) and translated text (right/bottom). Language selector dropdowns
@@ -1389,6 +1498,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   tokenized (local vars for panel-header-height, textarea-min-height,
   swap-button-size, line-height-body, disabled-opacity). All 93 tests pass,
   bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] SCRN014 - Build Reminders screen. List of reminders with
   title, due date/time, and repeat options. Create reminder form: title,
@@ -1419,6 +1530,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   - Fixed INITIAL_FORM.dueDate stale across midnight (function instead of const)
   - Added reminders table + indexes to Tauri SQLite migrations (version 3)
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] SCRN015 - Build Script Commands screen. List view of user-defined
   script commands. Each item: name, description, language icon (bash, python,
   node, ruby), last run date. Actions: Run (⏎) shows output in detail panel,
@@ -1428,6 +1541,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   src/components/script_commands/script_commands_view.tsx with mock scripts.
 
 === MISSING UI COMPONENTS ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] COMP016 - Build Action.CopyToClipboard declarative action. Create
   reusable action component that copies content to clipboard and shows HUD
@@ -1457,6 +1572,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     (EmojiPicker, ClipboardHistory, SnippetManager, FileSearch, ColorPicker,
     App.tsx) with createCopyAction. Remove duplicated HUD icons.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] COMP017 - Build Action.OpenInBrowser declarative action. Opens
   URL in default browser. Accepts: url, title (default "Open in Browser"),
   shortcut. In web: window.open(url). In Tauri: @tauri-apps/api/shell open.
@@ -1474,6 +1591,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   ⌘O keyboard shortcut via useKeyboardShortcut. FileSearchView updated:
   replaced local OpenHUDIcon with shared OpenInBrowserHUDIcon. All 93 tests
   pass, bun run check passes.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] COMP018 - Build List.Item.Detail inline detail panel. When a
   ListItem has a detail prop, the list splits into list (left, ~40%) and
@@ -1495,6 +1614,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   detail.scss. $list-detail-ratio token added to _tokens.scss. All 93 tests
   pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] COMP019 - Build Action.PickDate component. Date picker that
   appears inline in action panel or as a pushed form field. Supports
   date-only and date+time modes. Min/max date constraints. Calendar grid
@@ -1502,12 +1623,16 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Keyboard navigation: arrows for days, PageUp/Down for months. Create
   src/components/date_picker/ with date_picker.tsx and date_picker.scss.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] COMP020 - Add List pagination support (infinite scroll). Add
   onLoadMore callback and hasMore boolean props to List. When user scrolls
   near bottom (IntersectionObserver on sentinel element), trigger
   onLoadMore. Show loading skeleton items (3 placeholder rows with pulse
   animation) while loading. Update List component. Demo: Clipboard History
   loads 20 items at a time.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] COMP021 - Build proper markdown renderer for Detail component.
   Already implemented: Detail component (detail.tsx) uses marked + dompurify
@@ -1519,6 +1644,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   images (max-width, rounded). No separate wrapper needed — single usage
   in Detail component makes a utility file unnecessary.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] COMP022 - Build Form.LinkAccessory component. Small accessory
   displayed in the right side of the SearchBar/navigation bar when a Form
   is active. Shows a link with icon + label. Clickable, opens URL or
@@ -1526,12 +1653,16 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   Update SearchBar to accept optional rightAccessory prop. Demo: "View Docs"
   link in Create Snippet form.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] COMP023 - Build color swatch accessory for ListItem. When a
   ListItem accessory has a color hex value, render a small color circle
   (12x12px, rounded) next to the text. Used in clipboard history for copied
   colors and in color picker. Update ListItem rendering to detect color
   accessory type and render swatch. Add color?: string field to
   ListItemAccessoryData.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] COMP024 - Build empty search fallback actions. When root search
   has no matching results, show fallback items: "Search Google for '{query}'",
@@ -1542,6 +1673,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 === VISUAL POLISH ===
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] VIS001 - Add virtual scrolling for large lists. Current List
   renders all items in DOM which becomes slow with 100+ items. Implement
   virtual scroll: only render visible items + buffer (5 items above/below
@@ -1551,6 +1684,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   scroll.ts. Apply to List component. Test with 1000+ items in Clipboard
   History.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] VIS002 - Add custom window title bar. Since Tauri uses frameless
   window, build a custom title bar. macOS style: traffic light buttons
   (close/minimize/maximize) on left side, centered title text. Make it
@@ -1558,12 +1693,16 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   has its own). Create src/components/title_bar/ with title_bar.tsx and
   title_bar.scss. Position above CommandPalette. 28px height matching macOS.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] VIS003 - Add smooth scroll momentum and snap-to-item. Lists
   should have native-feeling scroll momentum (CSS scroll-behavior: smooth).
   When scroll stops, snap to nearest item boundary (CSS scroll-snap-type:
   y proximity on list container, scroll-snap-align: start on items). Ensure
   keyboard navigation scrollIntoView uses smooth behavior. Test on macOS
   trackpad and mouse wheel.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P2] VIS004 - Add focus ring animation matching Raycast. When
   navigating list items with keyboard, show a subtle animated focus ring
@@ -1573,17 +1712,23 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   10% opacity). 80ms transition duration. Only show on keyboard navigation,
   not mouse hover.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] VIS005 - Add window open/close animations. When CommandPalette
   appears: macOS-style spring animation (scale from 0.95 to 1.0, opacity
   0 to 1, with slight overshoot). When closing: scale to 0.97, opacity to 0,
   faster (150ms). Use CSS @keyframes with cubic-bezier easing that mimics
   spring physics. In Tauri mode, coordinate with window show/hide timing.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] VIS006 - Add Grid view hover preview tooltip. When hovering a
   GridItem for 800ms, show an enlarged preview tooltip above the item
   (larger icon/image, full title, metadata). Positioned above the item,
   centered. Fade in/out. Dismiss on mouse leave. Create
   src/components/grid/grid_preview.tsx and grid_preview.scss.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] VIS007 - Add subtle parallax effect to command palette background.
   Very subtle background gradient shift based on mouse position (±2px max
@@ -1592,6 +1737,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   affects background layer, not content. Disable when prefers-reduced-motion.
 
 === SEARCH & INTERACTION ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] SRCH001 - Implement fuzzy search matching. Replace current
   substring search with fuzzy matching (Fuse.js-style scoring). Match
@@ -1626,6 +1773,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     SnippetManagerView, EmojiPickerView, FileSearchView) to use fuzzy search
     for filtering and pass query for highlighting.
 
+--------------------------------------------------------------------------------
+
 - [x] [P1] SRCH002 - Add recent commands tracking. Track last 10 opened
   commands with timestamps. Show "Recent Commands" section in root search
   when query is empty (above other sections). Persist via localStorage/
@@ -1644,6 +1793,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   clearRecent exported for future UI integration. All 93 tests pass, bun
   run check passes.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] SRCH003 - Add search bar placeholder cycling. When search bar
   is empty, cycle through helpful placeholder texts every 4 seconds:
   "Type a command...", "Search applications...", "Calculate something...",
@@ -1657,6 +1808,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   ::placeholder when cycling is active. CSS opacity transition for smooth fade.
   CYCLING_PLACEHOLDERS constant in root_search_view.tsx. Timer cleanup on
   unmount handles mid-transition teardown. All 93 tests pass.
+
+--------------------------------------------------------------------------------
 
 - [x] [P2] SRCH004 - Add ⌘L to copy current item URL/value. Universal
   shortcut that copies the most relevant value of the selected item (URL
@@ -1680,6 +1833,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     WindowManagement (name), FloatingNotes (content), Reminders (title),
     Translator (translation), ColorPicker (hex).
 
+--------------------------------------------------------------------------------
+
 - [ ] [P0] SRCH005:
 (P0 because last session crashed. Actually in progress, continue)
 - Add search debouncing and loading state. Debounce  search input by 150ms to
@@ -1697,6 +1852,8 @@ hook. Apply to all search bars. Cancel pending debounce on unmount.
   focusing other elements during search.
 
 === INFRASTRUCTURE ===
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] INFRA004 - Build extension architecture. Formalize each screen
   as an "extension" with a manifest. Create ExtensionManifest type in
@@ -1728,6 +1885,8 @@ hook. Apply to all search bars. Cancel pending debounce on unmount.
     emoji, window-management, color-picker, settings, and applications bundle.
   - [x] INFRA004c - Replace commands.ts with barrel import from extensions/,
     create extensions/index.ts for auto-discovery. Clean up dead code.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] INFRA005 - Create Tauri IPC bridge layer. Abstract all
   platform-specific operations behind a unified interface. Create
@@ -1761,6 +1920,8 @@ hook. Apply to all search bars. Cancel pending debounce on unmount.
   - [x] INFRA005b - Refactor existing utils to use platform API: clipboard.ts,
     open_url.ts, use_window.ts, main.tsx. Consumers unchanged.
 
+--------------------------------------------------------------------------------
+
 - [x] [P2] INFRA006 - Add error boundary components. Create
   src/components/error_boundary/ with error_boundary.tsx (class component
   wrapping React.ErrorBoundary). Show friendly error UI: icon, "Something
@@ -1784,9 +1945,13 @@ hook. Apply to all search bars. Cancel pending debounce on unmount.
   change, onReset={nav.pop} for explicit retry. Root search view not wrapped
   (unrecoverable). All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P2] INFRA007 - Add state management with @belt/tools state-machine.
 Replace prop-drilling and scattered useState across App - belt/tools is an
 internal package public available in npm. See docs and examples at /Users/anotonio.silva/antonio/belt/packages/tools
+
+--------------------------------------------------------------------------------
 
 - [ ] [P2] INFRA008 - Add proper build configuration for production. Vite
   production build: minification (terser), tree-shaking, chunk splitting
@@ -1795,6 +1960,8 @@ internal package public available in npm. See docs and examples at /Users/anoton
   visualizer). Set up path aliases (@/ for src/). Add environment variable
   support (.env, .env.production). Target: initial bundle < 200KB gzipped.
   Update vite.config.ts.
+
+--------------------------------------------------------------------------------
 
 - [x] [P1] INFRA009 - Add CI/CD pipeline. Create .github/workflows/ci.yml:
   lint (bun run check), test (bun run test), build (bun run build), optional
@@ -1815,12 +1982,16 @@ internal package public available in npm. See docs and examples at /Users/anoton
   Linux/Windows builds deferred until cross-platform support is implemented.
   All 93 tests pass, bun run check passes.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P3] INFRA010 - Add telemetry/analytics abstraction. Create
   src/utils/analytics.ts with track(event, properties?) function. Events:
   command_opened, search_query, action_triggered, extension_enabled/disabled,
   theme_changed. In web demo: log to console. In production: send to
   analytics endpoint. Respect user opt-out preference in settings. Add
   "Share Usage Data" toggle in Settings > Advanced. No PII in events.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] INFRA011 - Add i18n internationalization support. Create
   src/i18n/ with translation files (en.json, pt.json, es.json, ja.json).
@@ -1829,6 +2000,8 @@ internal package public available in npm. See docs and examples at /Users/anoton
   returns t(key) function. Language selector in Settings > General. Default
   to system locale. Persist preference. Start with English strings
   extracted from all components.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] INFRA012 - Add performance monitoring utilities. Create
   src/utils/perf.ts with: measureRender(componentName) HOC that logs
@@ -1840,16 +2013,22 @@ internal package public available in npm. See docs and examples at /Users/anoton
 
 === TESTING (NEW) ===
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST007 - Add unit tests for calculator.ts. Test all math
   operations: basic arithmetic, operator precedence, parentheses, functions
   (sqrt, sin, cos, etc), constants (pi, e), percentages, "X% of Y" syntax,
   edge cases (division by zero, NaN, Infinity), invalid expressions, very
   large/small numbers. Minimum 30 test cases. Use vitest.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST008 - Add unit tests for fuzzy_search.ts (after SRCH001).
   Test scoring: exact match > prefix > word boundary > substring > fuzzy.
   Test highlighting of matched characters. Test edge cases: empty query,
   empty candidates, special characters, unicode. Minimum 20 test cases.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P1000] TEST009 - Add unit tests for storage.ts. Test get/set/remove
   with various types (string, number, boolean, object, array). Test
@@ -1857,15 +2036,21 @@ internal package public available in npm. See docs and examples at /Users/anoton
   handling (invalid JSON, quota exceeded mock). Test migration paths.
   Minimum 15 test cases.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST010 - Add unit tests for format_date.ts. Test all
   relative date ranges: just now, minutes ago, hours ago, yesterday, N days
   ago, absolute date, different year. Test edge cases: midnight boundaries,
   timezone handling, future dates, invalid dates. Minimum 15 test cases.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST011 - Add integration tests for command registry. Test
   register/get/search/getSections. Test search matches title, subtitle,
   keywords, aliases. Test section ordering. Test duplicate registration
   warning. Minimum 10 test cases.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P1000] TEST012 - Add E2E tests with Playwright for core flows.
   Flow 1: Open → type query → select result → drill into view → Escape back.
@@ -1874,12 +2059,16 @@ internal package public available in npm. See docs and examples at /Users/anoton
   Flow 4: Clipboard History → pin item → verify pinned section.
   Each flow as separate test. Screenshot on failure.
 
+--------------------------------------------------------------------------------
+
 - [ ] [P1000] TEST013 - Add accessibility audit tests. Use axe-core with
   Playwright to audit each view for WCAG 2.1 AA violations. Test: color
   contrast ratios, ARIA roles/labels, keyboard navigation order, focus
   management, screen reader announcements. Run on: root search, clipboard
   history, snippet manager, emoji picker, settings, forms. Zero violations
   target.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P1000] TEST014 - Add performance benchmark tests. Measure and assert:
   initial render time < 100ms, search filter time < 50ms for 1000 items,

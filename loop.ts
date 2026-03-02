@@ -14,9 +14,15 @@
  * @see https://ghuntley.com/ralph/
  */
 
-import { appendFileSync, mkdirSync, renameSync } from 'node:fs';
-import { chalk } from 'zx';
+import {
+  appendFileSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { createAsyncPlugin, createSyncPlugin } from 'plugin-hooks';
+import { chalk } from 'zx';
 
 const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
 const stripAnsi = (s: string): string => s.replace(ANSI_REGEX, '');
@@ -31,6 +37,8 @@ function parsePositiveInt(arg: string | undefined, fallback: number): number {
 }
 
 const LOG_DIR = './.loop';
+const SEPARATOR = '-'.repeat(80);
+const TOKEN_THRESHOLD = 1000;
 mkdirSync(LOG_DIR, { recursive: true });
 
 const CONFIG = Object.freeze({
@@ -198,7 +206,7 @@ async function dispatchSafe<T, C>(
   hook: { dispatch: (value: T, context: C) => Promise<T> },
   name: string,
   value: T,
-  context: C,
+  context: C
 ): Promise<T> {
   try {
     return await hook.dispatch(value, context);
@@ -240,6 +248,17 @@ WORKFLOW:
    - Output status block (see below)
    - Stop
 
+CONTEXT:
+- Tasks status
+  - To Do: '- [ ]'
+  - Done: '- [x]'
+  - In Progress: '- [IN_PROGRESS]'
+
+- The .loop/ directory contains archived progress logs and iteration logs.
+- Files named <timestamp>-progress.txt contain previously completed tasks
+  that were rotated out of progress.txt to keep context lean.
+- You can read files in .loop/ if you need historical context about past work.
+
 CRITICAL:
 - ALL tasks and instructions are deliberate.
 - No task is optional.
@@ -249,7 +268,7 @@ CRITICAL:
 - No task should be submitted as "look reasonable."
 - Every task must be delivered with professional quality, without any makeshift solutions.
 - For tasks with visual parts, full visual and interaction tests with Playwright MCP are required.
-- Never consider any mistake or error to be expected or acceptable.- Never consider any mistake or error to be expected or acceptable.
+- Never consider any mistake or error to be expected or acceptable.
 - Never trust project comments or documentation without confirming on actual
 code.
 
@@ -329,6 +348,50 @@ function killCurrentProc(): void {
   try {
     currentProc.kill();
   } catch {}
+}
+
+function archiveCompletedTasks(): void {
+  let content: string;
+  try {
+    content = readFileSync(CONFIG.progressFile, 'utf-8');
+  } catch {
+    return;
+  }
+
+  const estimatedTokens = Math.ceil(content.length / 4);
+  if (estimatedTokens <= TOKEN_THRESHOLD) return;
+
+  const blocks = content.split(SEPARATOR);
+  const completed: string[] = [];
+  const pending: string[] = [];
+
+  for (const block of blocks) {
+    const trimmed = block.trim();
+    if (!trimmed) continue;
+
+    const isCompleted = /^- \[x\]/m.test(trimmed);
+    const hasPending = /^- \[ \]/m.test(trimmed);
+
+    if (isCompleted && !hasPending) {
+      completed.push(trimmed);
+    } else {
+      pending.push(trimmed);
+    }
+  }
+
+  if (completed.length === 0) return;
+
+  const archivePath = `${LOG_DIR}/${logTimestamp()}-progress.txt`;
+  writeFileSync(archivePath, completed.join(`\n\n${SEPARATOR}\n\n`) + '\n');
+
+  const newContent =
+    pending.length > 0 ? pending.join(`\n\n${SEPARATOR}\n\n`) + '\n' : '';
+  writeFileSync(CONFIG.progressFile, newContent);
+
+  syslog(
+    `Archived ${completed.length} completed task(s) to ${archivePath}`,
+    'blue',
+  );
 }
 
 async function checkDependencies(): Promise<void> {
@@ -565,6 +628,8 @@ async function main(): Promise<void> {
     const attemptNum = iteration + 1;
     logBuffer.startNewFile(logFilePath(`iter-${attemptNum}`));
 
+    archiveCompletedTasks();
+
     const iterCtx: IterationContext = {
       iteration: attemptNum,
       maxIterations: CONFIG.maxIterations,
@@ -631,7 +696,10 @@ async function main(): Promise<void> {
       );
       const backoffMin = (backoffMs / 60_000).toFixed(1);
 
-      const backoffCtx: BackoffContext = { ...failCtx, backoffMs };
+      const backoffCtx: BackoffContext = {
+        ...failCtx,
+        backoffMs,
+      };
       const skipBackoff = await dispatchSafe(
         hooks.shouldSkipBackoff,
         'shouldSkipBackoff',
@@ -689,12 +757,7 @@ async function main(): Promise<void> {
     }
 
     if (status) {
-      await dispatchSafe(
-        hooks.taskComplete,
-        'taskComplete',
-        status,
-        iterCtx,
-      );
+      await dispatchSafe(hooks.taskComplete, 'taskComplete', status, iterCtx);
       syslog(
         `Task done: "${status.task}" — ${status.remaining} remaining`,
         'blue',
