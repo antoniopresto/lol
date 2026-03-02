@@ -350,16 +350,37 @@ function killCurrentProc(): void {
 
 async function gitCommit(files: string[], message: string): Promise<boolean> {
   try {
-    const add = Bun.spawnSync(['git', 'add', ...files], { cwd: process.cwd() });
+    const add = Bun.spawnSync(
+      [
+        'git',
+        'add',
+        ...files,
+      ],
+      { cwd: process.cwd() },
+    );
     if (add.exitCode !== 0) return false;
 
-    const diff = Bun.spawnSync(['git', 'diff', '--cached', '--quiet'], {
-      cwd: process.cwd(),
-    });
+    const diff = Bun.spawnSync(
+      [
+        'git',
+        'diff',
+        '--cached',
+        '--quiet',
+      ],
+      {
+        cwd: process.cwd(),
+      },
+    );
     if (diff.exitCode === 0) return false;
 
     const commit = Bun.spawnSync(
-      ['git', 'commit', '-m', message, '--no-verify'],
+      [
+        'git',
+        'commit',
+        '-m',
+        message,
+        '--no-verify',
+      ],
       { cwd: process.cwd() },
     );
     return commit.exitCode === 0;
@@ -412,7 +433,10 @@ async function archiveCompletedTasks(): Promise<void> {
   );
 
   const committed = await gitCommit(
-    [archivePath, CONFIG.progressFile],
+    [
+      archivePath,
+      CONFIG.progressFile,
+    ],
     `chore(loop): archive ${completed.length} completed task(s)`,
   );
   if (committed) {
