@@ -1,3 +1,5 @@
+@use '../../styles/tokens' as *;
+
 .root-search__app-icon {
   border-radius: $radius-sm;
 }

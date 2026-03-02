@@ -16,6 +16,12 @@
 
 import { appendFileSync, mkdirSync, renameSync } from 'node:fs';
 import { chalk } from 'zx';
+import {
+  AsyncSeriesHook,
+  SyncHook,
+  SyncWaterfallHook,
+  SyncBailHook,
+} from 'tapable';
 
 const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
 const stripAnsi = (s: string): string => s.replace(ANSI_REGEX, '');
@@ -40,6 +46,80 @@ const CONFIG = Object.freeze({
   logFlushInterval: 2_000,
   exitPattern: /RALPH_STATUS:\s*\{[^}]*"exit":\s*true[^}]*\}/,
 });
+
+interface IterationResult {
+  output: string;
+  exitCode: number;
+  timedOut: boolean;
+}
+
+interface RalphStatus {
+  exit: boolean;
+  task: string;
+  remaining: number;
+}
+
+interface IterationContext {
+  iteration: number;
+  maxIterations: number;
+  logPath: string;
+}
+
+interface FailureContext extends IterationContext {
+  exitCode: number;
+  consecutiveFailures: number;
+}
+
+interface BackoffContext extends FailureContext {
+  backoffMs: number;
+}
+
+/**
+ * Tapable hooks for the Ralph Loop lifecycle.
+ *
+ * Hook contracts:
+ * - `resolveStatus` (SyncWaterfallHook): Taps MUST return `RalphStatus | null`.
+ *   Only the first argument (status) is waterfalled; the second (output) is read-only context.
+ * - `shouldSkipBackoff` (SyncBailHook): Return `true` to skip backoff. Return `undefined`
+ *   to defer to the next tap. Do NOT return `false` — it short-circuits without skipping.
+ * - `cleanup` (SyncHook): Only synchronous side effects are guaranteed. `process.exit`
+ *   follows immediately.
+ */
+const hooks = {
+  loopStart: new AsyncSeriesHook<[typeof CONFIG]>(['config']),
+  iterationStart: new AsyncSeriesHook<[IterationContext]>(['context']),
+  iterationSuccess: new AsyncSeriesHook<[IterationResult, IterationContext]>([
+    'result',
+    'context',
+  ]),
+  iterationTimeout: new AsyncSeriesHook<[IterationResult, IterationContext]>([
+    'result',
+    'context',
+  ]),
+  iterationFailure: new AsyncSeriesHook<[IterationResult, FailureContext]>([
+    'result',
+    'context',
+  ]),
+  resolveStatus: new SyncWaterfallHook<[RalphStatus | null, string]>([
+    'status',
+    'output',
+  ]),
+  taskComplete: new AsyncSeriesHook<[RalphStatus, IterationContext]>([
+    'status',
+    'context',
+  ]),
+  allTasksComplete: new AsyncSeriesHook<[RalphStatus, number]>([
+    'status',
+    'totalIterations',
+  ]),
+  shouldSkipBackoff: new SyncBailHook<[BackoffContext], boolean | undefined>([
+    'context',
+  ]),
+  loopEnd: new AsyncSeriesHook<[number]>(['totalIterations']),
+  cleanup: new SyncHook<[string]>(['signal']),
+};
+
+export { hooks as ralphHooks };
 
 function slugify(text: string): string {
   return text
@@ -136,8 +216,20 @@ function syslog(message = '', color?: Color): void {
   println(`‣ ${message}`, color);
 }
 
+async function callHookSafe(
+  hook: { promise: (...args: never[]) => Promise<void> },
+  name: string,
+  ...args: unknown[]
+): Promise<void> {
+  try {
+    await (hook.promise as (...a: unknown[]) => Promise<void>)(...args);
+  } catch (err) {
+    syslog(`Hook "${name}" error: ${err}`, 'red');
+  }
+}
+
 const TASK_PROMPT = `
-1 - Understand and write your understanding of every single and 
+1 - Understand and write your understanding of every single and
 each WORKFLOW AND CRITICAL statement.
 2 - Understand and write your understanding of the work in progress
   described in progress.txt and compared with the actual files.
@@ -147,18 +239,18 @@ WORKFLOW:
 1. Read ./.claude/progress.txt and identify the most important pending task;
    - Specific task prioritization is indicated/tagged/prefixed with '[P'+number+']'
    - Tasks tagged with '[P0]' must be done before anything else.
-   - Tasks tagged with P bigger than 999 (e.g. '[P1000]'), are low-priority 
-   tasks, they should be done when possible, but they must be done 
-   (they are not ignorable); If the task takes longer and there are other 
+   - Tasks tagged with P bigger than 999 (e.g. '[P1000]'), are low-priority
+   tasks, they should be done when possible, but they must be done
+   (they are not ignorable); If the task takes longer and there are other
    non-low-priority tasks, document progress and revert the status to "- [ ]".
-   
+
 2. If NO pending tasks exist, plan next improvements, add tasks and stop
 3. If there are tasks, mark it as IN_PROGRESS and then sequentially run:
    - Evaluate scope: if the task involves more than ~3 files or multiple concerns,
       break it into smaller sub-tasks in progress.txt BEFORE starting. Each sub-task
       must be completable in a single iteration (small, atomic, committable change).
    - Execute task
-   - Run 'bun run check' and fix found issues.     
+   - Run 'bun run check' and fix found issues.
    - Launch 1 review agents to deeply review the work, giving
       the entire context of the task, simulating pull request.
    - Review output and consider improvements
@@ -169,16 +261,16 @@ WORKFLOW:
    - Stop
 
 CRITICAL:
-- ALL tasks and instructions are deliberate. 
+- ALL tasks and instructions are deliberate.
 - No task is optional.
 - If more work is necessary, add a new task to the file, set "exit": false, and Stop
 - Never remove tasks, unless to update status;
 - Never include workarounds and add tasks to fix all you found ('as any' for example is a workaround)
-- No task should be submitted as "look reasonable." 
+- No task should be submitted as "look reasonable."
 - Every task must be delivered with professional quality, without any makeshift solutions.
 - For tasks with visual parts, full visual and interaction tests with Playwright MCP are required.
 - Never consider any mistake or error to be expected or acceptable.- Never consider any mistake or error to be expected or acceptable.
-- Never trust project comments or documentation without confirming on actual 
+- Never trust project comments or documentation without confirming on actual
 code.
 
 --------------------------------------------------------------------------------
@@ -226,12 +318,6 @@ interface StreamMessage {
   content?: ContentBlock[];
 }
 
-interface RalphStatus {
-  exit: boolean;
-  task: string;
-  remaining: number;
-}
-
 function parseRalphStatus(output: string): RalphStatus | null {
   const marker = output.lastIndexOf('RALPH_STATUS:');
   if (marker === -1) return null;
@@ -276,12 +362,6 @@ async function checkDependencies(): Promise<void> {
     syslog(`ERROR: Progress file not found: ${CONFIG.progressFile}`, 'red');
     process.exit(1);
   }
-}
-
-interface IterationResult {
-  output: string;
-  exitCode: number;
-  timedOut: boolean;
 }
 
 async function runIteration(): Promise<IterationResult> {
@@ -366,8 +446,6 @@ async function runIteration(): Promise<IterationResult> {
         }
 
         if (msg.type === 'assistant' || msg.type === 'message') {
-          // Content already streamed via content_block_delta events.
-          // Only print here as fallback if no streaming occurred.
           const blocks = msg.message?.content ?? msg.content;
           if (!Array.isArray(blocks)) continue;
 
@@ -387,8 +465,6 @@ async function runIteration(): Promise<IterationResult> {
           if (!Array.isArray(blocks)) continue;
 
           for (const block of blocks) {
-            //
-            // Handling tool result
             if (block.type === 'tool_result' && block.content) {
               const rawContent =
                 typeof block.content === 'string'
@@ -478,6 +554,11 @@ async function main(): Promise<void> {
   const cleanup = (signal: string) => {
     if (cleanupCalled) return;
     cleanupCalled = true;
+    try {
+      hooks.cleanup.call(signal);
+    } catch (err) {
+      console.error(`[cleanup hook error] ${err}`);
+    }
     println();
     syslog(`Interrupted by ${signal}. Cleaning up...`);
     killCurrentProc();
@@ -493,6 +574,8 @@ async function main(): Promise<void> {
   printHeader();
   syslog('Starting automated task loop...');
 
+  await hooks.loopStart.promise(CONFIG);
+
   let consecutiveFailures = 0;
   let iteration = 0;
   const BACKOFF_BASE_MS = 60_000;
@@ -502,6 +585,12 @@ async function main(): Promise<void> {
     const attemptNum = iteration + 1;
     logBuffer.startNewFile(logFilePath(`iter-${attemptNum}`));
 
+    const iterCtx: IterationContext = {
+      iteration: attemptNum,
+      maxIterations: CONFIG.maxIterations,
+      logPath: logBuffer.currentPath(),
+    };
+
     println();
     println('==========================================', 'green');
     syslog(`Iteration #${attemptNum} / ${CONFIG.maxIterations}`, 'green');
@@ -509,20 +598,47 @@ async function main(): Promise<void> {
     println('==========================================', 'green');
     println();
 
-    const { output, exitCode, timedOut } = await runIteration();
+    await callHookSafe(hooks.iterationStart, 'iterationStart', iterCtx);
+
+    const result = await runIteration();
+    const { output, exitCode, timedOut } = result;
 
     if (exitCode === 0) {
       syslog('Claude Code completed successfully', 'green');
       consecutiveFailures = 0;
+      await callHookSafe(
+        hooks.iterationSuccess,
+        'iterationSuccess',
+        result,
+        iterCtx,
+      );
     } else if (timedOut) {
       syslog(
         'Iteration timed out — progress may persist in progress.txt',
         'yellow',
       );
       consecutiveFailures = 0;
+      await callHookSafe(
+        hooks.iterationTimeout,
+        'iterationTimeout',
+        result,
+        iterCtx,
+      );
     } else {
       syslog(`Claude Code exited with code ${exitCode}`, 'yellow');
       consecutiveFailures++;
+
+      const failCtx: FailureContext = {
+        ...iterCtx,
+        exitCode,
+        consecutiveFailures,
+      };
+      await callHookSafe(
+        hooks.iterationFailure,
+        'iterationFailure',
+        result,
+        failCtx,
+      );
 
       const backoffMs = Math.min(
         BACKOFF_BASE_MS * Math.pow(2, consecutiveFailures - 1),
@@ -530,21 +646,39 @@ async function main(): Promise<void> {
       );
       const backoffMin = (backoffMs / 60_000).toFixed(1);
 
-      println();
-      println('==========================================', 'yellow');
-      syslog(
-        `${consecutiveFailures} consecutive failure(s) — retrying in ${backoffMin}min`,
-        'yellow',
-      );
-      println('==========================================', 'yellow');
+      const backoffCtx: BackoffContext = { ...failCtx, backoffMs };
+      let skipBackoff: boolean | undefined;
+      try {
+        skipBackoff = hooks.shouldSkipBackoff.call(backoffCtx);
+      } catch (err) {
+        syslog(`Hook "shouldSkipBackoff" error: ${err}`, 'red');
+      }
 
-      await Bun.sleep(backoffMs);
+      if (skipBackoff === true) {
+        syslog('Backoff skipped by hook', 'yellow');
+      } else {
+        println();
+        println('==========================================', 'yellow');
+        syslog(
+          `${consecutiveFailures} consecutive failure(s) — retrying in ${backoffMin}min`,
+          'yellow',
+        );
+        println('==========================================', 'yellow');
+        await Bun.sleep(backoffCtx.backoffMs);
+      }
       continue;
     }
 
     iteration++;
 
-    const status = parseRalphStatus(output);
+    const rawStatus = parseRalphStatus(output);
+    let status: RalphStatus | null;
+    try {
+      status = hooks.resolveStatus.call(rawStatus, output);
+    } catch (err) {
+      syslog(`Hook "resolveStatus" error: ${err}`, 'red');
+      status = rawStatus;
+    }
     const taskSlug = status
       ? slugify(status.task)
       : timedOut
@@ -553,6 +687,12 @@ async function main(): Promise<void> {
     logBuffer.renameFile(logFilePath(taskSlug));
 
     if (status?.exit) {
+      await callHookSafe(
+        hooks.allTasksComplete,
+        'allTasksComplete',
+        status,
+        iteration,
+      );
       println();
       println('==========================================', 'green');
       syslog('ALL TASKS COMPLETED!', 'green');
@@ -565,6 +705,12 @@ async function main(): Promise<void> {
     }
 
     if (status) {
+      await callHookSafe(
+        hooks.taskComplete,
+        'taskComplete',
+        status,
+        iterCtx,
+      );
       syslog(
         `Task done: "${status.task}" — ${status.remaining} remaining`,
         'blue',
@@ -584,6 +730,8 @@ async function main(): Promise<void> {
     }
   }
 
+  await callHookSafe(hooks.loopEnd, 'loopEnd', iteration);
+
   println();
   println('==========================================', 'red');
   syslog(`MAX ITERATIONS REACHED (${CONFIG.maxIterations})`, 'red');
@@ -593,4 +741,6 @@ async function main(): Promise<void> {
   process.exit(1);
 }
 
-main();
+if (import.meta.main) {
+  main();
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { NavViewData } from '../../app_types';
 import { useAlert } from '../../hooks/use_alert';
 import { useApplications } from '../../hooks/use_applications';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useFavorites } from '../../hooks/use_favorites';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
@@ -102,13 +103,19 @@ const searchFilterSections: SearchDropdownSection[] = [
 
 interface RootSearchViewProps {
   onCompactChange?: (compact: boolean) => void;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
+export function RootSearchView({
+  onCompactChange,
+  onLoadingChange,
+}: RootSearchViewProps) {
   const nav = useNavigation<NavViewData>();
   const { push } = nav;
 
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -205,13 +212,13 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     }
 
     let filteredResult: SectionData[];
-    if (query) {
-      const commandResults = searchCommands(query);
+    if (debouncedQuery) {
+      const commandResults = searchCommands(debouncedQuery);
       const appItems = appSection?.items ?? [];
       const matchedApps = appItems
         .map(item => ({
           item,
-          score: fuzzyScore(query, item.title)?.score ?? -Infinity,
+          score: fuzzyScore(debouncedQuery, item.title)?.score ?? -Infinity,
         }))
         .filter(({ score }) => score > -Infinity)
         .sort((a, b) => b.score - a.score)
@@ -271,11 +278,11 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
       .map(id => allFlatItems.find(item => item.id === id))
       .filter((item): item is ListItemData => !!item);
 
-    if (query) {
+    if (debouncedQuery) {
       const filteredFavs = favoriteItems.filter(
         item =>
-          fuzzyMatch(query, item.title) ||
-          fuzzyMatch(query, item.subtitle ?? ''),
+          fuzzyMatch(debouncedQuery, item.title) ||
+          fuzzyMatch(debouncedQuery, item.subtitle ?? ''),
       );
       if (filteredFavs.length > 0) {
         const favIds = new Set(filteredFavs.map(f => f.id));
@@ -340,7 +347,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
 
     return filteredResult;
   }, [
-    query,
+    debouncedQuery,
     filterValue,
     favoriteIds,
     recentIds,
@@ -349,9 +356,9 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
   ]);
 
   const calculatorResult = useMemo(() => {
-    if (!query.trim()) return null;
-    return evaluate(query);
-  }, [query]);
+    if (!debouncedQuery.trim()) return null;
+    return evaluate(debouncedQuery);
+  }, [debouncedQuery]);
 
   const allItems = useMemo(() => {
     const items = flattenItems(filtered);
@@ -359,7 +366,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
       const calcItem: ListItemData = {
         id: '__calculator__',
         title: `= ${calculatorResult}`,
-        subtitle: query.trim(),
+        subtitle: debouncedQuery.trim(),
         icon: <CalculatorIcon />,
       };
       return [
@@ -371,7 +378,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
   }, [
     filtered,
     calculatorResult,
-    query,
+    debouncedQuery,
   ]);
 
   const appPathMap = useMemo(() => {
@@ -863,6 +870,13 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
     onCompactChange,
   ]);
 
+  useEffect(() => {
+    onLoadingChange?.(isSearchPending);
+  }, [
+    isSearchPending,
+    onLoadingChange,
+  ]);
+
   return (
     <>
       <SearchBar
@@ -922,7 +936,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
                             <ListItem
                               index={globalIndex++}
                               title={`= ${calculatorResult}`}
-                              subtitle={query.trim()}
+                              subtitle={debouncedQuery.trim()}
                               icon={<CalculatorIcon />}
                               accessories={[{ text: 'Copy' }]}
                             />
@@ -955,7 +969,7 @@ export function RootSearchView({ onCompactChange }: RootSearchViewProps) {
                                   subtitle={item.subtitle}
                                   icon={item.icon}
                                   accessories={itemAccessories}
-                                  query={query || undefined}
+                                  query={debouncedQuery || undefined}
                                 />
                               );
                             })}

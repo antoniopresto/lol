@@ -13,6 +13,7 @@ import {
 } from '../../data/reminders_data';
 import { useAlert } from '../../hooks/use_alert';
 import { useDbSearch } from '../../hooks/use_db_search';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -36,6 +37,7 @@ import { HUDContainer } from '../hud/hud_container';
 import { CheckIcon, ClockIcon, TrashIcon } from '../icons';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -361,6 +363,8 @@ export function RemindersView() {
   const nav = useNavigation();
   const [entries, setEntries] = useState<ReminderEntry[]>([]);
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -402,7 +406,7 @@ export function RemindersView() {
 
   const dbSearchFn = useCallback((q: string) => reminderDb.search(q), []);
   const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
-    query,
+    debouncedQuery,
     dbSearchFn,
     rowToEntry,
   );
@@ -416,16 +420,18 @@ export function RemindersView() {
       items = items.filter(e => e.completed);
     }
 
-    if (!ftsResults && query) {
+    if (!ftsResults && debouncedQuery) {
       items = items.filter(
-        e => fuzzyMatch(query, e.title) || fuzzyMatch(query, e.notes),
+        e =>
+          fuzzyMatch(debouncedQuery, e.title) ||
+          fuzzyMatch(debouncedQuery, e.notes),
       );
     }
 
     return items;
   }, [
     entries,
-    query,
+    debouncedQuery,
     filterValue,
     ftsResults,
   ]);
@@ -898,6 +904,7 @@ export function RemindersView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalItemCount === 0 ? (

@@ -15,6 +15,7 @@ import {
 } from '../../data/snippet_data';
 import { useAlert } from '../../hooks/use_alert';
 import { useDbSearch } from '../../hooks/use_db_search';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -38,6 +39,7 @@ import {
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -317,6 +319,8 @@ export function SnippetManagerView() {
   const nav = useNavigation();
   const [entries, setEntries] = useState<SnippetEntry[]>([]);
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -359,7 +363,7 @@ export function SnippetManagerView() {
 
   const dbSearchFn = useCallback((q: string) => snippetDb.search(q), []);
   const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
-    query,
+    debouncedQuery,
     dbSearchFn,
     rowToEntry,
   );
@@ -369,18 +373,18 @@ export function SnippetManagerView() {
     if (filterValue !== 'all') {
       items = items.filter(e => e.category === filterValue);
     }
-    if (!ftsResults && query) {
+    if (!ftsResults && debouncedQuery) {
       items = items.filter(
         e =>
-          fuzzyMatch(query, e.name) ||
-          fuzzyMatch(query, e.keyword) ||
-          fuzzyMatch(query, e.content),
+          fuzzyMatch(debouncedQuery, e.name) ||
+          fuzzyMatch(debouncedQuery, e.keyword) ||
+          fuzzyMatch(debouncedQuery, e.content),
       );
     }
     return items;
   }, [
     entries,
-    query,
+    debouncedQuery,
     filterValue,
     ftsResults,
   ]);
@@ -824,6 +828,7 @@ export function SnippetManagerView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalItemCount === 0 ? (

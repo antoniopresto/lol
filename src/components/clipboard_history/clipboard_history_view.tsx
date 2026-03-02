@@ -12,6 +12,7 @@ import {
   useClipboardHistory,
 } from '../../hooks/use_clipboard_history';
 import { useDbSearch } from '../../hooks/use_db_search';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -32,6 +33,7 @@ import { EmptyState } from '../empty_state/empty_state';
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -153,6 +155,8 @@ export function ClipboardHistoryView() {
   const nav = useNavigation();
   const { entries, togglePin, deleteEntry } = useClipboardHistory();
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -161,7 +165,7 @@ export function ClipboardHistoryView() {
   const now = useMemo(() => new Date(), []);
   const dbSearchFn = useCallback((q: string) => clipboardDb.search(q), []);
   const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
-    query,
+    debouncedQuery,
     dbSearchFn,
     clipboardRowToEntry,
   );
@@ -171,15 +175,17 @@ export function ClipboardHistoryView() {
     if (filterValue !== 'all') {
       items = items.filter(e => e.contentType === filterValue);
     }
-    if (!ftsResults && query) {
+    if (!ftsResults && debouncedQuery) {
       items = items.filter(
-        e => fuzzyMatch(query, e.content) || fuzzyMatch(query, e.sourceApp),
+        e =>
+          fuzzyMatch(debouncedQuery, e.content) ||
+          fuzzyMatch(debouncedQuery, e.sourceApp),
       );
     }
     return items;
   }, [
     entries,
-    query,
+    debouncedQuery,
     filterValue,
     ftsResults,
   ]);
@@ -503,6 +509,7 @@ export function ClipboardHistoryView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalItemCount === 0 ? (
@@ -540,7 +547,7 @@ export function ClipboardHistoryView() {
                                 tooltip: entry.copiedAt.toLocaleString(),
                               },
                             ]}
-                            query={query || undefined}
+                            query={debouncedQuery || undefined}
                           />
                         );
                       })}
@@ -566,7 +573,7 @@ export function ClipboardHistoryView() {
                                 tooltip: entry.copiedAt.toLocaleString(),
                               },
                             ]}
-                            query={query || undefined}
+                            query={debouncedQuery || undefined}
                           />
                         );
                       })}

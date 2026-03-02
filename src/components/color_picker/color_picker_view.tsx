@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { MOCK_COLORS } from '../../data/color_data';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import type { ColorItemData } from '../../types';
@@ -14,6 +15,7 @@ import { EmptyState } from '../empty_state/empty_state';
 import { Grid, GridItem } from '../grid';
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -91,6 +93,8 @@ const colorFilterSections: SearchDropdownSection[] = [
 
 export function ColorPickerView() {
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -101,9 +105,9 @@ export function ColorPickerView() {
     if (filterValue !== 'all') {
       colors = colors.filter(c => c.category === filterValue);
     }
-    return filterColors(colors, query);
+    return filterColors(colors, debouncedQuery);
   }, [
-    query,
+    debouncedQuery,
     filterValue,
   ]);
 
@@ -252,6 +256,7 @@ export function ColorPickerView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="color-picker__body">
         {filteredColors.length === 0 ? (
           <EmptyState

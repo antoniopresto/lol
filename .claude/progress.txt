@@ -1680,11 +1680,14 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
     WindowManagement (name), FloatingNotes (content), Reminders (title),
     Translator (translation), ColorPicker (hex).
 
-- [ ] [P2] SRCH005 - Add search debouncing and loading state. Debounce
-  search input by 150ms to avoid excessive re-renders during fast typing.
-  Show loading bar during debounce period. Create src/hooks/use_debounce.ts
-  with generic useDebounce(value, delay) hook. Apply to all search bars.
-  Cancel pending debounce on unmount.
+- [ ] [P0] SRCH005:
+(P0 because last session crashed. Actually in progress, continue)
+- Add search debouncing and loading state. Debounce  search input by 150ms to
+avoid excessive re-renders during fast typing.  Show loading bar during debounce
+period. Create src/hooks/use_debounce.ts with generic useDebounce(value, delay)
+hook. Apply to all search bars. Cancel pending debounce on unmount.
+
+--------------------------------------------------------------------------------
 
 - [ ] [P3] SRCH006 - Add Tab completion in search. When Tab is pressed in
   search and there's a single matching result, auto-complete the search

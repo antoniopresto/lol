@@ -14,6 +14,7 @@ import {
 } from '../../data/quicklinks_data';
 import { useAlert } from '../../hooks/use_alert';
 import { useDbSearch } from '../../hooks/use_db_search';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -36,6 +37,7 @@ import { Form, FormDropdown, FormTextField } from '../form';
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -442,6 +444,8 @@ export function QuicklinksView() {
   const nav = useNavigation();
   const [entries, setEntries] = useState<QuicklinkEntry[]>([]);
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -489,7 +493,7 @@ export function QuicklinksView() {
 
   const dbSearchFn = useCallback((q: string) => quicklinkDb.search(q), []);
   const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
-    query,
+    debouncedQuery,
     dbSearchFn,
     rowToEntry,
   );
@@ -499,15 +503,17 @@ export function QuicklinksView() {
     if (filterValue !== 'all') {
       items = items.filter(e => e.type === filterValue);
     }
-    if (!ftsResults && query) {
+    if (!ftsResults && debouncedQuery) {
       items = items.filter(
-        e => fuzzyMatch(query, e.name) || fuzzyMatch(query, e.link),
+        e =>
+          fuzzyMatch(debouncedQuery, e.name) ||
+          fuzzyMatch(debouncedQuery, e.link),
       );
     }
     return items;
   }, [
     entries,
-    query,
+    debouncedQuery,
     filterValue,
     ftsResults,
   ]);
@@ -1033,6 +1039,7 @@ export function QuicklinksView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalItemCount === 0 ? (

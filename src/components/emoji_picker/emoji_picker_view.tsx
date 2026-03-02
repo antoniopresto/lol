@@ -6,6 +6,7 @@ import {
   EMOJI_CATEGORY_ORDER,
   MOCK_EMOJIS,
 } from '../../data/emoji_data';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -17,6 +18,7 @@ import type { DropdownSection } from '../action_panel/actions_dropdown';
 import { EmptyState } from '../empty_state/empty_state';
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -82,6 +84,8 @@ const FILTER_SECTIONS: SearchDropdownSection[] = [
 export function EmojiPickerView() {
   const nav = useNavigation();
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [activeIndex, setActiveIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -126,24 +130,24 @@ export function EmojiPickerView() {
     if (filterValue !== 'all') {
       emojis = emojis.filter(e => e.category === filterValue);
     }
-    if (query) {
+    if (debouncedQuery) {
       emojis = emojis.filter(
         e =>
-          fuzzyMatch(query, e.name) ||
-          e.keywords.some(k => fuzzyMatch(query, k)) ||
-          e.char === query,
+          fuzzyMatch(debouncedQuery, e.name) ||
+          e.keywords.some(k => fuzzyMatch(debouncedQuery, k)) ||
+          e.char === debouncedQuery,
       );
     }
     return emojis;
   }, [
-    query,
+    debouncedQuery,
     filterValue,
   ]);
 
   const sections = useMemo(() => {
     const result: EmojiSection[] = [];
 
-    if (!query && filterValue === 'all' && recentEmojis.length > 0) {
+    if (!debouncedQuery && filterValue === 'all' && recentEmojis.length > 0) {
       result.push({
         title: 'Recently Used',
         emojis: recentEmojis,
@@ -173,7 +177,7 @@ export function EmojiPickerView() {
     return result;
   }, [
     filtered,
-    query,
+    debouncedQuery,
     filterValue,
     recentEmojis,
   ]);
@@ -487,6 +491,7 @@ export function EmojiPickerView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalCount === 0 ? (

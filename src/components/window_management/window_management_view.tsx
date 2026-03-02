@@ -11,6 +11,7 @@ import {
   WINDOW_LAYOUTS,
   getLayoutIcon,
 } from '../../data/window_layouts_data';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -22,6 +23,7 @@ import { EmptyState } from '../empty_state/empty_state';
 import { HUDContainer } from '../hud/hud_container';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import type { SearchDropdownSection } from '../search_bar/search_dropdown';
 import { SearchDropdown } from '../search_bar/search_dropdown';
@@ -114,6 +116,8 @@ const FILTER_SECTIONS: SearchDropdownSection[] = [
 export function WindowManagementView() {
   const nav = useNavigation();
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [filterValue, setFilterValue] = useState('all');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -124,12 +128,12 @@ export function WindowManagementView() {
     if (filterValue !== 'all') {
       items = items.filter(l => l.category === filterValue);
     }
-    if (query) {
-      items = items.filter(l => fuzzyMatch(query, l.name));
+    if (debouncedQuery) {
+      items = items.filter(l => fuzzyMatch(debouncedQuery, l.name));
     }
     return items;
   }, [
-    query,
+    debouncedQuery,
     filterValue,
   ]);
 
@@ -297,7 +301,7 @@ export function WindowManagementView() {
             icon: <Kbd keys={layout.shortcutKeys} />,
           },
         ]}
-        query={query || undefined}
+        query={debouncedQuery || undefined}
       />
     );
   }
@@ -318,6 +322,7 @@ export function WindowManagementView() {
           />
         }
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalItemCount === 0 ? (

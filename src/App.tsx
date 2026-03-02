@@ -39,6 +39,7 @@ export function App() {
   const { push, popToRoot } = nav;
   const { addRecent } = useRecentCommands();
   const [isCompact, setIsCompact] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [rootResetKey, setRootResetKey] = useState(0);
 
   const handleTrayNavigate = useCallback(
@@ -98,7 +99,7 @@ export function App() {
 
   return (
     <NavigationContextProvider value={nav}>
-      <CommandPalette isLoading compact={compact}>
+      <CommandPalette isLoading={isLoading} compact={compact}>
         {isFullView && nav.currentEntry ? (
           <ErrorBoundary key={nav.navKey} onReset={nav.pop}>
             <div className={`command-palette__nav-view${navDirectionClass}`}>
@@ -137,7 +138,11 @@ export function App() {
             />
           </>
         ) : (
-          <RootSearchView key={rootResetKey} onCompactChange={setIsCompact} />
+          <RootSearchView
+            key={rootResetKey}
+            onCompactChange={setIsCompact}
+            onLoadingChange={setIsLoading}
+          />
         )}
       </CommandPalette>
     </NavigationContextProvider>

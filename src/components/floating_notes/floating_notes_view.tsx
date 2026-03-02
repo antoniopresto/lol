@@ -12,6 +12,7 @@ import type { NoteEntry } from '../../data/notes_data';
 import { MOCK_NOTE_ENTRIES } from '../../data/notes_data';
 import { useAlert } from '../../hooks/use_alert';
 import { useDbSearch } from '../../hooks/use_db_search';
+import { SEARCH_DEBOUNCE_MS, useDebounce } from '../../hooks/use_debounce';
 import { useHUD } from '../../hooks/use_hud';
 import { useKeyboardShortcut } from '../../hooks/use_keyboard_shortcut';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -29,6 +30,7 @@ import { HUDContainer } from '../hud/hud_container';
 import { DocumentIcon, TrashIcon } from '../icons';
 import { Kbd } from '../kbd/kbd';
 import { List, ListItem, ListSection } from '../list';
+import { LoadingBar } from '../loading_bar/loading_bar';
 import { SearchBar } from '../search_bar/search_bar';
 import './floating_notes_view.scss';
 
@@ -290,6 +292,8 @@ export function FloatingNotesView() {
   const nav = useNavigation();
   const [entries, setEntries] = useState<NoteEntry[]>([]);
   const [query, setQuery] = useState('');
+  const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
+    useDebounce(query, SEARCH_DEBOUNCE_MS);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [subView, setSubView] = useState<NoteSubView>('list');
@@ -328,22 +332,24 @@ export function FloatingNotesView() {
 
   const dbSearchFn = useCallback((q: string) => noteDb.search(q), []);
   const { results: ftsResults, invalidate: invalidateFts } = useDbSearch(
-    query,
+    debouncedQuery,
     dbSearchFn,
     rowToEntry,
   );
 
   const filtered = useMemo(() => {
     const items = ftsResults ?? entries;
-    if (!ftsResults && query) {
+    if (!ftsResults && debouncedQuery) {
       return items.filter(
-        e => fuzzyMatch(query, e.title) || fuzzyMatch(query, e.content),
+        e =>
+          fuzzyMatch(debouncedQuery, e.title) ||
+          fuzzyMatch(debouncedQuery, e.content),
       );
     }
     return items;
   }, [
     entries,
-    query,
+    debouncedQuery,
     ftsResults,
   ]);
 
@@ -676,6 +682,7 @@ export function FloatingNotesView() {
         activeDescendantId={activeDescendantId}
         breadcrumbs={nav.breadcrumbs.length > 0 ? nav.breadcrumbs : undefined}
       />
+      <LoadingBar visible={isSearchPending} />
       <div className="command-palette__body">
         <div className="command-palette__list-container">
           {totalItemCount === 0 ? (
