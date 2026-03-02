@@ -4,6 +4,9 @@
   flex: 1;
   overflow-y: auto;
   padding: 0 $space-2;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  -webkit-overflow-scrolling: touch;
 }
 
 .list--with-detail {
@@ -99,6 +102,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .list {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+
   .list-skeleton__icon,
   .list-skeleton__text {
     animation: none;

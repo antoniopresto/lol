@@ -9,6 +9,7 @@
   border-radius: $radius-list-item;
   cursor: pointer;
   transition: background-color $transition-fast ease;
+  scroll-snap-align: start;
 
   &:hover:not(&--active) {
     background-color: var(--color-surface-hover);

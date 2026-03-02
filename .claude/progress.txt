@@ -147,7 +147,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [ ] [P2] VIS003 - Add smooth scroll momentum and snap-to-item. Lists
+- [x] [P2] VIS003 - Add smooth scroll momentum and snap-to-item. Lists
   should have native-feeling scroll momentum (CSS scroll-behavior: smooth).
   When scroll stops, snap to nearest item boundary (CSS scroll-snap-type:
   y proximity on list container, scroll-snap-align: start on items). Ensure

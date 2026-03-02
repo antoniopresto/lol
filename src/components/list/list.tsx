@@ -80,7 +80,10 @@ export function List({
     const activeElement = container.querySelector<HTMLElement>(
       `[data-list-index="${activeIndex}"]`,
     );
-    activeElement?.scrollIntoView({ block: 'nearest' });
+    activeElement?.scrollIntoView({
+      block: 'nearest',
+      behavior: 'smooth',
+    });
   }, [activeIndex]);
 
   useEffect(() => {
