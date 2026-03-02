@@ -1,4 +1,4 @@
-- [ ] [P0] Plan and add tasks for complete AI chat interface, covering
+- [x] [P0] Plan and add tasks for complete AI chat interface, covering
 complete ai chat plus complete features for Ralph loop UI. The screens must
 allow complete loop dashboard, tasks organization and visualization, commands
 visualizations, etc... (plan all required and nice to have features).
@@ -6,6 +6,262 @@ visualizations, etc... (plan all required and nice to have features).
 See before planning:
 - ./loop.ts
 - https://gist.github.com/antoniopresto/1f84ea81bfc1104a5f69541c05e2a510
+
+================================================================================
+AI CHAT INTERFACE — PLANNED TASKS
+================================================================================
+
+=== CORE AI CHAT ===
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CHAT001 - Build AI Chat message components. Create
+  src/components/ai_chat/ with: chat_message.tsx (single message bubble with
+  user/assistant roles, avatar, timestamp), chat_message_list.tsx (scrollable
+  message list, auto-scroll to bottom on new messages, scroll-to-top button).
+  User messages right-aligned with user avatar. Assistant messages left-aligned
+  with AI avatar (sparkle icon). Support markdown rendering in assistant
+  messages (headings, bold, italic, lists, links). Code blocks with syntax
+  highlighting (use highlight.js or prism via CSS classes). Copy button on
+  code blocks. Each message shows timestamp on hover. Create corresponding
+  .scss files using project tokens.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CHAT002 - Build AI Chat input area. Create chat_input.tsx: multi-line
+  textarea with auto-resize (min 1 line, max 8 lines). Send button (arrow-up
+  icon, highlighted when input non-empty). Submit on Enter, newline on
+  Shift+Enter. Character count indicator (subtle, bottom-right). Attachment
+  button placeholder (paperclip icon, non-functional initially). Disabled
+  state while assistant is responding (with stop button to cancel). Input
+  history: Up/Down arrows cycle through previous user messages when input is
+  empty. Create chat_input.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CHAT003 - Build AI Chat view container. Create ai_chat_view.tsx:
+  full-view component that composes chat_message_list + chat_input. Manages
+  conversation state (messages array with role/content/timestamp). Simulates
+  streaming responses (typewriter effect, 20ms per character for mock data).
+  Empty state: centered sparkle icon + "Ask anything" text + suggestion
+  chips ("Explain this code", "Write a function", "Summarize text",
+  "Fix this bug"). Header shows current model name + conversation title.
+  Register as extension command: id="ai-chat", title="AI Chat",
+  section="Suggestions", fullView=true, icon=ChatBubbleIcon.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CHAT004 - Build AI Chat model picker. Create chat_model_picker.tsx:
+  dropdown in chat header showing available models grouped by provider.
+  Groups: Anthropic (Claude 4.6 Opus, Claude 4.6 Sonnet, Claude 4.5 Haiku),
+  OpenAI (GPT-5, GPT-4o, o3-mini), Google (Gemini 2.5 Pro, Gemini 2.5 Flash).
+  Each model shows: name, provider icon, context window size badge.
+  Selected model persists in localStorage. Default: Claude 4.6 Sonnet.
+  Keyboard shortcut: ⌘M to open model picker. Create chat_model_picker.scss.
+  Mock data only — no actual API calls.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CHAT005 - Build AI Chat conversations sidebar. Create
+  chat_conversations.tsx: left sidebar panel (260px width, collapsible with
+  ⌘B). Lists all conversations sorted by last message date. Each item:
+  title (first user message truncated to 40 chars), last message preview,
+  timestamp, message count badge. Search bar at top to filter conversations.
+  "New Chat" button at top (⌘N). Right-click context menu: Rename, Delete,
+  Duplicate. Pin conversations to top. Conversations stored in localStorage.
+  Active conversation highlighted. Create chat_conversations.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CHAT006 - Build AI Chat action panel and keyboard shortcuts.
+  Actions: Copy Last Response (⌘C when no text selected), Copy Conversation
+  (⌘Shift+C), New Chat (⌘N), Toggle Sidebar (⌘B), Switch Model (⌘M),
+  Clear Conversation (⌘Shift+Delete with alert confirmation), Export as
+  Markdown (⌘E). Action panel opens with ⌘K like other views. Each action
+  shows keyboard shortcut in the panel. Integrate with existing ActionPanel
+  component.
+
+--------------------------------------------------------------------------------
+
+=== AI COMMANDS ===
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] AICMD001 - Build AI Commands list view. Create
+  src/components/ai_commands/ with ai_commands_view.tsx: list of predefined
+  AI commands. Built-in commands: "Fix Spelling & Grammar", "Improve Writing",
+  "Make Shorter", "Make Longer", "Change Tone (Professional/Casual/Friendly)",
+  "Explain Code", "Add Comments to Code", "Translate to...", "Summarize",
+  "Extract Key Points", "Generate Tests". Each item: icon, title, description,
+  category tag (Writing, Code, Productivity). Search/filter by name.
+  Register as extension: id="ai-commands", title="AI Commands",
+  section="Commands". Create ai_commands_view.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] AICMD002 - Build AI Command execution view. Create
+  ai_command_runner.tsx: when an AI command is selected, push a view showing
+  input area (if command needs argument) + output area. Input: the text to
+  transform (paste or type). Output: simulated AI response with streaming
+  effect. Actions: Copy Result (⌘C), Apply to Clipboard, Run Again,
+  Edit Command. Split view: input on top, output on bottom, with draggable
+  divider. Loading state with shimmer animation. Create
+  ai_command_runner.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] AICMD003 - Build Create/Edit AI Command form. Create
+  ai_command_form.tsx: Form view to create custom AI commands. Fields:
+  Title (required), Icon picker, Description, System Prompt (textarea with
+  placeholder guidance), Model selector (dropdown), Creativity slider
+  (0-2, maps to temperature), Category (dropdown: Writing/Code/Productivity/
+  Custom). Validate title uniqueness. Save to localStorage. Edit existing
+  commands reuses same form. Delete with confirmation alert. Push from
+  AI Commands list via "Create Command" action (⌘N).
+
+--------------------------------------------------------------------------------
+
+=== QUICK AI ===
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] QUICKAI001 - Build Quick AI floating panel. Create
+  src/components/quick_ai/ with quick_ai_view.tsx: compact floating view
+  (not full command palette). Single input line + response area below.
+  Response streams in with typewriter effect. Actions bar at bottom:
+  Copy (⌘C), Insert (⏎), Open in Chat (⌘O opens full AI Chat with
+  this conversation). Model indicator in top-right corner (clickable to
+  change). Register as command: id="quick-ai", title="Quick AI",
+  section="Commands", icon=SparkleIcon. Keyboard shortcut hint in
+  root search. Create quick_ai.scss.
+
+--------------------------------------------------------------------------------
+
+=== CHAT PRESETS ===
+
+--------------------------------------------------------------------------------
+
+- [ ] PRESET001 - Build AI Chat Presets system. Create
+  src/components/ai_chat/chat_presets.tsx: presets are pre-configured
+  chat profiles (name, icon, system prompt, model, creativity). Built-in
+  presets: "TypeScript Expert", "Code Reviewer", "Technical Writer",
+  "Brainstorming Partner". Preset picker shows in chat header (click
+  current preset name). Create Preset form reuses AICMD003 form pattern.
+  When starting new chat, can select preset. Preset badge shows in
+  conversation sidebar. Store in localStorage.
+
+--------------------------------------------------------------------------------
+
+================================================================================
+RALPH LOOP DASHBOARD — PLANNED TASKS
+================================================================================
+
+=== LOOP MONITORING ===
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] RALPH001 - Build Ralph Loop status dashboard. Create
+  src/components/ralph_dashboard/ with ralph_dashboard_view.tsx: full-view
+  dashboard for monitoring Ralph loop execution. Top section: large status
+  indicator (Running/Stopped/Idle with colored dot — green/red/gray),
+  current iteration number / max iterations, elapsed time, consecutive
+  failures count. Progress bar showing iteration progress (current/max).
+  Register as extension: id="ralph-dashboard", title="Ralph Dashboard",
+  section="Commands", icon=TerminalIcon, fullView=true. Mock data initially.
+  Create ralph_dashboard.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] RALPH002 - Build Ralph task list panel. Create
+  ralph_task_list.tsx: renders tasks from progress.txt format. Each task
+  shows: status icon (checkbox empty/checked/spinner for in-progress),
+  task ID badge (CHAT001, SCRN009, etc.), title, priority tag (P0=red,
+  P1=orange, P2=yellow, P3=blue, P1000=gray). Filter by status:
+  All/To Do/In Progress/Completed. Filter by priority. Sort by priority
+  or ID. Group by section (headers from ===...=== lines in progress.txt).
+  Task count summary at top: "5 to do, 1 in progress, 12 completed".
+  Create ralph_task_list.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] RALPH003 - Build Ralph iteration history. Create
+  ralph_iteration_history.tsx: list of past iterations loaded from .loop/
+  directory. Each item: iteration number, timestamp, task name (from slug),
+  status (success/timeout/failure with colored icon), duration estimate.
+  Click to expand and show log preview (first 50 lines). Most recent
+  iteration at top. Auto-refresh when new log files appear. Search/filter
+  iterations. Create ralph_iteration_history.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] RALPH004 - Build Ralph task detail panel. Create ralph_task_detail.tsx:
+  when selecting a task in the task list, show detail panel (right side or
+  push view). Shows: full task description (parsed from progress.txt),
+  status with timestamp of last change, priority level, sub-tasks (if any),
+  related files (parsed from task description), iteration logs that
+  mention this task. Actions: Mark Complete, Mark In Progress, Edit
+  Description (opens form), View Related Logs. Create ralph_task_detail.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] RALPH005 - Build Ralph progress visualization. Create
+  ralph_progress_chart.tsx: visual summary of loop progress. Donut chart
+  showing task status distribution (to do/in progress/completed). Below
+  chart: stat cards — Total Tasks, Completed, Success Rate (%), Average
+  Iterations per Task. Timeline view: horizontal bar showing completed
+  tasks over time (from archived progress files). Use pure SVG for charts
+  (no external chart library). Create ralph_progress_chart.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] RALPH006 - Build Ralph log viewer. Create ralph_log_viewer.tsx:
+  full-screen log viewer for iteration logs. Monospace font, dark background.
+  Syntax highlighting for: timestamps (blue), errors (red), warnings
+  (yellow), success messages (green), file paths (cyan). Search within log
+  (⌘F). Line numbers. Word wrap toggle. Auto-scroll to bottom toggle.
+  Open from iteration history or task detail. Support large files (virtual
+  scroll for logs > 1000 lines). Create ralph_log_viewer.scss.
+
+--------------------------------------------------------------------------------
+
+=== LOOP CONTROL ===
+
+--------------------------------------------------------------------------------
+
+- [ ] RALPH007 - Build Ralph loop controls. Create ralph_controls.tsx:
+  control panel for the Ralph loop (Tauri mode only, mock in web).
+  Start Loop button (with max iterations input), Stop Loop button (with
+  confirmation), Pause/Resume toggle. Current config display: max iterations,
+  delay between iterations, iteration timeout. Edit config form (updates
+  loop.ts config at runtime — mock in web). Status websocket connection
+  indicator. In web mode, show "Desktop Only" badge on actual controls
+  but allow viewing mock data. Create ralph_controls.scss.
+
+--------------------------------------------------------------------------------
+
+=== COMMANDS VISUALIZATION ===
+
+--------------------------------------------------------------------------------
+
+- [ ] [P1] CMDVIZ001 - Build Commands explorer view. Create
+  src/components/commands_explorer/ with commands_explorer_view.tsx: visual
+  catalog of all registered commands. Grid layout: each command as a card
+  showing icon, title, extension name, section, mode badge (view/no-view/
+  menu-bar), keyboard shortcut (if any). Filter by section, extension,
+  mode. Search by name. Click to execute command (push view). Shows total
+  command count. Register as extension: id="commands-explorer",
+  title="Browse Commands", section="Commands". Create
+  commands_explorer.scss.
+
+--------------------------------------------------------------------------------
+
+- [ ] CMDVIZ002 - Build Extension detail view. Create
+  extension_detail_view.tsx: when clicking extension name in commands
+  explorer, push view showing extension details. Extension icon (large),
+  name, description, author, command count. List of all commands in this
+  extension. Each command: title, description, mode, keywords, aliases.
+  Actions: Execute Command, View Source (shows manifest data in detail
+  panel). Create extension_detail.scss.
 
 --------------------------------------------------------------------------------
 
