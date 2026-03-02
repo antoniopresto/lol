@@ -1,35 +1,27 @@
-- [ ] [P3] SCRN007 - Build Extension Store screen. List view of mock extensions
-  with: extension icon, name, developer, download count accessory. Detail panel
-  shows description, screenshots placeholder, commands list, install button.
-  Search and category filter via List.Dropdown. Push from "Store" command.
+- [ ] [P0] Plan and add tasks for complete AI chat interface, covering
+complete ai chat plus complete features for Ralph loop UI. The screens must
+allow complete loop dashboard, tasks organization and visualization, commands
+visualizations, etc... (plan all required and nice to have features).
+
+See before planning:
+- ./loop.ts
+- https://gist.github.com/antoniopresto/1f84ea81bfc1104a5f69541c05e2a510
 
 --------------------------------------------------------------------------------
 
-- [ ] [P3] SCRN008 - Build AI Chat interface. Separate view (not in main command
-  palette or styled differently). Chat bubbles: user messages (right-aligned),
-  AI responses (left-aligned, with markdown rendering). Input bar at bottom
-  with send button. Model selector dropdown. Mock streaming response effect
-  (typewriter). Push from "AI Chat" command.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] SCRN009 - Build Notes editor screen. Markdown editor with toolbar
+- [ ] SCRN009 - Build Notes editor screen. Markdown editor with toolbar
   (bold, italic, strikethrough, code, heading, list, checklist). Split or
   toggle between edit and preview modes. Notes list sidebar (or push from list).
   Create src/components/notes/ with notes_editor.tsx, notes_list.tsx, and
   .scss files. Push from "Notes" command.
 
-=== VISUAL POLISH & THEMES ===
-
 --------------------------------------------------------------------------------
 
-- [ ] [P3] THEME003 - Add proper semantic color system. Create Color enum/object
+- [ ] THEME003 - Add proper semantic color system. Create Color enum/object
   matching Raycast's: Blue, Green, Magenta, Orange, Purple, Red, Yellow,
   PrimaryText, SecondaryText. Each color auto-adapts to current theme. Use
   CSS custom properties. Replace hardcoded hex in tag_colors.ts with semantic
   colors. Create src/constants/colors.ts.
-
-=== KEYBOARD & INTERACTION ===
 
 --------------------------------------------------------------------------------
 
@@ -86,7 +78,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [ ] [P3] SCRN015 - Build Script Commands screen. List view of user-defined
+- [ ] SCRN015 - Build Script Commands screen. List view of user-defined
   script commands. Each item: name, description, language icon (bash, python,
   node, ruby), last run date. Actions: Run (⏎) shows output in detail panel,
   Edit (opens in editor), Copy Script, Delete. Mock script execution with
@@ -107,23 +99,12 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [ ] [P3] COMP023 - Build color swatch accessory for ListItem. When a
+- [ ] COMP023 - Build color swatch accessory for ListItem. When a
   ListItem accessory has a color hex value, render a small color circle
   (12x12px, rounded) next to the text. Used in clipboard history for copied
   colors and in color picker. Update ListItem rendering to detect color
   accessory type and render swatch. Add color?: string field to
   ListItemAccessoryData.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] COMP024 - Build empty search fallback actions. When root search
-  has no matching results, show fallback items: "Search Google for '{query}'",
-  "Search DuckDuckGo for '{query}'", "Search Wikipedia for '{query}'". Each
-  item has appropriate search engine icon. Enter opens search URL in browser.
-  Configurable fallback list in settings. Create src/data/fallback_data.ts.
-  Update App.tsx to show fallbacks when filteredSections is empty.
-
-=== VISUAL POLISH ===
 
 --------------------------------------------------------------------------------
 
@@ -147,39 +128,11 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [ ] [P2] VIS004 - Add focus ring animation matching Raycast. When
-  navigating list items with keyboard, show a subtle animated focus ring
-  that transitions between items (not just instant highlight switch).
-  Use CSS transition on a pseudo-element that moves between item positions.
-  The ring should have a very subtle glow (box-shadow with accent color at
-  10% opacity). 80ms transition duration. Only show on keyboard navigation,
-  not mouse hover.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] VIS005 - Add window open/close animations. When CommandPalette
-  appears: macOS-style spring animation (scale from 0.95 to 1.0, opacity
-  0 to 1, with slight overshoot). When closing: scale to 0.97, opacity to 0,
-  faster (150ms). Use CSS @keyframes with cubic-bezier easing that mimics
-  spring physics. In Tauri mode, coordinate with window show/hide timing.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] VIS006 - Add Grid view hover preview tooltip. When hovering a
+- [ ] VIS006 - Add Grid view hover preview tooltip. When hovering a
   GridItem for 800ms, show an enlarged preview tooltip above the item
   (larger icon/image, full title, metadata). Positioned above the item,
   centered. Fade in/out. Dismiss on mouse leave. Create
   src/components/grid/grid_preview.tsx and grid_preview.scss.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] VIS007 - Add subtle parallax effect to command palette background.
-  Very subtle background gradient shift based on mouse position (±2px max
-  movement). Creates depth illusion matching Raycast's glass effect. CSS
-  custom properties updated via mousemove listener (throttled to rAF). Only
-  affects background layer, not content. Disable when prefers-reduced-motion.
-
-=== SEARCH & INTERACTION ===
 
 --------------------------------------------------------------------------------
 
@@ -190,52 +143,11 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   portion. Works in root search only (not within views). Prevent Tab from
   focusing other elements during search.
 
-=== INFRASTRUCTURE ===
-
 --------------------------------------------------------------------------------
 
-- [ ] [P2] INFRA007 - Add state management with @belt/tools state-machine.
+- [ ] INFRA007 - Add state management with @belt/tools state-machine.
 Replace prop-drilling and scattered useState across App - belt/tools is an
 internal package public available in npm. See docs and examples at /Users/anotonio.silva/antonio/belt/packages/tools
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] INFRA010 - Add telemetry/analytics abstraction. Create
-  src/utils/analytics.ts with track(event, properties?) function. Events:
-  command_opened, search_query, action_triggered, extension_enabled/disabled,
-  theme_changed. In web demo: log to console. In production: send to
-  analytics endpoint. Respect user opt-out preference in settings. Add
-  "Share Usage Data" toggle in Settings > Advanced. No PII in events.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] INFRA011 - Add i18n internationalization support. Create
-  src/i18n/ with translation files (en.json, pt.json, es.json, ja.json).
-  Translation keys for all UI strings (button labels, section titles,
-  placeholder texts, error messages). Create useTranslation hook that
-  returns t(key) function. Language selector in Settings > General. Default
-  to system locale. Persist preference. Start with English strings
-  extracted from all components.
-
---------------------------------------------------------------------------------
-
-- [ ] [P3] INFRA012 - Add performance monitoring utilities. Create
-  src/utils/perf.ts with: measureRender(componentName) HOC that logs
-  render time in dev mode, useRenderCount() hook for detecting excessive
-  re-renders, throttle() and debounce() utilities. Add React.StrictMode
-  in dev. Profile List rendering with 500+ items. Identify and fix
-  unnecessary re-renders with React.memo where needed. Target: 60fps
-  scroll performance.
-
-=== TESTING (NEW) ===
-
---------------------------------------------------------------------------------
-
-- [ ] [P1000] TEST007 - Add unit tests for calculator.ts. Test all math
-  operations: basic arithmetic, operator precedence, parentheses, functions
-  (sqrt, sin, cos, etc), constants (pi, e), percentages, "X% of Y" syntax,
-  edge cases (division by zero, NaN, Infinity), invalid expressions, very
-  large/small numbers. Minimum 30 test cases. Use vitest.
 
 --------------------------------------------------------------------------------
 
@@ -243,21 +155,6 @@ internal package public available in npm. See docs and examples at /Users/anoton
   Test scoring: exact match > prefix > word boundary > substring > fuzzy.
   Test highlighting of matched characters. Test edge cases: empty query,
   empty candidates, special characters, unicode. Minimum 20 test cases.
-
---------------------------------------------------------------------------------
-
-- [ ] [P1000] TEST009 - Add unit tests for storage.ts. Test get/set/remove
-  with various types (string, number, boolean, object, array). Test
-  validators (isStringArray, isRecord, isBooleanRecord). Test error
-  handling (invalid JSON, quota exceeded mock). Test migration paths.
-  Minimum 15 test cases.
-
---------------------------------------------------------------------------------
-
-- [ ] [P1000] TEST010 - Add unit tests for format_date.ts. Test all
-  relative date ranges: just now, minutes ago, hours ago, yesterday, N days
-  ago, absolute date, different year. Test edge cases: midnight boundaries,
-  timezone handling, future dates, invalid dates. Minimum 15 test cases.
 
 --------------------------------------------------------------------------------
 
@@ -276,18 +173,3 @@ internal package public available in npm. See docs and examples at /Users/anoton
   Each flow as separate test. Screenshot on failure.
 
 --------------------------------------------------------------------------------
-
-- [ ] [P1000] TEST013 - Add accessibility audit tests. Use axe-core with
-  Playwright to audit each view for WCAG 2.1 AA violations. Test: color
-  contrast ratios, ARIA roles/labels, keyboard navigation order, focus
-  management, screen reader announcements. Run on: root search, clipboard
-  history, snippet manager, emoji picker, settings, forms. Zero violations
-  target.
-
---------------------------------------------------------------------------------
-
-- [ ] [P1000] TEST014 - Add performance benchmark tests. Measure and assert:
-  initial render time < 100ms, search filter time < 50ms for 1000 items,
-  navigation push/pop < 100ms, scroll FPS > 55fps with 500 items. Use
-  vitest + performance.now() for unit benchmarks. Use Playwright for
-  runtime performance metrics. Create performance regression baseline.
