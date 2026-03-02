@@ -98,7 +98,7 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [ ] [P2] COMP019 - Build Action.PickDate component. Date picker that
+- [x] [P2] COMP019 - Build Action.PickDate component. Date picker that
   appears inline in action panel or as a pushed form field. Supports
   date-only and date+time modes. Min/max date constraints. Calendar grid
   UI with month/year navigation. Selected date highlighted with accent.
