@@ -348,7 +348,27 @@ function killCurrentProc(): void {
   } catch {}
 }
 
-function archiveCompletedTasks(): void {
+async function gitCommit(files: string[], message: string): Promise<boolean> {
+  try {
+    const add = Bun.spawnSync(['git', 'add', ...files], { cwd: process.cwd() });
+    if (add.exitCode !== 0) return false;
+
+    const diff = Bun.spawnSync(['git', 'diff', '--cached', '--quiet'], {
+      cwd: process.cwd(),
+    });
+    if (diff.exitCode === 0) return false;
+
+    const commit = Bun.spawnSync(
+      ['git', 'commit', '-m', message, '--no-verify'],
+      { cwd: process.cwd() },
+    );
+    return commit.exitCode === 0;
+  } catch {
+    return false;
+  }
+}
+
+async function archiveCompletedTasks(): Promise<void> {
   let content: string;
   try {
     content = readFileSync(CONFIG.progressFile, 'utf-8');
@@ -390,6 +410,14 @@ function archiveCompletedTasks(): void {
     `Archived ${completed.length} completed task(s) to ${archivePath}`,
     'blue',
   );
+
+  const committed = await gitCommit(
+    [archivePath, CONFIG.progressFile],
+    `chore(loop): archive ${completed.length} completed task(s)`,
+  );
+  if (committed) {
+    syslog('Committed archive and compressed progress.txt', 'blue');
+  }
 }
 
 async function checkDependencies(): Promise<void> {
@@ -626,7 +654,7 @@ async function main(): Promise<void> {
     const attemptNum = iteration + 1;
     logBuffer.startNewFile(logFilePath(`iter-${attemptNum}`));
 
-    archiveCompletedTasks();
+    await archiveCompletedTasks();
 
     const iterCtx: IterationContext = {
       iteration: attemptNum,
@@ -765,6 +793,15 @@ async function main(): Promise<void> {
         'Warning: No RALPH_STATUS found in output. Claude may not have followed the protocol.',
         'yellow',
       );
+    }
+
+    logBuffer.flush();
+    const logsCommitted = await gitCommit(
+      [LOG_DIR],
+      `chore(loop): iteration #${attemptNum} logs`,
+    );
+    if (logsCommitted) {
+      syslog('Committed iteration logs', 'blue');
     }
 
     if (iteration < CONFIG.maxIterations) {
