@@ -1,20 +1,3 @@
-- [x] [P0] Plan and add tasks for complete AI chat interface, covering
-complete ai chat plus complete features for Ralph loop UI. The screens must
-allow complete loop dashboard, tasks organization and visualization, commands
-visualizations, etc... (plan all required and nice to have features).
-
-See before planning:
-- ./loop.ts
-- https://gist.github.com/antoniopresto/1f84ea81bfc1104a5f69541c05e2a510
-
-================================================================================
-AI CHAT INTERFACE — PLANNED TASKS
-================================================================================
-
-=== CORE AI CHAT ===
-
---------------------------------------------------------------------------------
-
 - [ ] [P1] CHAT001 - Build AI Chat message components. Create
   src/components/ai_chat/ with: chat_message.tsx (single message bubble with
   user/assistant roles, avatar, timestamp), chat_message_list.tsx (scrollable
@@ -427,5 +410,3 @@ internal package public available in npm. See docs and examples at /Users/anoton
   Flow 3: Settings → change theme → verify visual change.
   Flow 4: Clipboard History → pin item → verify pinned section.
   Each flow as separate test. Screenshot on failure.
-
---------------------------------------------------------------------------------

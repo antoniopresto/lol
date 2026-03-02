@@ -1,0 +1,14 @@
+- [x] [P0] Plan and add tasks for complete AI chat interface, covering
+complete ai chat plus complete features for Ralph loop UI. The screens must
+allow complete loop dashboard, tasks organization and visualization, commands
+visualizations, etc... (plan all required and nice to have features).
+
+See before planning:
+- ./loop.ts
+- https://gist.github.com/antoniopresto/1f84ea81bfc1104a5f69541c05e2a510
+
+================================================================================
+AI CHAT INTERFACE — PLANNED TASKS
+================================================================================
+
+=== CORE AI CHAT ===
