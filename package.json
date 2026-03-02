@@ -66,8 +66,8 @@
     "@tauri-apps/plugin-sql": "^2.3.2",
     "dompurify": "^3.3.1",
     "marked": "^17.0.3",
+    "plugin-hooks": "^2.0.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "tapable": "^2.3.0"
+    "react-dom": "^19.2.4"
   }
 }

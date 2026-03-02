@@ -16,12 +16,7 @@
 
 import { appendFileSync, mkdirSync, renameSync } from 'node:fs';
 import { chalk } from 'zx';
-import {
-  AsyncSeriesHook,
-  SyncHook,
-  SyncWaterfallHook,
-  SyncBailHook,
-} from 'tapable';
+import { createAsyncPlugin, createSyncPlugin } from 'plugin-hooks';
 
 const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
 const stripAnsi = (s: string): string => s.replace(ANSI_REGEX, '');
@@ -75,48 +70,31 @@ interface BackoffContext extends FailureContext {
 }
 
 /**
- * Tapable hooks for the Ralph Loop lifecycle.
+ * Plugin hooks for the Ralph Loop lifecycle.
  *
- * Hook contracts:
- * - `resolveStatus` (SyncWaterfallHook): Taps MUST return `RalphStatus | null`.
- *   Only the first argument (status) is waterfalled; the second (output) is read-only context.
- * - `shouldSkipBackoff` (SyncBailHook): Return `true` to skip backoff. Return `undefined`
- *   to defer to the next tap. Do NOT return `false` — it short-circuits without skipping.
- * - `cleanup` (SyncHook): Only synchronous side effects are guaranteed. `process.exit`
- *   follows immediately.
+ * All hooks use plugin-hooks middleware pipelines:
+ * - Async plugins: middleware receives (value, context, self). Return undefined to pass through,
+ *   return a value to replace. Errors propagate from dispatch().
+ * - `resolveStatus`: waterfall — return a modified `RalphStatus | null` to override,
+ *   or return undefined to pass through.
+ * - `shouldSkipBackoff`: uses `returnOnFirst` — first middleware that returns `true`
+ *   short-circuits and skips backoff.
+ * - `cleanup`: synchronous — only sync side effects are guaranteed before `process.exit`.
  */
 const hooks = {
-  loopStart: new AsyncSeriesHook<[typeof CONFIG]>(['config']),
-  iterationStart: new AsyncSeriesHook<[IterationContext]>(['context']),
-  iterationSuccess: new AsyncSeriesHook<[IterationResult, IterationContext]>([
-    'result',
-    'context',
-  ]),
-  iterationTimeout: new AsyncSeriesHook<[IterationResult, IterationContext]>([
-    'result',
-    'context',
-  ]),
-  iterationFailure: new AsyncSeriesHook<[IterationResult, FailureContext]>([
-    'result',
-    'context',
-  ]),
-  resolveStatus: new SyncWaterfallHook<[RalphStatus | null, string]>([
-    'status',
-    'output',
-  ]),
-  taskComplete: new AsyncSeriesHook<[RalphStatus, IterationContext]>([
-    'status',
-    'context',
-  ]),
-  allTasksComplete: new AsyncSeriesHook<[RalphStatus, number]>([
-    'status',
-    'totalIterations',
-  ]),
-  shouldSkipBackoff: new SyncBailHook<[BackoffContext], boolean | undefined>([
-    'context',
-  ]),
-  loopEnd: new AsyncSeriesHook<[number]>(['totalIterations']),
-  cleanup: new SyncHook<[string]>(['signal']),
+  loopStart: createAsyncPlugin<typeof CONFIG>(),
+  iterationStart: createAsyncPlugin<IterationContext>(),
+  iterationSuccess: createAsyncPlugin<IterationResult, IterationContext>(),
+  iterationTimeout: createAsyncPlugin<IterationResult, IterationContext>(),
+  iterationFailure: createAsyncPlugin<IterationResult, FailureContext>(),
+  resolveStatus: createAsyncPlugin<RalphStatus | null, string>(),
+  taskComplete: createAsyncPlugin<RalphStatus, IterationContext>(),
+  allTasksComplete: createAsyncPlugin<RalphStatus, number>(),
+  shouldSkipBackoff: createAsyncPlugin<boolean, BackoffContext>({
+    returnOnFirst: true,
+  }),
+  loopEnd: createAsyncPlugin<number>(),
+  cleanup: createSyncPlugin<string>(),
 };
 
 export { hooks as ralphHooks };
@@ -216,15 +194,17 @@ function syslog(message = '', color?: Color): void {
   println(`‣ ${message}`, color);
 }
 
-async function callHookSafe(
-  hook: { promise: (...args: never[]) => Promise<void> },
+async function dispatchSafe<T, C>(
+  hook: { dispatch: (value: T, context: C) => Promise<T> },
   name: string,
-  ...args: unknown[]
-): Promise<void> {
+  value: T,
+  context: C,
+): Promise<T> {
   try {
-    await (hook.promise as (...a: unknown[]) => Promise<void>)(...args);
+    return await hook.dispatch(value, context);
   } catch (err) {
     syslog(`Hook "${name}" error: ${err}`, 'red');
+    return value;
   }
 }
 
@@ -555,7 +535,7 @@ async function main(): Promise<void> {
     if (cleanupCalled) return;
     cleanupCalled = true;
     try {
-      hooks.cleanup.call(signal);
+      hooks.cleanup.dispatch(signal, undefined);
     } catch (err) {
       console.error(`[cleanup hook error] ${err}`);
     }
@@ -574,7 +554,7 @@ async function main(): Promise<void> {
   printHeader();
   syslog('Starting automated task loop...');
 
-  await hooks.loopStart.promise(CONFIG);
+  await dispatchSafe(hooks.loopStart, 'loopStart', CONFIG, undefined);
 
   let consecutiveFailures = 0;
   let iteration = 0;
@@ -598,7 +578,12 @@ async function main(): Promise<void> {
     println('==========================================', 'green');
     println();
 
-    await callHookSafe(hooks.iterationStart, 'iterationStart', iterCtx);
+    await dispatchSafe(
+      hooks.iterationStart,
+      'iterationStart',
+      iterCtx,
+      undefined,
+    );
 
     const result = await runIteration();
     const { output, exitCode, timedOut } = result;
@@ -606,7 +591,7 @@ async function main(): Promise<void> {
     if (exitCode === 0) {
       syslog('Claude Code completed successfully', 'green');
       consecutiveFailures = 0;
-      await callHookSafe(
+      await dispatchSafe(
         hooks.iterationSuccess,
         'iterationSuccess',
         result,
@@ -618,7 +603,7 @@ async function main(): Promise<void> {
         'yellow',
       );
       consecutiveFailures = 0;
-      await callHookSafe(
+      await dispatchSafe(
         hooks.iterationTimeout,
         'iterationTimeout',
         result,
@@ -633,7 +618,7 @@ async function main(): Promise<void> {
         exitCode,
         consecutiveFailures,
       };
-      await callHookSafe(
+      await dispatchSafe(
         hooks.iterationFailure,
         'iterationFailure',
         result,
@@ -647,12 +632,12 @@ async function main(): Promise<void> {
       const backoffMin = (backoffMs / 60_000).toFixed(1);
 
       const backoffCtx: BackoffContext = { ...failCtx, backoffMs };
-      let skipBackoff: boolean | undefined;
-      try {
-        skipBackoff = hooks.shouldSkipBackoff.call(backoffCtx);
-      } catch (err) {
-        syslog(`Hook "shouldSkipBackoff" error: ${err}`, 'red');
-      }
+      const skipBackoff = await dispatchSafe(
+        hooks.shouldSkipBackoff,
+        'shouldSkipBackoff',
+        false,
+        backoffCtx,
+      );
 
       if (skipBackoff === true) {
         syslog('Backoff skipped by hook', 'yellow');
@@ -672,13 +657,12 @@ async function main(): Promise<void> {
     iteration++;
 
     const rawStatus = parseRalphStatus(output);
-    let status: RalphStatus | null;
-    try {
-      status = hooks.resolveStatus.call(rawStatus, output);
-    } catch (err) {
-      syslog(`Hook "resolveStatus" error: ${err}`, 'red');
-      status = rawStatus;
-    }
+    const status = await dispatchSafe(
+      hooks.resolveStatus,
+      'resolveStatus',
+      rawStatus,
+      output,
+    );
     const taskSlug = status
       ? slugify(status.task)
       : timedOut
@@ -687,7 +671,7 @@ async function main(): Promise<void> {
     logBuffer.renameFile(logFilePath(taskSlug));
 
     if (status?.exit) {
-      await callHookSafe(
+      await dispatchSafe(
         hooks.allTasksComplete,
         'allTasksComplete',
         status,
@@ -705,7 +689,7 @@ async function main(): Promise<void> {
     }
 
     if (status) {
-      await callHookSafe(
+      await dispatchSafe(
         hooks.taskComplete,
         'taskComplete',
         status,
@@ -730,7 +714,7 @@ async function main(): Promise<void> {
     }
   }
 
-  await callHookSafe(hooks.loopEnd, 'loopEnd', iteration);
+  await dispatchSafe(hooks.loopEnd, 'loopEnd', iteration, undefined);
 
   println();
   println('==========================================', 'red');
