@@ -277,6 +277,20 @@ export const clipboardDb = {
     }
     return storageGet('clipboard-history', isClipboardRowArray) ?? [];
   },
+  async getPage(limit: number, offset: number): Promise<ClipboardEntryRow[]> {
+    if (isTauri) {
+      const db = await getDb();
+      return db.select<ClipboardEntryRow[]>(
+        'SELECT id, content, content_type, source_app, copied_at, pinned FROM clipboard_entries ORDER BY pinned DESC, copied_at DESC LIMIT $1 OFFSET $2',
+        [
+          limit,
+          offset,
+        ],
+      );
+    }
+    const all = await this.getAll();
+    return all.slice(offset, offset + limit);
+  },
   async insert(entry: ClipboardEntryRow): Promise<void> {
     if (isTauri) {
       const db = await getDb();

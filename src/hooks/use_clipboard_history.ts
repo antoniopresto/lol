@@ -7,6 +7,7 @@ import type { ClipboardEntryRow } from '../utils/database';
 import { clipboardDb } from '../utils/database';
 
 const MAX_ENTRIES = 1000;
+const PAGE_SIZE = 20;
 
 const VALID_CONTENT_TYPES = new Set<ClipboardEntry['contentType']>([
   'text',
@@ -82,7 +83,10 @@ function trimToMaxEntries(entries: ClipboardEntry[]): {
 
 export function useClipboardHistory() {
   const [entries, setEntries] = useState<ClipboardEntry[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const entriesRef = useRef<ClipboardEntry[]>([]);
+  const offsetRef = useRef(0);
 
   useEffect(() => {
     entriesRef.current = entries;
@@ -92,23 +96,36 @@ export function useClipboardHistory() {
     let aborted = false;
 
     clipboardDb
-      .getAll(MAX_ENTRIES)
+      .getPage(PAGE_SIZE, 0)
       .then(rows => {
         if (aborted) return;
         if (rows.length > 0) {
           setEntries(rows.map(rowToEntry));
+          offsetRef.current = rows.length;
+          setHasMore(rows.length >= PAGE_SIZE);
         } else if (!isTauri) {
-          const mock = MOCK_CLIPBOARD_ENTRIES.map(e => ({ ...e }));
+          const mock = MOCK_CLIPBOARD_ENTRIES.slice(0, PAGE_SIZE).map(e => ({
+            ...e,
+          }));
           setEntries(mock);
-          Promise.all(mock.map(e => clipboardDb.insert(entryToRow(e)))).catch(
-            console.error,
-          );
+          offsetRef.current = mock.length;
+          setHasMore(MOCK_CLIPBOARD_ENTRIES.length > PAGE_SIZE);
+          Promise.all(
+            MOCK_CLIPBOARD_ENTRIES.map(e => clipboardDb.insert(entryToRow(e))),
+          ).catch(console.error);
+        } else {
+          setHasMore(false);
         }
       })
       .catch(err => {
         console.error('Failed to load clipboard history:', err);
         if (!isTauri && !aborted) {
-          setEntries(MOCK_CLIPBOARD_ENTRIES.map(e => ({ ...e })));
+          const mock = MOCK_CLIPBOARD_ENTRIES.slice(0, PAGE_SIZE).map(e => ({
+            ...e,
+          }));
+          setEntries(mock);
+          offsetRef.current = mock.length;
+          setHasMore(MOCK_CLIPBOARD_ENTRIES.length > PAGE_SIZE);
         }
       });
 
@@ -204,11 +221,43 @@ export function useClipboardHistory() {
 
   const clearAll = useCallback(() => {
     setEntries([]);
+    offsetRef.current = 0;
+    setHasMore(false);
     clipboardDb.clear().catch(console.error);
   }, []);
 
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+
+    clipboardDb
+      .getPage(PAGE_SIZE, offsetRef.current)
+      .then(rows => {
+        if (rows.length > 0) {
+          const newEntries = rows.map(rowToEntry);
+          setEntries(prev => {
+            const existingIds = new Set(prev.map(e => e.id));
+            const unique = newEntries.filter(e => !existingIds.has(e.id));
+            return [
+              ...prev,
+              ...unique,
+            ];
+          });
+          offsetRef.current += rows.length;
+        }
+        setHasMore(rows.length >= PAGE_SIZE);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoadingMore(false));
+  }, [
+    isLoadingMore,
+    hasMore,
+  ]);
+
   return {
     entries,
+    hasMore,
+    loadMore,
     togglePin,
     deleteEntry,
     clearAll,

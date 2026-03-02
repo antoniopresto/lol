@@ -15,6 +15,27 @@ interface ListProps {
   onActiveIndexChange?: (index: number) => void;
   onAction?: (index: number) => void;
   detail?: ReactNode;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+}
+
+function ListSkeleton() {
+  return (
+    <div className="list-skeleton" aria-hidden="true">
+      <div className="list-skeleton__item">
+        <div className="list-skeleton__icon" />
+        <div className="list-skeleton__text" />
+      </div>
+      <div className="list-skeleton__item">
+        <div className="list-skeleton__icon" />
+        <div className="list-skeleton__text list-skeleton__text--short" />
+      </div>
+      <div className="list-skeleton__item">
+        <div className="list-skeleton__icon" />
+        <div className="list-skeleton__text list-skeleton__text--medium" />
+      </div>
+    </div>
+  );
 }
 
 export function List({
@@ -23,9 +44,14 @@ export function List({
   onActiveIndexChange,
   onAction,
   detail,
+  onLoadMore,
+  hasMore,
 }: ListProps) {
   const [activeIndex, setActiveIndexRaw] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef(onLoadMore);
+  loadMoreRef.current = onLoadMore;
 
   const setActiveIndex = useCallback(
     (index: number) => {
@@ -97,6 +123,26 @@ export function List({
     onAction,
   ]);
 
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0]?.isIntersecting) {
+          loadMoreRef.current?.();
+        }
+      },
+      {
+        root: containerRef.current,
+        rootMargin: '0px 0px 100px 0px',
+      },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore]);
+
   const contextValue = useMemo(
     () => ({
       activeIndex,
@@ -106,6 +152,13 @@ export function List({
       activeIndex,
       setActiveIndex,
     ],
+  );
+
+  const loadMoreContent = (
+    <>
+      {hasMore && <div ref={sentinelRef} className="list-sentinel" />}
+      {hasMore && <ListSkeleton />}
+    </>
   );
 
   if (detail != null) {
@@ -119,6 +172,7 @@ export function List({
             id="command-list"
           >
             {children}
+            {loadMoreContent}
           </div>
           <div
             className="list-detail-panel"
@@ -136,6 +190,7 @@ export function List({
     <ListContext value={contextValue}>
       <div ref={containerRef} className="list" role="listbox" id="command-list">
         {children}
+        {loadMoreContent}
       </div>
     </ListContext>
   );

@@ -98,16 +98,8 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [x] [P2] COMP019 - Build Action.PickDate component. Date picker that
-  appears inline in action panel or as a pushed form field. Supports
-  date-only and date+time modes. Min/max date constraints. Calendar grid
-  UI with month/year navigation. Selected date highlighted with accent.
-  Keyboard navigation: arrows for days, PageUp/Down for months. Create
-  src/components/date_picker/ with date_picker.tsx and date_picker.scss.
-
---------------------------------------------------------------------------------
-
-- [ ] [P2] COMP020 - Add List pagination support (infinite scroll). Add
+- [x] [P0] COMP020 Completed:
+  Add List pagination support (infinite scroll). Add
   onLoadMore callback and hasMore boolean props to List. When user scrolls
   near bottom (IntersectionObserver on sentinel element), trigger
   onLoadMore. Show loading skeleton items (3 placeholder rows with pulse
@@ -207,16 +199,6 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
   affects background layer, not content. Disable when prefers-reduced-motion.
 
 === SEARCH & INTERACTION ===
-
---------------------------------------------------------------------------------
-
-- [x] [P0] SRCH005:
-- Add search debouncing and loading state. Debounce search input by 150ms to
-avoid excessive re-renders during fast typing. Show loading bar during debounce
-period. Create src/hooks/use_debounce.ts with generic useDebounce(value, delay)
-hook. Apply to all search bars. Cancel pending debounce on unmount.
-(Completed: use_debounce.ts exists with SEARCH_DEBOUNCE_MS=150, isPending flag,
-cleanup on unmount. Applied to all 9 search views. LoadingBar component wired.)
 
 --------------------------------------------------------------------------------
 

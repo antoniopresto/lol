@@ -153,7 +153,8 @@ const FILTER_SECTIONS: SearchDropdownSection[] = [
 
 export function ClipboardHistoryView() {
   const nav = useNavigation();
-  const { entries, togglePin, deleteEntry } = useClipboardHistory();
+  const { entries, hasMore, loadMore, togglePin, deleteEntry } =
+    useClipboardHistory();
   const [query, setQuery] = useState('');
   const { debouncedValue: debouncedQuery, isPending: isSearchPending } =
     useDebounce(query, SEARCH_DEBOUNCE_MS);
@@ -523,6 +524,8 @@ export function ClipboardHistoryView() {
               itemCount={totalItemCount}
               onActiveIndexChange={handleActiveIndexChange}
               onAction={handleAction}
+              onLoadMore={!debouncedQuery ? loadMore : undefined}
+              hasMore={!debouncedQuery && hasMore}
             >
               {(() => {
                 let globalIndex = 0;
