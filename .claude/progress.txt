@@ -98,16 +98,6 @@ TAURI DESKTOP APP — NEW TASKS (from T0001 planning)
 
 --------------------------------------------------------------------------------
 
-- [x] [P0] COMP020 Completed:
-  Add List pagination support (infinite scroll). Add
-  onLoadMore callback and hasMore boolean props to List. When user scrolls
-  near bottom (IntersectionObserver on sentinel element), trigger
-  onLoadMore. Show loading skeleton items (3 placeholder rows with pulse
-  animation) while loading. Update List component. Demo: Clipboard History
-  loads 20 items at a time.
-
---------------------------------------------------------------------------------
-
 - [ ] [P2] COMP022 - Build Form.LinkAccessory component. Small accessory
   displayed in the right side of the SearchBar/navigation bar when a Form
   is active. Shows a link with icon + label. Clickable, opens URL or

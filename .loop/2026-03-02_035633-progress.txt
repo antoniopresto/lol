@@ -1,0 +1,7 @@
+- [x] [P0] COMP020 Completed:
+  Add List pagination support (infinite scroll). Add
+  onLoadMore callback and hasMore boolean props to List. When user scrolls
+  near bottom (IntersectionObserver on sentinel element), trigger
+  onLoadMore. Show loading skeleton items (3 placeholder rows with pulse
+  animation) while loading. Update List component. Demo: Clipboard History
+  loads 20 items at a time.
